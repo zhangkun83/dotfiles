@@ -1,0 +1,8 @@
+export GTK_IM_MODULE=ibus
+export XMODIFIERS=@im=ibus
+export QT_IM_MODULE=ibus
+PATH=$HOME/bin:$HOME/bin/maven/bin:$HOME/.emacs.d/bin:$PATH
+export PATH
+export ANDROID_HOME=$HOME/bin/android-sdk-linux
+alias gradle='"$(git rev-parse --show-toplevel)/gradlew"'
+export EDITOR=em

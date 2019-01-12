@@ -1,0 +1,51 @@
+#!/bin/bash
+# Link all java source files listed in SRCFILES to a single directory
+# so that they can be easily located from stack traces in compilation mode,
+# where only package names (not full paths) are displayed.
+set -e
+
+function file_last_modified_time {
+    if [[ "$(uname)" == "Darwin" ]]; then
+        stat -f '%m' "$1"
+    else
+        stat --format '%Y' "$1"
+    fi
+}
+
+if [[ -z "$ZK_PROJECT_ROOT" ]]; then
+    echo "ZK_PROJECT_ROOT is not set"
+    exit 1
+fi
+
+cd "$ZK_PROJECT_ROOT"
+
+last_update_timestamp=0
+
+SRC_LIST_FILE="$HOME/.zk/index/$ZK_PROJECT_ROOT/SRCFILES"
+OUTPUT_DIR="$HOME/.zk/index/$ZK_PROJECT_ROOT/JAVA_LINKS"
+
+TIMESTAMP_FILE="$OUTPUT_DIR/.timestamp"
+if [[ -e "$TIMESTAMP_FILE" ]]; then
+    last_update_timestamp=$(file_last_modified_time "$TIMESTAMP_FILE")
+else
+    mkdir -p "$OUTPUT_DIR"
+fi
+
+touch -a -m "$TIMESTAMP_FILE"
+
+echo "Linking java files ..."
+grep '\.java$' "$SRC_LIST_FILE" | while read file; do
+    file_timestamp=$(file_last_modified_time "$file")
+    if [[ "$file_timestamp" -gt "$last_update_timestamp" ]]; then
+        dest=$(grep '^package .*;' "$file" | sed -e 's/^package //g' -e 's/;$//g' -e 's/\./\//g')
+        dest="$OUTPUT_DIR/$dest"
+        if [[ -n "$dest" ]]; then
+            mkdir -p "$dest"
+            if [[ -n "$ZK_DEBUG" ]]; then
+                echo ln -sf "$file" "$dest"
+            fi
+            ln -sf "$file" "$dest"
+        fi
+    fi
+done
+

@@ -1,0 +1,7 @@
+#!/bin/bash
+# My custom blaze launcher. It runs blaze from $ZK_PROJECT_ROOT no
+# matter what the current directory is.
+if [ -n "$ZK_PROJECT_ROOT" ]; then
+    cd "$ZK_PROJECT_ROOT"
+fi
+blaze "$@"

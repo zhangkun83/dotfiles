@@ -1,0 +1,22 @@
+#!/bin/bash
+declare -a input_files
+declare -a intermediate_files
+declare -a args
+
+# Collect input files
+while (( "$#" )); do
+    if [[ "$1" =~ ^--.* ]]; then
+	args+=("$1")
+    else
+	input_files+=("$1")
+	intermediate_file+=($(mktemp))
+    fi
+    shift
+done
+
+if [[ ${#input_files[@]} -eq 0 ]]; then
+    # Read from stdin
+    intermediate_file=$(mktemp)
+    gmd-to-md.awk > "$intermediate_file"
+    markdown.pl < "$intermediate_file"
+fi

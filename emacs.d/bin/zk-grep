@@ -1,0 +1,11 @@
+#!/bin/bash
+#Grep in the files listed in SRCFILES
+set -e
+
+if [ -z "$ZK_PROJECT_ROOT" ]; then
+    echo "ZK_PROJECT_ROOT is not set"
+    exit 1
+fi
+
+cd "$ZK_PROJECT_ROOT"
+cat "$HOME/.zk/index/$ZK_PROJECT_ROOT/SRCFILES" | xargs grep -n "$@"

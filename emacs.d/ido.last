@@ -1,0 +1,26 @@
+;;; -*- coding: utf-8 -*-
+
+;; ----- ido-last-directory-list -----
+(
+ ("/home/zhangkun/" . "Desktop/")
+)
+
+;; ----- ido-work-directory-list -----
+(
+ 
+)
+
+;; ----- ido-work-file-list -----
+(
+ 
+)
+
+;; ----- ido-dir-file-cache -----
+(
+ ("/home/zhangkun/Desktop/" (23607 59299 852829 312000) "../" "./")
+
+ ("/home/zhangkun/" (23609 8250 688630 544000) "org/" ".gnome/" ".bash_history" ".bash_profile" ".secureConnect/" ".dbus/" "Pictures/" ".profile" ".zkrc" ".viminfo" ".Xauthority" ".gnupg/" "Desktop/" ".themes/" ".gtkrc-2.0~" ".xsession-errors.old" ".gimp-2.8/" ".config/" ".ssh/" "Downloads/" ".urxvt/" ".local/" "../" ".xsessionrc" ".bash_logout" ".xsession-errors" "Documents/" ".dmrc" ".puppet/" ".gmrun_history" "Public/" ".cache/" "github/" ".ICEauthority" ".gtkrc-2.0" ".pki/" ".bashrc" ".kde/" ".wget-hsts" "./" ".gconf/" ".fehbg" "Templates/" ".kshrc" ".Xresources" "Videos/" ".emacs.d/" ".cinnamon/" "Music/")
+)
+
+;; ----- ido-unc-hosts-cache -----
+t

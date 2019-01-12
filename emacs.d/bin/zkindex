@@ -1,0 +1,37 @@
+#!/bin/bash
+#Generates TAGS and SRCFILES to be used by Emacs zk-* features.
+set -e
+
+if [ -z "$ZK_PROJECT_ROOT" ]; then
+    echo "ZK_PROJECT_ROOT is not set"
+    exit 1
+fi
+
+INDEX_DIR="$HOME/.zk/index/$ZK_PROJECT_ROOT"
+mkdir -p "$INDEX_DIR"
+SRC_LIST_FILE="$INDEX_DIR/SRCFILES"
+
+cd "$ZK_PROJECT_ROOT"
+
+echo "Regenerating SRCFILES ... "
+
+if [ -e "zkindex.listsrcs" ]; then
+    echo "Using zkindex.listsrcs to generate src list ... "
+    . zkindex.listsrcs > "$SRC_LIST_FILE"
+else
+    echo "Using default src list rules ..."
+    # Always generate absolute paths, use $PWD instead of .
+    find "$PWD" -type f | grep '\/src\/.*\.\(\(groovy\)\|\(java\)\|\(proto\)\)$' > "$SRC_LIST_FILE"
+    find "$PWD" -type f | grep '\.gradle$' >> "$SRC_LIST_FILE"
+fi
+
+cd "$INDEX_DIR"
+
+# ctags.io is the best ctags implementation that I know
+echo "Regenerating TAGS ... "
+ctags -e -L - < "$SRC_LIST_FILE"
+
+echo "Regenerating JAVA_IMPORTS ..."
+cat "$SRC_LIST_FILE" | grep '\.java$' | xargs grep -h "^import .*\\<.*\\>;$" | sort | uniq > JAVA_IMPORTS
+
+zk-link-javasrc

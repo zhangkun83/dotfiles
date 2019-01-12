@@ -1,0 +1,7 @@
+#!/bin/bash
+# To be run in the shell-mode as the default editor
+echo 'To open the file in current emacs session, press C-c e'
+mkdir -p $(dirname "$1")
+touch "$1"
+echo -n '#ZKEDIT#' $(realpath "$1")
+read

@@ -1,0 +1,20 @@
+#!/bin/bash
+# My custom gradle launcher. It
+# 1) Finds a gradlew script in a ancestor directory and uses it.
+# 2) Displays gradle's stdout and stderr separately to prevent a compile error (stderr)
+# showing in the same line a progress output (stdout), messing up with path detection.
+# 3) Tweak the checkstyle error message so that the code position is detected.
+if [ -n "$ZK_PROJECT_ROOT" ]; then
+    cd "$ZK_PROJECT_ROOT"
+fi
+TMP_FILE="$(mktemp)"
+$(git rev-parse --show-toplevel)/gradlew "$@" 2> "$TMP_FILE"
+BUILD_RET=$?
+
+# checkstyle error messages start with '[ant:checkstyle]', which for
+# unknown reason is not recognized as containing a source position by
+# compilation-mode.  Here I move '[ant:checkstyle]' to the end of the
+# line, which makes compilation-mode happy.
+cat "$TMP_FILE" | sed -e 's/^\(\[ant:checkstyle\]\)\(.*\)/\2\1/g'
+rm "$TMP_FILE"
+exit $BUILD_RET
