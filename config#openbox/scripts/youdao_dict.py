@@ -75,7 +75,7 @@ class youdao_dict:
 
         self.input_box = gtk.Entry()
         self.input_box.set_activates_default(True)
-        self.input_box.set_size_request(400, -1)
+        self.input_box.set_size_request(600, -1)
         self.input_box.set_text(self.read_clipboard())
 
     
