@@ -318,4 +318,18 @@ or code block or class/function definitions that end with '}'"
 (global-set-key (kbd "C-s") 'zk-isearch-forward-to-beginning)
 (define-key isearch-mode-map (kbd "C-s") 'zk-isearch-repeat-forward-to-beginning)
 
+(when (string-prefix-p "/google/src/cloud" command-line-default-directory)
+  (defun zk-find-g4-opened-file(f)
+    "Find an opened file in the g4 client"
+    (interactive
+     (list (ido-completing-read
+            "Find an g4 opened file: "
+            (-map 'zk-project-get-relative-path
+                  (process-lines
+                   "bash" "-c"
+                   (concat "cd " zk-project-root "; g4 p -s localpath | grep '^  */' | grep -o '^  */[^ ]*' | grep -o '[^ ]*'; echo -n"))))))
+    (find-file (zk-project-restore-absolute-path f)))
+  (global-set-key (kbd "C-x C-M-f") 'zk-find-g4-opened-file)
+)
+
 (provide 'zk)

@@ -3,9 +3,6 @@
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/org/lisp"))
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/slime"))
 
-;; Load site-specific bits
-(load "init-site.el")
-
 ;; Disable tool-bar
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 
