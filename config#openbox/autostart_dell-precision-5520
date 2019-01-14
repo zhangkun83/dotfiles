@@ -17,9 +17,13 @@ $DIR/scripts/restart_ibus.sh
 # I want to use my own locker, so disable it.
 # Alternatively, just "apt-get remove light-locker"
 # killall light-locker
+
 # Use "xinput list-props <device_id>" to view all properties
 
 xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=int 'libinput Disable While Typing Enabled' 0
+
+# Faster pointer acceleration
+xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=float 'libinput Accel Speed' 0.3
 
 redshift -O 5800
 
