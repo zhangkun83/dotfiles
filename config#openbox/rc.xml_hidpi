@@ -110,6 +110,7 @@
       <slant>normal</slant>
       <!-- 'italic' or 'normal' -->
     </font>
+    <windowListIconSize>96</windowListIconSize>
   </theme>
   <desktops>
     <!-- this stuff is only used at startup, pagers allow you to change them
