@@ -21,7 +21,7 @@ $DIR/scripts/restart_ibus.sh
 # Use "xinput list-props <device_id>" to view all properties
 
 xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=int 'libinput Disable While Typing Enabled' 0
-xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=int 'libinput Tapping Enabled' 1
+xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=int 'libinput Tapping Enabled' 0
 xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=int 'libinput Tapping Drag Enabled' 0
 
 # Faster pointer acceleration
