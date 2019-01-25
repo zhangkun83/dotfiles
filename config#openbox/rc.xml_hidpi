@@ -357,6 +357,16 @@
         <menu>client-list-combined-menu</menu>
       </action>
     </keybind>
+    <keybind key="W-b">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/cascade.sh google-chrome 100</command>
+      </action>
+    </keybind>
+    <keybind key="W-S-b">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/cascade.sh google-chrome 0</command>
+      </action>
+    </keybind>
     <keybind key="W-o">
       <action name="ShowMenu">
         <menu>root-menu</menu>
