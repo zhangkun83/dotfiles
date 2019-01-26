@@ -6,26 +6,35 @@
                 file:///usr/share/openbox/menu.xsd">
 
 <menu id="root-menu" label="Openbox 3">
-  <item label="Terminal emulator">
-    <action name="Execute"><execute>~/.config/openbox/scripts/urxvt.sh</execute></action>
-  </item>
-  <item label="Chrome (work)">
-    <action name="Execute"><execute>~/.config/openbox/scripts/chrome-default-user.sh</execute></action>
-  </item>
-  <item label="Chrome (personal)">
-    <action name="Execute"><execute>~/.config/openbox/scripts/chrome-personal.sh</execute></action>
-  </item>
-  <item label="File manager">
-    <action name="Execute"><execute>thunar</execute></action>
-  </item>
-  <separator />
+  <separator label="Launchers" />
+    <item label="Terminal emulator">
+      <action name="Execute"><execute>~/.config/openbox/scripts/urxvt.sh</execute></action>
+    </item>
+    <item label="Chrome (work)">
+      <action name="Execute"><execute>~/.config/openbox/scripts/chrome-default-user.sh</execute></action>
+    </item>
+    <item label="Chrome (personal)">
+      <action name="Execute"><execute>~/.config/openbox/scripts/chrome-personal.sh</execute></action>
+    </item>
+    <item label="File manager">
+      <action name="Execute"><execute>thunar</execute></action>
+    </item>
+    <item label="Dictionary">
+      <action name="Execute"><execute>~/.config/openbox/scripts/youdao_dict.py</execute></action>
+    </item>
+    <item label="Volume control">
+      <action name="Execute"><execute>pavucontrol</execute></action>
+    </item>
+  <separator label="Actions" />
   <item label="Switch wallpaper">
     <action name="Execute"><execute>~/.config/openbox/scripts/prepare-wallpaper.sh</execute></action>
   </item>
   <item label="Reconfigure">
     <action name="Reconfigure" />
   </item>
-  <separator />
+  <item label="Lock screen">
+    <action name="~/.config/openbox/scripts/lock.sh" />
+  </item>
   <item label="Exit">
     <action name="Exit" />
   </item>
