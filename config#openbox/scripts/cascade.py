@@ -67,8 +67,6 @@ min_x = wa_x
 min_y = wa_y
 max_x = wa_x + wa_w - win_width
 max_y = wa_y + wa_h - win_height
-dir_x = 1
-dir_y = 1
 # The window stack goes from the bottom to the top.
 for win_id in curr_stacking_win_ids:
     # Un-maximize and un-minimize, then move
@@ -76,13 +74,10 @@ for win_id in curr_stacking_win_ids:
     execute(["wmctrl", "-ir", win_id_str, "-b", "remove,maximized_vert,maximized_horz"])
     execute(["wmctrl", "-ir", win_id_str, "-b", "remove,hidden"])
     execute(["wmctrl", "-ir", win_id_str, "-e", "0,%d,%d,%d,%d" % (x, y, win_width, win_height)])
-    x += xstep * dir_x
-    y += ystep * dir_y
-    # If out of boundary, bounce back
-    if x < min_x or x > max_x:
-        dir_x = -dir_x
-        x += xstep * dir_x * 2
-    if y < min_y or y > max_y:
-        dir_y = -dir_y
-        y += ystep * dir_y * 2
-
+    x += xstep
+    y += ystep
+    # If out of boundary, wrap
+    if x > max_x:
+        x = min_x
+    if y > max_y:
+        y = min_y
