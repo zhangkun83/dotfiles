@@ -67,6 +67,7 @@ min_x = wa_x
 min_y = wa_y
 max_x = wa_x + wa_w - win_width
 max_y = wa_y + wa_h - win_height
+x_span = max_x - min_x
 
 # The algorithm
 #
@@ -94,12 +95,13 @@ for win_id in curr_stacking_win_ids:
     execute(["wmctrl", "-ir", win_id_str, "-e", "0,%d,%d,%d,%d" % (x, y, win_width, win_height)])
     x += xstep
     y += ystep
+    assert x_span > 0
     if y > max_y:
         # End of stride
         x = stride_init_x + stride_x_offset
         y = min_y
         while x > max_x:
-            x -= (max_x - min_x)
+            x -= x_span
         stride_init_x = x
     while x > max_x:
-        x -= (max_x - min_x)
+        x -= x_span
