@@ -67,6 +67,24 @@ min_x = wa_x
 min_y = wa_y
 max_x = wa_x + wa_w - win_width
 max_y = wa_y + wa_h - win_height
+
+# The algorithm
+#
+# The cascade is done in "strides". Each stride starts from the top
+# and increment (xstep, ystep) for each step, until it reaches the
+# bottom boundary, which marks the end of this stride.  The next
+# stride will start at a point right to the start of this stride, far
+# enough (calculated as stride_x_offset below) so that the next stride
+# won't cover the titles of this stride.
+#
+# During a stride, if right boundary is reached, wrap to the left and
+# continue the stride.
+
+stride_x_offset = win_width + (win_height / ystep) * xstep
+
+# Initial position of the current stride
+stride_init_x = wa_x
+
 # The window stack goes from the bottom to the top.
 for win_id in curr_stacking_win_ids:
     # Un-maximize and un-minimize, then move
@@ -76,8 +94,12 @@ for win_id in curr_stacking_win_ids:
     execute(["wmctrl", "-ir", win_id_str, "-e", "0,%d,%d,%d,%d" % (x, y, win_width, win_height)])
     x += xstep
     y += ystep
-    # If out of boundary, wrap
-    if x > max_x:
-        x = min_x
     if y > max_y:
+        # End of stride
+        x = stride_init_x + stride_x_offset
         y = min_y
+        while x > max_x:
+            x -= (max_x - min_x)
+        stride_init_x = x
+    while x > max_x:
+        x -= (max_x - min_x)
