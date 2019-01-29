@@ -20,6 +20,8 @@ def execute(args):
     return stdout_str.split("\n")
 
 # Fetch a xwin property, or None if the property doesn't exist
+# TODO: this is really ugly and doesn't strip quotes on STRING property.
+# Use RE instead.
 def get_xwin_property(xprop_output, key):
     prefix = key + " = "
     property_lines = [ i for i in xprop_output if i.startswith(prefix) ]
@@ -27,21 +29,22 @@ def get_xwin_property(xprop_output, key):
         return None
     return property_lines[0][len(prefix):]
 
+
+def get_xwininfo_value(xwininfo, key):
+    line = [ i.strip() for i in xwininfo if i.strip().startswith(key) ][0]
+    return line[line.find(":") + 1:].strip()
+
 encoded_win_state_pattern = re.compile(r'"?(\d+):(\d+):(\d+):(\d+) (\w*)"?')
 
-# _NET_FRAME_EXTENTS: left, right, top, bottom
-border_widths_pattern = re.compile(r'(\d+), (\d+), (\d+), (\d+)')
-
 class WinState:
-    def __init__(self, win_id, x, y, w, h):
+    def __init__(self, win_id):
         self.win_id = win_id
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
+        self.x = -1
+        self.y = -1
+        self.w = -1
+        self.h = -1
         self.xprops = None
         self.state = ""
-        self.adjusted = False
 
     def __repr__(self):
         return "win_id=0x%x, encoded=%s" % (
@@ -52,22 +55,23 @@ class WinState:
             self.xprops = execute(["xprop", "-id", win_id_str])
         return self.xprops
 
+    def fetch_geometry(self):
+        xwininfo = execute(["xwininfo", "-id", win_id_str])
+        # Position of inner part (excluding decoration) relative to the screen
+        absolute_x = int(get_xwininfo_value(xwininfo, "Absolute upper-left X"))
+        absolute_y = int(get_xwininfo_value(xwininfo, "Absolute upper-left Y"))
+        # Position of inner part (excluding decoration) relative to the whole window
+        relative_x = int(get_xwininfo_value(xwininfo, "Relative upper-left X"))
+        relative_y = int(get_xwininfo_value(xwininfo, "Relative upper-left Y"))
+
+        # Position of the whole window relative to the screen
+        self.x = absolute_x - relative_x
+        self.y = absolute_y - relative_y
+        self.w = int(get_xwininfo_value(xwininfo, "Width"))
+        self.h = int(get_xwininfo_value(xwininfo, "Height"))
+
     def fetch_state(self):
         self.state = get_xwin_property(self.get_props(), "_NET_WM_STATE(ATOM)")
-
-    # The positions returned by wmctrl is for the part inside window decoration,
-    # we need to actually get the positions of the window decoration for use in uncascade.
-    def adjust_position(self):
-        assert not self.adjusted
-        border_widths_raw = get_xwin_property(self.get_props(), "_NET_FRAME_EXTENTS(CARDINAL)")
-        m = border_widths_pattern.match(border_widths_raw)
-        left = int(m.group(1))
-        top = int(m.group(3))
-        # TODO: the actual margin appears to be the double of what I
-        # get from the _NET_FRAME_EXTENTS property. Don't know why.
-        self.x -= left*2
-        self.y -= top*2
-        self.adjusted = True
 
     def encode(self):
         return "%d:%d:%d:%d %s" % (self.x, self.y, self.w, self.h, self.state)
@@ -75,7 +79,11 @@ class WinState:
     def decode_from(self, encoded):
         m = encoded_win_state_pattern.match(encoded)
         assert m != None
-        decoded = WinState(self.win_id, int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)))
+        decoded = WinState(self.win_id)
+        decoded.x = int(m.group(1))
+        decoded.y = int(m.group(2))
+        decoded.w = int(m.group(3))
+        decoded.h = int(m.group(4))
         decoded.state = m.group(5)
         return decoded
 
@@ -98,14 +106,9 @@ curr_desktop_id, wa_x, wa_y, wa_w, wa_h = desktop_info_match.groups()
 wa_x, wa_y, wa_w, wa_h = [ int(s) for s in [wa_x, wa_y, wa_w, wa_h] ]
 
 # Get window IDs of current desktop, but is not sorted by stack.
-win_infos = execute(["wmctrl", "-lG"])
-win_info_pattern = re.compile(r'^(0x[0-9a-z]+) +' + curr_desktop_id +
-                              r' +(\d+) +(\d+) +(\d+) +(\d+) +(.*)')
-curr_desktop_wins = [ WinState(int(match.group(1), 16),
-                               int(match.group(2)),
-                               int(match.group(3)),
-                               int(match.group(4)),
-                               int(match.group(5)))
+win_infos = execute(["wmctrl", "-l"])
+win_info_pattern = re.compile(r'^(0x[0-9a-z]+) +' + curr_desktop_id + r' +')
+curr_desktop_wins = [ WinState(int(match.group(1), 16))
                       for match in [ win_info_pattern.match(info) for info in win_infos ] if match]
 curr_desktop_wins_dict = { win.win_id: win for win in curr_desktop_wins }
 
@@ -128,7 +131,8 @@ if len(sys.argv) < 3:
         print(encoded_uncascade_state)
         if encoded_uncascade_state:
             s = win.decode_from(encoded_uncascade_state)
-            # I don't use vert and horz separately.
+            # TODO: I don't use vert and horz maximization separately, so it doesn't matter.
+            # Ideally I should check and set each individually.
             if "MAXIMIZED" in s.state:
                 execute(["wmctrl", "-ir", win_id_str, "-b", "add,maximized_vert,maximized_horz"])
             if "HIDDEN" in s.state:
@@ -180,8 +184,8 @@ else:
     for win in curr_stacking_wins:
         # Un-maximize and un-minimize, then move
         win_id_str = str(win.win_id)
+        win.fetch_geometry()
         win.fetch_state()
-        win.adjust_position()
         win.write_xwin_property("_ZK_UNCASCADE_STATE", win.encode())
         execute(["wmctrl", "-ir", win_id_str, "-b", "remove,maximized_vert,maximized_horz"])
         execute(["wmctrl", "-ir", win_id_str, "-b", "remove,hidden"])
