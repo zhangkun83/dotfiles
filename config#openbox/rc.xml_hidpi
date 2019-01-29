@@ -313,14 +313,9 @@
     <keybind key="W-S-d">
       <action name="ToggleShowDesktop"/>
     </keybind>
-    <keybind key="W-S-s">
-      <action name="Execute">
-        <command>~/.config/openbox/scripts/cascade.py 100 100</command>
-      </action>
-    </keybind>
     <keybind key="W-s">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/cascade.py</command>
+        <command>~/.config/openbox/scripts/cascade.py 100 100</command>
       </action>
     </keybind>
     <!-- Keybindings for windows -->

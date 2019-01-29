@@ -1,8 +1,8 @@
 #!/usr/bin/python3
-# Cascade windows of current desktop using "wmctrl"
-# Usage:
-#   To cascade: cascade.py <xstep> <ystep>
-#   To restore the states from previous cascade: cascade.py
+# Cascade windows of current desktop using "wmctrl", "xprop", "xwininfo"
+# If there is at least one window that was affected by cascade and not yet uncascaded, this script
+# will do an uncascade instead.
+# Usage:  cascade.py <xstep> <ystep>
 
 import re
 import sys
@@ -122,85 +122,89 @@ stacking_win_ids = [ int(match.group(0), 16) for match
 # Get windows IDs of current desktop sorted by stack
 curr_stacking_wins = [ curr_desktop_wins_dict[id] for id in stacking_win_ids if id in curr_desktop_wins_dict]
 
-if len(sys.argv) < 3:
-    # Un-cascade
-    # The window stack goes from the bottom to the top.
-    for win in curr_stacking_wins:
-        win_id_str = str(win.win_id)
-        encoded_uncascade_state = get_xwin_property(win.get_props(), "_ZK_UNCASCADE_STATE(STRING)")
-        print(encoded_uncascade_state)
-        if encoded_uncascade_state:
-            s = win.decode_from(encoded_uncascade_state)
-            # TODO: I don't use vert and horz maximization separately, so it doesn't matter.
-            # Ideally I should check and set each individually.
-            if "MAXIMIZED" in s.state:
-                execute(["wmctrl", "-ir", win_id_str, "-b", "add,maximized_vert,maximized_horz"])
-            # Do not restore to minimize for the topmost window
-            if (not (win is curr_stacking_wins[-1])) and ("HIDDEN" in s.state):
-                execute(["wmctrl", "-ir", win_id_str, "-b", "add,hidden"])
-            execute(["wmctrl", "-ir", win_id_str, "-e", "0,%d,%d,%d,%d" % (s.x, s.y, s.w, s.h)])
-        win.remove_xwin_property("_ZK_UNCASCADE_STATE")
-else:
-    # Cascade
-    xstep = int(sys.argv[1])
-    ystep = int(sys.argv[2])
+uncascaded = False
 
-    # Calculate new window sizes.  All windows are resized to the
-    # same.  Windows may be shrinked so no parts of any window
-    # would go out of working area boundaries, but can't shrink to
-    # smaller than the 1/3 of the working area dimensions.
-    num_curr_windows = len(curr_stacking_wins)
-    win_width = max(wa_w - xstep * num_curr_windows, wa_w / 3)
-    win_height = max(wa_h - ystep * num_curr_windows, wa_h / 3)
+# Un-cascade
+# The window stack goes from the bottom to the top.
+for win in curr_stacking_wins:
+    win_id_str = str(win.win_id)
+    encoded_uncascade_state = get_xwin_property(win.get_props(), "_ZK_UNCASCADE_STATE(STRING)")
+    if encoded_uncascade_state:
+        uncascaded = True
+        s = win.decode_from(encoded_uncascade_state)
+        # TODO: I don't use vert and horz maximization separately, so it doesn't matter.
+        # Ideally I should check and set each individually.
+        if "MAXIMIZED" in s.state:
+            execute(["wmctrl", "-ir", win_id_str, "-b", "add,maximized_vert,maximized_horz"])
+        # Do not restore to minimize for the topmost window
+        if (not (win is curr_stacking_wins[-1])) and ("HIDDEN" in s.state):
+            execute(["wmctrl", "-ir", win_id_str, "-b", "add,hidden"])
+        execute(["wmctrl", "-ir", win_id_str, "-e", "0,%d,%d,%d,%d" % (s.x, s.y, s.w, s.h)])
+    win.remove_xwin_property("_ZK_UNCASCADE_STATE")
 
-    x = wa_x
-    y = wa_y
+if uncascaded:
+    exit(0)
 
-    # Don't let any part of the window out of the working area.
-    min_x = wa_x
-    min_y = wa_y
-    max_x = wa_x + wa_w - win_width
-    max_y = wa_y + wa_h - win_height
-    x_span = max_x - min_x
+# Cascade
+xstep = int(sys.argv[1])
+ystep = int(sys.argv[2])
 
-    # The algorithm
-    #
-    # The cascade is done in "strides". Each stride starts from
-    # the top and increment (xstep, ystep) for each step, until it
-    # reaches the bottom boundary, which marks the end of this
-    # stride.  The next stride will start at a point right to the
-    # start of this stride, far enough (calculated as
-    # stride_x_offset below) so that the next stride won't cover
-    # the titles of this stride.
-    #
-    # During a stride, if right boundary is reached, wrap to the
-    # left and continue the stride.
+# Calculate new window sizes.  All windows are resized to the
+# same.  Windows may be shrinked so no parts of any window
+# would go out of working area boundaries, but can't shrink to
+# smaller than the 1/3 of the working area dimensions.
+num_curr_windows = len(curr_stacking_wins)
+win_width = max(wa_w - xstep * num_curr_windows, wa_w / 3)
+win_height = max(wa_h - ystep * num_curr_windows, wa_h / 3)
 
-    stride_x_offset = win_width + (win_height / ystep) * xstep
+x = wa_x
+y = wa_y
 
-    # Initial position of the current stride
-    stride_init_x = wa_x
+# Don't let any part of the window out of the working area.
+min_x = wa_x
+min_y = wa_y
+max_x = wa_x + wa_w - win_width
+max_y = wa_y + wa_h - win_height
+x_span = max_x - min_x
 
-    # The window stack goes from the bottom to the top.
-    for win in curr_stacking_wins:
-        # Un-maximize and un-minimize, then move
-        win_id_str = str(win.win_id)
-        win.fetch_geometry()
-        win.fetch_state()
-        win.write_xwin_property("_ZK_UNCASCADE_STATE", win.encode())
-        execute(["wmctrl", "-ir", win_id_str, "-b", "remove,maximized_vert,maximized_horz"])
-        execute(["wmctrl", "-ir", win_id_str, "-b", "remove,hidden"])
-        execute(["wmctrl", "-ir", win_id_str, "-e", "0,%d,%d,%d,%d" % (x, y, win_width, win_height)])
+# The algorithm
+#
+# The cascade is done in "strides". Each stride starts from
+# the top and increment (xstep, ystep) for each step, until it
+# reaches the bottom boundary, which marks the end of this
+# stride.  The next stride will start at a point right to the
+# start of this stride, far enough (calculated as
+# stride_x_offset below) so that the next stride won't cover
+# the titles of this stride.
+#
+# During a stride, if right boundary is reached, wrap to the
+# left and continue the stride.
 
-        x += xstep
-        y += ystep
-        assert x_span > 0
-        if y > max_y:
-            # End of stride
-            x = stride_init_x + stride_x_offset
-            y = min_y
+stride_x_offset = win_width + (win_height / ystep) * xstep
+
+# Initial position of the current stride
+stride_init_x = wa_x
+
+# The window stack goes from the bottom to the top.
+for win in curr_stacking_wins:
+    # Un-maximize and un-minimize, then move
+    win_id_str = str(win.win_id)
+    win.fetch_geometry()
+    win.fetch_state()
+    win.write_xwin_property("_ZK_UNCASCADE_STATE", win.encode())
+    execute(["wmctrl", "-ir", win_id_str, "-b", "remove,maximized_vert,maximized_horz"])
+    execute(["wmctrl", "-ir", win_id_str, "-b", "remove,hidden"])
+    execute(["wmctrl", "-ir", win_id_str, "-e", "0,%d,%d,%d,%d" % (x, y, win_width, win_height)])
+
+    x += xstep
+    y += ystep
+    assert x_span > 0
+    if y > max_y:
+        # End of stride
+        x = stride_init_x + stride_x_offset
+        y = min_y
+        while x > max_x:
+            x -= x_span
+            stride_init_x = x
             while x > max_x:
                 x -= x_span
-                stride_init_x = x
-                while x > max_x:
-                    x -= x_span
