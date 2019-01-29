@@ -317,6 +317,11 @@
         <command>~/.config/openbox/scripts/cascade.py 50 50</command>
       </action>
     </keybind>
+    <keybind key="W-s">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/cascade.py</command>
+      </action>
+    </keybind>
     <!-- Keybindings for windows -->
     <keybind key="W-S-c">
       <action name="Close"/>
