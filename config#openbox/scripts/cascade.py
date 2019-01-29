@@ -135,7 +135,8 @@ if len(sys.argv) < 3:
             # Ideally I should check and set each individually.
             if "MAXIMIZED" in s.state:
                 execute(["wmctrl", "-ir", win_id_str, "-b", "add,maximized_vert,maximized_horz"])
-            if "HIDDEN" in s.state:
+            # Do not restore to minimize for the topmost window
+            if (not (win is curr_stacking_wins[-1])) and ("HIDDEN" in s.state):
                 execute(["wmctrl", "-ir", win_id_str, "-b", "add,hidden"])
             execute(["wmctrl", "-ir", win_id_str, "-e", "0,%d,%d,%d,%d" % (s.x, s.y, s.w, s.h)])
         win.remove_xwin_property("_ZK_UNCASCADE_STATE")
