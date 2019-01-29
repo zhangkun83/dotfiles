@@ -18,6 +18,29 @@ def execute(args):
     return stdout_str.split("\n")
 
 
+class WinState:
+    def __init__(self, win_id, x, y, w, h, title):
+        self.win_id = win_id
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.title = title
+        self.state = None
+
+    def __repr__(self):
+        return "win_id=0x%x, title=%s, encoded=%s" % (
+            self.win_id, self.title, self.encode())
+
+    def fetch_state(self):
+        xprop_output = execute(["xprop", "-id", str(self.win_id)])
+        prefix = "_NET_WM_STATE(ATOM) = "
+        state_line = [ i for i in xprop_output if i.startswith(prefix) ][0]
+        self.state = state_line[len(prefix):]
+
+    def encode(self):
+        return "%d:%d:%d:%d (%s)" % (self.x, self.y, self.w, self.h, self.state)
+
 xstep = int(sys.argv[1])
 ystep = int(sys.argv[2])
 
@@ -34,12 +57,17 @@ curr_desktop_id, wa_x, wa_y, wa_w, wa_h = desktop_info_match.groups()
 wa_x, wa_y, wa_w, wa_h = [ int(s) for s in [wa_x, wa_y, wa_w, wa_h] ]
 
 # Get window IDs of current desktop, but is not sorted by stack.
-win_infos = execute(["wmctrl", "-l"])
-win_info_pattern = re.compile("^(0x[0-9a-z]+) +(" + curr_desktop_id + ") ") 
-curr_desktop_win_ids = [ int(match.group(1), 16) for match in
-                               [ win_info_pattern.match(info) for info in win_infos ]
-                               if match]
-
+win_infos = execute(["wmctrl", "-lG"])
+win_info_pattern = re.compile(r'^(0x[0-9a-z]+) +' + curr_desktop_id +
+                              r' +(\d+) +(\d+) +(\d+) +(\d+) +(.*)')
+curr_desktop_wins = [ WinState(int(match.group(1), 16),
+                               int(match.group(2)),
+                               int(match.group(3)),
+                               int(match.group(4)),
+                               int(match.group(5)),
+                               match.group(6))
+                      for match in [ win_info_pattern.match(info) for info in win_infos ] if match]
+curr_desktop_wins_dict = { win.win_id: win for win in curr_desktop_wins }
 
 # Get all window IDs sorted by stack through a different way.
 root_prop_output = execute(["xprop", "-root"])
@@ -49,13 +77,14 @@ stacking_win_ids = [ int(match.group(0), 16) for match
                         in re.finditer("0x[0-9a-z]+", stacking_list_line) ]
 
 # Get windows IDs of current desktop sorted by stack
-curr_stacking_win_ids = [ id for id in stacking_win_ids if id in curr_desktop_win_ids]
+curr_stacking_wins = [ curr_desktop_wins_dict[id] for id in stacking_win_ids if id in curr_desktop_wins_dict]
+
 
 # Calculate new window sizes.  All windows are resized to the same.
 # Windows may be shrinked so no parts of any window would go out of
 # working area boundaries, but can't shrink to smaller than the 1/3 of
 # the working area dimensions.
-num_curr_windows = len(curr_stacking_win_ids)
+num_curr_windows = len(curr_stacking_wins)
 win_width = max(wa_w - xstep * num_curr_windows, wa_w / 3)
 win_height = max(wa_h - ystep * num_curr_windows, wa_h / 3)
 
@@ -87,9 +116,10 @@ stride_x_offset = win_width + (win_height / ystep) * xstep
 stride_init_x = wa_x
 
 # The window stack goes from the bottom to the top.
-for win_id in curr_stacking_win_ids:
+for win in curr_stacking_wins:
     # Un-maximize and un-minimize, then move
-    win_id_str = str(win_id)
+    win_id_str = str(win.win_id)
+    win.fetch_state()
     execute(["wmctrl", "-ir", win_id_str, "-b", "remove,maximized_vert,maximized_horz"])
     execute(["wmctrl", "-ir", win_id_str, "-b", "remove,hidden"])
     execute(["wmctrl", "-ir", win_id_str, "-e", "0,%d,%d,%d,%d" % (x, y, win_width, win_height)])
