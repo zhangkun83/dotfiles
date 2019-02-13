@@ -6,7 +6,7 @@ xset r rate 220 30
 xfce4-panel &
 xfce4-power-manager &
 
-redshift -O 6100
+redshift -O 5800
 
 $DIR/scripts/start_if_absent.sh urxvtd urxvtd -q -o -f
 $DIR/scripts/start_if_absent.sh nm-applet nm-applet
