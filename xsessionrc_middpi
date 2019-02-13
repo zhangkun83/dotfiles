@@ -1,0 +1,9 @@
+source $HOME/.zkrc
+# GTK3 HiDPI hack
+# To scale UI elements by a factor of two.  This also scales up text.
+# Ideally it would be 1.5, but only integers are accepted here.
+export GDK_SCALE=2
+
+# But text has already been scaled because of the large DPI setting
+# in .Xresources.  Scale them down.
+export GDK_DPI_SCALE=0.667
