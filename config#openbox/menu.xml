@@ -33,7 +33,7 @@
     <action name="Reconfigure" />
   </item>
   <item label="Lock screen">
-    <action name="~/.config/openbox/scripts/lock.sh" />
+    <action name="Execute"><execute>~/.config/openbox/scripts/lock.sh</execute></action>
   </item>
   <item label="Exit">
     <action name="Exit" />
