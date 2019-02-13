@@ -8,6 +8,7 @@ Xft.hinting: 0
 Xft.lcdfilter: lcddefault
 Xft.rgba: rgb
 Xcursor.theme: DMZ-Black
+Xcursor.size: 64
 !Make urxvt not intercept Contrl-Shift
 URxvt*iso14755: False
 
