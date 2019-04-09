@@ -180,6 +180,7 @@
 (global-set-key (kbd "C--") 'zk-prev-window)
 (global-set-key (kbd "C-=") 'other-window)
 (global-set-key [f7] 'switch-to-buffer)
+(global-set-key (kbd "C-'") 'switch-to-buffer)
 
 (global-set-key (kbd "C-c p") 'zk-insert-file-path-of-a-buffer)
 (global-set-key (kbd "C-c f") 'zk-open-file-path-from-region)
