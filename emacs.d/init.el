@@ -200,13 +200,14 @@
  ;; If there is more than one, they won't work right.
  '(c-echo-syntactic-information-p t)
  '(case-fold-search nil)
+ '(custom-enabled-themes (quote (leuven)))
  '(dabbrev-case-replace nil)
+ '(fci-rule-character 9474)
  '(font-use-system-font t)
  '(ido-enable-flex-matching nil)
  '(inhibit-startup-screen t)
  '(ns-command-modifier nil)
  '(org-startup-indented t)
- '(fci-rule-character ?│)
  '(tags-revert-without-query t))
 
 (put 'narrow-to-region 'disabled nil)
@@ -217,3 +218,9 @@
 (global-set-key (kbd "C-b") 'zk-go-to-char-backward)
 
 
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
