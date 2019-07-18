@@ -330,6 +330,7 @@
     <!-- Keybindings for window switching -->
     <keybind key="W-Tab">
       <action name="NextWindow">
+        <raise>yes</raise>
         <finalactions>
           <action name="Focus"/>
           <action name="Raise"/>
@@ -339,6 +340,7 @@
     </keybind>
     <keybind key="W-grave">
       <action name="PreviousWindow">
+        <raise>yes</raise>
         <finalactions>
           <action name="Focus"/>
           <action name="Raise"/>
@@ -1007,6 +1009,18 @@
       </mousebind>
     </context>
     <context name="Root">
+      <mousebind button="Up" action="Click">
+        <action name="PreviousWindow">
+          <interactive>no</interactive>
+          <linear>yes</linear>
+        </action>
+      </mousebind>
+      <mousebind button="Down" action="Click">
+        <action name="NextWindow">
+          <interactive>no</interactive>
+          <linear>yes</linear>
+        </action>
+      </mousebind>
       <!-- Menus -->
       <mousebind button="Left" action="Press">
         <action name="ShowMenu">
