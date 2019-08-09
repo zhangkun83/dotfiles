@@ -182,7 +182,7 @@
 (global-set-key [f7] 'switch-to-buffer)
 (global-set-key (kbd "C-'") 'switch-to-buffer)
 
-(global-set-key (kbd "C-c p") 'zk-insert-file-path-of-a-buffer)
+(global-set-key (kbd "C-c p") 'zk-copy-buffer-file-path)
 (global-set-key (kbd "C-c f") 'zk-open-file-path-from-region)
 (define-key minibuffer-local-map (kbd "C-c p") 'zk-minibuffer-insert-current-file-path)
 

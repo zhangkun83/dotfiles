@@ -273,14 +273,12 @@ or code block or class/function definitions that end with '}'"
   (if isearch-other-end
     (goto-char isearch-other-end)))
 
-(defun zk-insert-file-path-of-a-buffer (f)
-  "Insert the full path of a buffer's file"
-  (interactive
-   (list (ido-completing-read
-          "Select a file path to insert: "
-          (-filter (lambda(buffer-name) (stringp buffer-name))
-                   (-map (lambda(buffer) (buffer-file-name buffer)) (buffer-list))))))
-  (insert f))
+(defun zk-copy-buffer-file-path ()
+  "Copy the full path of a buffer's file to kill ring"
+  (interactive)
+  (let ((file-name (buffer-file-name (current-buffer))))
+    (kill-new file-name)
+    (message "Copied \"%s\"" file-name)))
 
 (defun zk-minibuffer-insert-current-file-path ()
   "Get the full file path of original buffer and insert it to minibuffer."
