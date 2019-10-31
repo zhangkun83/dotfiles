@@ -144,6 +144,7 @@
 ;; Also used by gradlez script
 (require 'zk)
 (setenv "ZK_PROJECT_ROOT" zk-project-root)
+(setq frame-title-format '("emacs - " command-line-default-directory))
 
 (setenv "EDITOR" "editor-stub")
 (setenv "P4EDITOR" "editor-stub")
