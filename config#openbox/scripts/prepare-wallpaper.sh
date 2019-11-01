@@ -8,7 +8,7 @@ wallpaper_download_path="$wallpaper_download_dir/downloaded_wallpaper"
 
 # Try to download a random wallpaper from a website
 mkdir -p "$wallpaper_download_dir"
-wget https://source.unsplash.com/random/1920x1080 --no-verbose \
+wget https://picsum.photos/1920/1080 --no-verbose \
      --output-document="$wallpaper_download_path" \
     && wallpaper_path="$wallpaper_download_path"
 
