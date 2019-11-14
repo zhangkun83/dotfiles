@@ -25,7 +25,7 @@ xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=int 'libinput Tapping Dra
 # Faster pointer acceleration
 xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=float 'libinput Accel Speed' 0.5
 
-redshift -O 5800
+redshift -PO 5800
 
 xfce4-panel &
 xfce4-power-manager &
