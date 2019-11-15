@@ -691,12 +691,12 @@
     </keybind>
     <keybind key="W-backslash">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/chrome-default-user.sh</command>
+        <command>~/.config/openbox/scripts/chrome-default-user.sh --disable-gpu</command>
       </action>
     </keybind>
     <keybind key="W-S-backslash">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/chrome-personal.sh</command>
+        <command>~/.config/openbox/scripts/chrome-personal.sh --disable-gpu</command>
       </action>
     </keybind>
     <keybind key="W-F10">
