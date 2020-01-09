@@ -3,27 +3,16 @@ script_path="$(readlink -f "$0")"
 script_dir="$(dirname "$script_path")"
 parentdir="$(dirname "$script_dir")"
 WALLPAPER_SRC_DIR="$parentdir/runtime/wallpapers"
-wallpaper_download_dir="$parentdir/runtime"
-wallpaper_download_path="$wallpaper_download_dir/downloaded_wallpaper"
 
-# Try to download a random wallpaper from a website
-mkdir -p "$wallpaper_download_dir"
-wget https://picsum.photos/1920/1080 --no-verbose \
-     --output-document="$wallpaper_download_path" \
-    && wallpaper_path="$wallpaper_download_path"
+wallpaper=$(ls -1 "$WALLPAPER_SRC_DIR" | shuf | head -1)
 
-if [[ -z "$wallpaper_path" ]]; then
-    echo "prepare-wallpaper.sh: Download failed. Trying to use local wallpapers"
-    wallpaper=$(ls -1 "$WALLPAPER_SRC_DIR" | shuf | head -1)
-    if [[ -z "$wallpaper" ]]; then
-        wallpaper="wallpaper.jpg"
-        wallpaper_path="$script_dir/$wallpaper"
-    else
-        wallpaper_path="$WALLPAPER_SRC_DIR/$wallpaper"
-    fi
+if [[ -z "$wallpaper" ]]; then
+    wallpaper="wallpaper-tile.png"
+    wallpaper_path="$script_dir/$wallpaper"
 else
-    echo "prepare-wallpaper.sh: Using downloaded wallpaper".
+    wallpaper_path="$WALLPAPER_SRC_DIR/$wallpaper"
 fi
+
 # If the file name ends with "-tile", it's a tile image
 if [[ "$wallpaper" == *-tile.* ]]; then
     option="--bg-tile"
