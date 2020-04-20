@@ -12,30 +12,26 @@ Xcursor.size: 64
 !Make urxvt not intercept Contrl-Shift
 URxvt*iso14755: False
 
-*foreground:   #4d4d4c
-*background:   #fafafa
+!zenburn color scheme
 
-! Black + Grey (Comment)
-*color0:       #000000
-*color8:       #8e908c
-! Red + Bright Red
-*color1:       #c82829
-*color9:       #ff3334
-! Green + Bright Green
-*color2:       #718c00
-*color10:      #9ec400
-! Yellow (Orange) + Bright Yellow (Yellow)
-*color3:       #f5871f
-*color11:      #eab700
-! Blue + Bright Blue
-*color4:       #4271ae
-*color12:      #5795e6
-! Magenta (Purple) + Bright Magenta
-*color5:       #8959a8
-*color13:      #b777e0
-! Cyan (Aqua) + Bright Cyan
-*color6:       #3e999f
-*color14:      #54ced6
-! Light Grey (Selection) + White (Current Line)
-*color7:       #d6d6d6
-*color15:      #efefef
+URxvt*background: #3f3f3f
+URxvt*foreground: #dcdccc
+URxvt*cursorColor: #aaaaaa
+!URxvt*colorUL: #366060
+URxvt*underlineColor: #eeeeee
+URxvt*color0: #3f3f3f
+URxvt*color1: #cc9393
+URxvt*color2: #7f9f7f
+URxvt*color3: #d0bf8f
+URxvt*color4: #6ca0a3
+URxvt*color5: #dc8cc3
+URxvt*color6: #93e0e3
+URxvt*color7: #dcdccc
+URxvt*color8: #000000
+URxvt*color9: #dca3a3
+URxvt*color10: #bfebbf
+URxvt*color11: #f0dfaf
+URxvt*color12: #8cd0d3
+URxvt*color13: #dc8cc3
+URxvt*color14: #93e0e3
+URxvt*color15: #ffffff

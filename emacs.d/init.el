@@ -201,7 +201,9 @@
  ;; If there is more than one, they won't work right.
  '(c-echo-syntactic-information-p t)
  '(case-fold-search nil)
- '(custom-enabled-themes (quote (leuven)))
+ (if (display-graphic-p)
+     '(custom-enabled-themes (quote (leuven)))
+   '(custom-enabled-themes (quote (whiteboard))))
  '(dabbrev-case-replace nil)
  '(fci-rule-character 9474)
  '(font-use-system-font t)
