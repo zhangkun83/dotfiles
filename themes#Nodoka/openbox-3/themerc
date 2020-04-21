@@ -1,0 +1,103 @@
+! Nodoka 1.8
+
+# fonts
+window.active.label.text.font:shadow=y:shadowtint=20:shadowoffset=1
+window.inactive.label.text.font:shadow=y:shadowtint=00:shadowoffset=0
+menu.title.text.font:shadow=y:shadowtint=20:shadowoffset=1
+menu.items.font:shadow=n
+
+border.width: 1 
+padding.width: 2 
+padding.height: 2 
+window.handle.width: 0 
+menu.overlap: 0
+*.justify: center
+*.bg.highlight: 50
+*.bg.shadow:    01
+window.active.border.color: #14638d
+window.inactive.border.color: #beb6b6
+window.active.client.color:  #14638d
+window.inactive.client.color:  #beb6b6
+window.client.padding.width: 1
+window.client.padding.height: 1
+
+# menu
+menu.border.color: #aaaaaa
+menu.border.width: 1
+
+menu.title.bg: solid flat
+menu.title.bg.color: #e6e7e6
+menu.title.text.color: #000000
+
+menu.items.bg: Flat Solid
+menu.items.bg.color: #ffffff
+menu.items.text.color: #000000
+menu.items.disabled.text.color: #aaaaaa
+
+menu.items.active.bg: flat gradient vertical border
+
+menu.items.active.bg.color: #1daef8
+menu.items.active.bg.colorTo: #097cb8
+menu.items.active.bg.border.color: #2f6683
+
+menu.items.active.text.color: #ffffff
+
+# active
+window.active.title.separator.color: #14628a
+
+window.active.title.bg: raised gradient vertical
+window.active.title.bg.color: #0198e8
+window.active.title.bg.colorTo: #126896
+
+window.active.title.bg.highlight: 35
+window.active.title.bg.shadow:    00
+
+window.active.label.bg: Parentrelative
+window.active.label.text.color: #ffffff
+
+window.active.button.*.bg: parentrelative
+window.active.button.*.image.color: #efefef
+window.active.button.hover.bg.color: #729fcf
+window.active.button.hover.image.color: #ffffff
+window.active.button.pressed.bg.color: #a7cef2
+window.active.button.disabled.image.color: #6d8fbc
+
+# inactive
+window.inactive.border.color: #beb6b6
+window.inactive.title.separator.color: #beb6b6
+
+window.inactive.title.bg: flat gradient vertical
+window.inactive.title.bg.color: #dad5d5
+window.inactive.title.bg.colorTo: #c0b8b8
+
+window.inactive.label.bg: parentrelative
+window.inactive.label.text.color: #8c9299
+
+window.*.handle.bg: flat solid
+window.*.handle.bg.color: #ffffff
+
+window.*.grip.bg: raised solid 
+window.*.grip.bg.color: #eaebec
+
+window.inactive.button.*.bg: parentrelative
+window.inactive.button.*.image.color: #8c9299
+window.inactive.button.pressed.bg.color: #a7cef2
+window.inactive.button.disabled.image.color: #6d8fbc
+
+# osd
+osd.border.width: 1
+osd.border.color:  #aaaaaa
+
+osd.bg: flat
+osd.bg.color: #ffffff
+
+osd.active.label.bg: flat vertical gradient border
+osd.active.label.bg.color: #1daef8
+osd.active.label.bg.colorTo: #097cb8
+osd.active.label.bg.border.color: #2f6683
+
+osd.active.label.text.color: #ffffff
+
+osd.inactive.label.bg: parentrelative
+osd.inactive.label.text.color: #000000
+
