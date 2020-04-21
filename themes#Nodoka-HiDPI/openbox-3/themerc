@@ -89,15 +89,15 @@ osd.border.width: 2
 osd.border.color:  #aaaaaa
 
 osd.bg: flat
-osd.bg.color: #ffffff
+osd.bg.color: #c0b8b8
 
 osd.active.label.bg: flat vertical gradient border
-osd.active.label.bg.color: #1daef8
-osd.active.label.bg.colorTo: #097cb8
+osd.active.label.bg.color: #dad5d5
+osd.active.label.bg.colorTo: #c0b8b8
 osd.active.label.bg.border.color: #2f6683
 
-osd.active.label.text.color: #ffffff
+osd.active.label.text.color: #000000
 
 osd.inactive.label.bg: parentrelative
-osd.inactive.label.text.color: #000000
+osd.inactive.label.text.color: #8c9299
 
