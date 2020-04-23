@@ -313,6 +313,12 @@ or code block or class/function definitions that end with '}'"
           (user-error "Selection is empty")))
     (user-error "No selection")))
 
+(defun zk-c-toggle-syntactic-indentation ()
+  "Toggle c-syntactic-indentation for current buffer"
+  (interactive)
+  (setq c-syntactic-indentation (not c-syntactic-indentation))
+  (message "Syntactic indentation: %s" (if c-syntactic-indentation "on" "off")))
+
 (global-set-key (kbd "C-s") 'zk-isearch-forward-to-beginning)
 (define-key isearch-mode-map (kbd "C-s") 'zk-isearch-repeat-forward-to-beginning)
 

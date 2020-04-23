@@ -153,6 +153,7 @@
 	  (lambda()
 	    "Register my own shortcuts for Java mode"
 	    (local-set-key (kbd "C-c i") 'zk-insert-java-import)
+	    (local-set-key (kbd "C-c d") 'zk-c-toggle-syntactic-indentation)
             (local-set-key (kbd "M-;") 'recenter-top-bottom)
             (local-set-key (kbd "M-h") 'zk-java-mark-thing)
             (local-set-key (kbd "M-i") 'zk-java-enter-braces-block)
@@ -160,7 +161,9 @@
             (local-set-key (kbd "M-n") 'zk-java-next-thing)
             (local-set-key (kbd "M-p") 'zk-java-prev-thing)
             (local-set-key (kbd "M-a") 'zk-java-beginning-braces-block)
-            (local-set-key (kbd "M-e") 'zk-java-end-braces-block)))
+            (local-set-key (kbd "M-e") 'zk-java-end-braces-block)
+            (local-set-key [backtab] (lambda() (interactive) (c-indent-line-or-region -1)))))
+
 (global-set-key (kbd "C-x M-f") 'zk-find-src-file-in-project)
 
 ; Java stacktrace detection in compilation-mode
@@ -182,7 +185,6 @@
 (global-set-key (kbd "C-=") 'other-window)
 (global-set-key [f7] 'switch-to-buffer)
 (global-set-key (kbd "C-'") 'switch-to-buffer)
-
 (global-set-key (kbd "C-c p") 'zk-copy-buffer-file-path)
 (global-set-key (kbd "C-c f") 'zk-open-file-path-from-region)
 (define-key minibuffer-local-map (kbd "C-c p") 'zk-minibuffer-insert-current-file-path)
