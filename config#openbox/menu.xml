@@ -26,6 +26,9 @@
       <action name="Execute"><execute>pavucontrol</execute></action>
     </item>
   <separator label="Actions" />
+  <item label="Re-adjust HCI settings">
+    <action name="Execute"><execute>~/.config/openbox/scripts/hci-adjustments</execute></action>
+  </item>
   <item label="Switch wallpaper">
     <action name="Execute"><execute>~/.config/openbox/scripts/prepare-wallpaper.sh</execute></action>
   </item>
