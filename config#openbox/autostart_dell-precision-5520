@@ -1,19 +1,5 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Change key repeat rate
-xset r rate 220 30
-
-$DIR/scripts/start_if_absent.sh urxvtd urxvtd -q -o -f
-$DIR/scripts/start_if_absent.sh xss-lock xss-lock -- $DIR/scripts/lock.sh
-$DIR/scripts/start_if_absent.sh wallpaper-auto-switcher.sh $DIR/scripts/wallpaper-auto-switcher.sh || $DIR/scripts/prepare-wallpaper.sh
-
-fcitx &
-
-# light-locker is the screen locker from lightdm.
-# I want to use my own locker, so disable it.
-# Alternatively, just "apt-get remove light-locker"
-# killall light-locker
-
 # Use "xinput list-props <device_id>" to view all properties
 
 xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=int 'libinput Disable While Typing Enabled' 0
@@ -23,7 +9,4 @@ xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=int 'libinput Tapping Dra
 # Faster pointer acceleration
 xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=float 'libinput Accel Speed' 0.5
 
-redshift -PO 5800
-
-xfce4-panel &
-xfce4-power-manager &
+. $DIR/autostart-common.sh

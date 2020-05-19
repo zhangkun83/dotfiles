@@ -1,0 +1,10 @@
+#!/bin/bash
+# Configurations that tend to be reset after waking up from sleep,
+# thus need to be done when logging in as well as when waking up.
+
+# Change key repeat rate
+xset r rate 220 30
+
+redshift -PO 5800
+
+notify-send "HCI adjustments completed"
