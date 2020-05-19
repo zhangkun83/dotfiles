@@ -20,3 +20,4 @@ else
     option="--bg-fill"
 fi
 feh "$option" "$wallpaper_path"
+notify-send -i preferences-desktop-wallpaper "Switched to \"$wallpaper\""

@@ -5,15 +5,15 @@ shift
 RESULT=$(ps -u $USER -o command | grep -F "$EXEC" | grep -v '\(^grep \)\|\(start_if_absent\.sh \)')
 
 function message {
-    echo "$1"
-    notify-send "$1"
+    echo "start_if_absent: $1"
+    notify-send -i system-run "$1"
 }
 
 if [ -z "$RESULT" ]; then
     $@ &
-    message "start_if_absent: $EXEC started"
+    message "$EXEC started"
     return 0
 else
-    message "start_if_absent: $EXEC already running"
+    message "$EXEC already running"
     return 1
 fi
