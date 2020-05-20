@@ -30,7 +30,7 @@
     <action name="Execute"><execute>~/.config/openbox/scripts/hci-adjustments</execute></action>
   </item>
   <item label="Switch wallpaper">
-    <action name="Execute"><execute>~/.config/openbox/scripts/prepare-wallpaper.sh</execute></action>
+    <action name="Execute"><execute>~/.config/openbox/scripts/prepare-wallpaper.sh --show-notification</execute></action>
   </item>
   <item label="Reconfigure">
     <action name="Reconfigure" />
