@@ -7,38 +7,38 @@
 
 <menu id="root-menu" label="Openbox 3">
   <separator label="Launchers" />
-    <item label="Terminal emulator">
+    <item label="Terminal emulator" icon="/usr/share/icons/gnome/48x48/apps/utilities-terminal.png">
       <action name="Execute"><execute>~/.config/openbox/scripts/urxvt.sh</execute></action>
     </item>
-    <item label="Chrome (work)">
+    <item label="Chrome (work)" icon="/usr/share/icons/hicolor/48x48/apps/google-chrome.png">
       <action name="Execute"><execute>~/.config/openbox/scripts/chrome-default-user.sh</execute></action>
     </item>
-    <item label="Chrome (personal)">
+    <item label="Chrome (personal)" icon="/usr/share/icons/hicolor/48x48/apps/google-chrome.png">
       <action name="Execute"><execute>~/.config/openbox/scripts/chrome-personal.sh</execute></action>
     </item>
-    <item label="File manager">
+    <item label="File manager" icon="/usr/share/icons/gnome/256x256/apps/system-file-manager.png">
       <action name="Execute"><execute>thunar</execute></action>
     </item>
-    <item label="Dictionary">
+    <item label="Dictionary" icon="/usr/share/icons/gnome/48x48/apps/accessories-dictionary.png">
       <action name="Execute"><execute>~/.config/openbox/scripts/youdao_dict.py</execute></action>
     </item>
-    <item label="Volume control">
+    <item label="Volume control" icon="/usr/share/icons/gnome/48x48/apps/multimedia-volume-control.png">
       <action name="Execute"><execute>pavucontrol</execute></action>
     </item>
   <separator label="Actions" />
-  <item label="Re-adjust HCI settings">
+  <item label="Re-adjust HCI settings" icon="/usr/share/icons/gnome/48x48/apps/preferences-desktop-display.png">
     <action name="Execute"><execute>~/.config/openbox/scripts/hci-adjustments</execute></action>
   </item>
-  <item label="Switch wallpaper">
+  <item label="Switch wallpaper" icon="/usr/share/icons/gnome/48x48/apps/preferences-desktop-wallpaper.png">
     <action name="Execute"><execute>~/.config/openbox/scripts/prepare-wallpaper.sh --show-notification</execute></action>
   </item>
-  <item label="Reconfigure">
+  <item label="Reload OB config" icon="/usr/share/icons/gnome/48x48/actions/view-refresh.png">
     <action name="Reconfigure" />
   </item>
-  <item label="Lock screen">
+  <item label="Lock screen" icon="/usr/share/icons/gnome/48x48/actions/system-lock-screen.png">
     <action name="Execute"><execute>~/.config/openbox/scripts/lock.sh</execute></action>
   </item>
-  <item label="Exit">
+  <item label="Log out" icon="/usr/share/icons/gnome/48x48/actions/system-log-out.png">
     <action name="Exit" />
   </item>
 </menu>
