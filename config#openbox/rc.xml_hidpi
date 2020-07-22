@@ -330,7 +330,7 @@
     <!-- Keybindings for window switching -->
     <keybind key="W-Tab">
       <action name="NextWindow">
-        <raise>yes</raise>
+        <raise>no</raise>
         <finalactions>
           <action name="Focus"/>
           <action name="Raise"/>
@@ -340,7 +340,7 @@
     </keybind>
     <keybind key="W-grave">
       <action name="PreviousWindow">
-        <raise>yes</raise>
+        <raise>no</raise>
         <finalactions>
           <action name="Focus"/>
           <action name="Raise"/>
