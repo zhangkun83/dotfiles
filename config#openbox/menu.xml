@@ -25,13 +25,17 @@
     <item label="Volume control" icon="/usr/share/icons/gnome/48x48/apps/multimedia-volume-control.png">
       <action name="Execute"><execute>pavucontrol</execute></action>
     </item>
-  <separator label="Actions" />
-  <item label="Re-adjust HCI settings" icon="/usr/share/icons/gnome/48x48/apps/preferences-desktop-display.png">
+  <separator label="HCI" />
+  <item label="Reset HCI settings" icon="/usr/share/icons/gnome/48x48/apps/preferences-desktop-display.png">
     <action name="Execute"><execute>~/.config/openbox/scripts/hci-adjustments</execute></action>
+  </item>
+  <item label="Night mode" icon="/usr/share/icons/gnome/48x48/apps/xscreensaver.png">
+    <action name="Execute"><execute>redshift -PO 4000</execute></action>
   </item>
   <item label="Switch wallpaper" icon="/usr/share/icons/gnome/48x48/apps/preferences-desktop-wallpaper.png">
     <action name="Execute"><execute>~/.config/openbox/scripts/prepare-wallpaper.sh --show-notification</execute></action>
   </item>
+  <separator label="System" />
   <item label="Reload OB config" icon="/usr/share/icons/gnome/48x48/actions/view-refresh.png">
     <action name="Reconfigure" />
   </item>
