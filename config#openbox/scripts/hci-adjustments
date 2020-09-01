@@ -3,8 +3,9 @@
 # thus need to be done when logging in as well as when waking up.
 
 # Change key repeat rate
-xset r rate 220 30
-notify-send -i keyboard "Key repeat speed adjusted"
+xset r rate 220 30 && notify-send -i keyboard "Key repeat speed adjusted"
 
-redshift -PO 5800
-notify-send -i display "Color temperature adjusted"
+redshift -PO 5800 && notify-send -i display "Color temperature adjusted"
+
+# Original mapping is 1 2 3 4 5 6 7 9 2 8
+xinput set-button-map 'Kingsis Peripherals Evoluent VerticalMouse 4' 1 2 3 4 5 6 7 0 2 0 && notify-send -i mouse "Disabled Forward/Backward buttons"
