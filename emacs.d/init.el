@@ -172,18 +172,15 @@
 (global-set-key (kbd "C-x \\") 'compile)
 (global-set-key (kbd "C-x |") 'compilation-minor-mode)
 
-(global-set-key [f8] 'revert-buffer)
-
 (defun zk-prev-window()
   "Switch to previous window"
   (interactive)
   (other-window -1))
 
-(global-set-key [f5] 'zk-prev-window)
-(global-set-key [f6] 'other-window)
-(global-set-key (kbd "C--") 'zk-prev-window)
-(global-set-key (kbd "C-=") 'other-window)
-(global-set-key [f7] 'switch-to-buffer)
+(global-set-key (kbd "M-_") 'zk-prev-window)
+(global-set-key (kbd "M-+") 'other-window)
+(global-set-key (kbd "M-*") 'switch-to-buffer)
+(global-set-key (kbd "M-~") 'revert-buffer)
 (global-set-key (kbd "C-'") 'switch-to-buffer)
 (global-set-key (kbd "C-c p") 'zk-copy-buffer-file-path)
 (global-set-key (kbd "C-c f") 'zk-open-file-path-from-region)
