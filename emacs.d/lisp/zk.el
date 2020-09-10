@@ -319,6 +319,19 @@ or code block or class/function definitions that end with '}'"
   (setq c-syntactic-indentation (not c-syntactic-indentation))
   (message "Syntactic indentation: %s" (if c-syntactic-indentation "on" "off")))
 
+(defun zk-insert-mean()
+  "Take the leading number from the current line and the previous line,
+  and insert the mean value of the two as a new line in between.
+  Useful for bi-secting version numbers."
+  (interactive)
+  (previous-line)
+  (move-beginning-of-line nil)
+  (let ((a (thing-at-point 'number t)))
+    (next-line)
+    (let ((b (thing-at-point 'number t)))
+      (open-line 1)
+      (insert (number-to-string (/ (+ a b) 2))))))
+
 (global-set-key (kbd "C-s") 'zk-isearch-forward-to-beginning)
 (define-key isearch-mode-map (kbd "C-s") 'zk-isearch-repeat-forward-to-beginning)
 
