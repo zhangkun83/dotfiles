@@ -5,6 +5,7 @@
 # Usage: afk-logger <idle_timeout_seconds> [log_file]
 # If log_file is not provided, will log to stdout
 
+import signal
 import sys
 import subprocess
 import time
@@ -32,6 +33,10 @@ def log_line_timestamped(timestamp, msg):
     timestamp_str = time.strftime('%Y-%m-%d %H:%M:%S ', time.localtime(timestamp))
     log_line(timestamp_str + msg)
 
+def shutdown_handler(signal_number, stack):
+    log_line_timestamped(time.time(), "IDLE (shutdown: {})".format(signal_number))
+    sys.exit(0)
+
 if len(sys.argv) < 2:
     sys.exit('Usage: afk-logger <idle_timeout_seconds> [log_file]')
 
@@ -43,29 +48,38 @@ if len(sys.argv) > 2:
 
 is_active = True
 last_poll_timestamp = time.time()
-log_line_timestamped(last_poll_timestamp, "ACTIVE")
-while True:
-    now_timestamp = time.time()
-    seconds_since_last_poll = now_timestamp - last_poll_timestamp
-    if seconds_since_last_poll > idle_timeout_seconds:
-        # No poll for too long, the machine was probably sleeping.
-        # Because the X idleness state may have been reset since the
-        # machine woke up, if we simply rely on xprintidle, we may
-        # miss this period.  Therefore, we always count this case
-        # as idleness.
-        idle_seconds = seconds_since_last_poll
-    else:
-        idle_seconds = int(execute(['xprintidle'])) / 1000.0
-    if is_active:
-        if idle_seconds >= idle_timeout_seconds:
-            idle_start_timestamp = now_timestamp - idle_seconds
-            log_line_timestamped(idle_start_timestamp, "IDLE")
-            is_active = False
-    else:
-        # Currently idle
-        if idle_seconds < idle_timeout_seconds:
-            # Exiting idleness
-            log_line_timestamped(now_timestamp, "ACTIVE")
-            is_active = True
-    last_poll_timestamp = now_timestamp
-    time.sleep(poll_interval_seconds)
+log_line_timestamped(last_poll_timestamp, "ACTIVE (startup)")
+signal.signal(signal.SIGTERM, shutdown_handler)
+signal.signal(signal.SIGINT, shutdown_handler)
+signal.signal(signal.SIGHUP, shutdown_handler)
+
+try:
+    while True:
+        now_timestamp = time.time()
+        seconds_since_last_poll = now_timestamp - last_poll_timestamp
+        if seconds_since_last_poll > idle_timeout_seconds:
+            # No poll for too long, the machine was probably sleeping.
+            # Because the X idleness state may have been reset since
+            # the machine woke up, if we simply rely on xprintidle, we
+            # may miss this period.  Therefore, we always count this
+            # case as idleness.
+            idle_seconds = seconds_since_last_poll
+            idle_reason = '(sleep)'
+        else:
+            idle_seconds = int(execute(['xprintidle'])) / 1000.0
+            idle_reason = '(timeout)'
+        if is_active:
+            if idle_seconds >= idle_timeout_seconds:
+                log_line_timestamped(now_timestamp, "IDLE " + idle_reason)
+                is_active = False
+        else:
+            # Currently idle
+            if idle_seconds < idle_timeout_seconds:
+                # Exiting idleness.
+                log_line_timestamped(now_timestamp, "ACTIVE (activity detected)")
+                is_active = True
+        last_poll_timestamp = now_timestamp
+        time.sleep(poll_interval_seconds)
+except Exception as e:
+    log_line_timestamped(now_timestamp, "IDLE (crash: {})".format(e))
+    sys.exit(e)
