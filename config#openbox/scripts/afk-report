@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # Generate a report from an afk-logger log
-# Usage: afk-report <log_file> <date>
+# Usage: afk-report <log_file> <date|today>
 
 import re
 import sys
@@ -21,13 +21,17 @@ class Event:
         return time.mktime(self.timestamp)
 
 if len(sys.argv) < 3:
-    sys.exit('Usage: afk-report <log_file> <date>')
+    sys.exit('Usage: afk-report <log_file> <date|today>')
 
 log_file_path = sys.argv[1]
 date_str = sys.argv[2]
 today_date_str = time.strftime('%Y-%m-%d', time.localtime())
+if date_str.lower() == 'today':
+    date_str = today_date_str
+
 log_pattern = re.compile(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) ([A-Z]+)')
 
+print('---------- LOGS ----------')
 events = []
 with open(log_file_path) as fp:
     for line in fp:
@@ -70,5 +74,5 @@ if events[-1].is_active:
         eod_timestamp = parse_timestamp(date_str + ' 23:59:59')
         print(format_timestamp(event.timestamp) + ' -- ' + format_timestamp(eod_timestamp))
         active_seconds += time.mktime(eod_timestamp) - event.get_timestamp_seconds()
-
-print('- TOTAL ACTIVE: {:4.1f} hours'.format(active_seconds / 3600.0))
+print('--------------------------')
+print('TOTAL ACTIVE: {:4.1f} hours'.format(active_seconds / 3600.0))
