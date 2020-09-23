@@ -71,7 +71,7 @@ with open(log_file_path) as fp:
 if len(events) == 0:
     sys.exit('No records')
 
-print('----------- ACTIVE PERIODS -----------')
+print('---- ACTIVE PERIODS ----- HOURS ------')
 
 # If the first event is from the previous day, adjust it to the beginning
 # of the requested day for proper duration calculation
@@ -97,12 +97,11 @@ for event in events:
     if (not event.is_active) and (prev_event.is_active):
         duration_seconds = event.get_timestamp_seconds() - prev_event.get_timestamp_seconds()
         active_seconds += duration_seconds
-        print('   {:<5} -- {:<11} ({:3.1f} hours)'.format(
+        print('{:>10} -- {:<11}  {:3.1f}'.format(
             prev_event.format_short_timestamp(),
             event.format_short_timestamp(),
             duration_seconds / 3600.0))
     prev_event = event
 
-print('--------------------------------------')
-print('                 TOTAL: {:4.1f} hours'.format(active_seconds / 3600.0))
+print('{:>26}{:4.1f}'.format('TOTAL:', active_seconds / 3600.0))
 print('--------------------------------------')
