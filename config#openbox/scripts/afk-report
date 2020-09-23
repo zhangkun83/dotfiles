@@ -1,0 +1,74 @@
+#!/usr/bin/python3
+# Generate a report from an afk-logger log
+# Usage: afk-report <log_file> <date>
+
+import re
+import sys
+import time
+
+def format_timestamp(timestamp):
+    return time.strftime('%H:%M:%S', timestamp)
+
+def parse_timestamp(timestamp_str):
+    return time.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+    
+class Event:
+    def __init__(self, timestamp_str, is_active):
+        self.timestamp = parse_timestamp(timestamp_str)
+        self.is_active = is_active
+
+    def get_timestamp_seconds(self):
+        return time.mktime(self.timestamp)
+
+if len(sys.argv) < 3:
+    sys.exit('Usage: afk-report <log_file> <date>')
+
+log_file_path = sys.argv[1]
+date_str = sys.argv[2]
+today_date_str = time.strftime('%Y-%m-%d', time.localtime())
+log_pattern = re.compile(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) ([A-Z]+)')
+
+events = []
+with open(log_file_path) as fp:
+    for line in fp:
+        if line.startswith(date_str):
+            print(line.strip())
+            m = log_pattern.match(line)
+            timestamp_str = m.group(1)
+            msg = m.group(2)
+            if msg == 'ACTIVE':
+                is_active = True
+            elif msg == 'IDLE':
+                is_active = False
+            else:
+                raise Exception('Unrecognized msg: ' + msg)
+            events.append(Event(timestamp_str, is_active))
+
+if len(events) == 0:
+    raise Exception('No records')
+
+print('----- ACTIVE PERIODS -----')
+
+# Use a pseudo event for the beginning of the day to be the reverse
+# of the first recorded event, in order to calculate durations
+prev_event = Event(date_str + ' 00:00:00', not events[0].is_active)
+
+active_seconds = 0
+for event in events:
+    if (not event.is_active) and (prev_event.is_active):
+        print(format_timestamp(prev_event.timestamp)
+              + ' -- ' + format_timestamp(event.timestamp))
+        active_seconds += event.get_timestamp_seconds() - prev_event.get_timestamp_seconds()
+    prev_event = event
+
+if events[-1].is_active:
+    event = events[-1]
+    if date_str == today_date_str:
+        print(format_timestamp(event.timestamp) + ' -- NOW')
+        active_seconds += time.time() - event.get_timestamp_seconds()
+    else:
+        eod_timestamp = parse_timestamp(date_str + ' 23:59:59')
+        print(format_timestamp(event.timestamp) + ' -- ' + format_timestamp(eod_timestamp))
+        active_seconds += time.mktime(eod_timestamp) - event.get_timestamp_seconds()
+
+print('- TOTAL ACTIVE: {:4.1f} hours'.format(active_seconds / 3600.0))

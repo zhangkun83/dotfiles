@@ -42,8 +42,8 @@ if len(sys.argv) > 2:
     log_file = sys.argv[2]
 
 is_active = True
-current_state_start_timestamp = time.time()
 last_poll_timestamp = time.time()
+log_line_timestamped(last_poll_timestamp, "ACTIVE")
 while True:
     now_timestamp = time.time()
     seconds_since_last_poll = now_timestamp - last_poll_timestamp
@@ -59,19 +59,13 @@ while True:
     if is_active:
         if idle_seconds >= idle_timeout_seconds:
             idle_start_timestamp = now_timestamp - idle_seconds
-            log_line_timestamped(
-                idle_start_timestamp,
-                "IDLE; was ACTIVE for %d" % (idle_start_timestamp - current_state_start_timestamp))
-            current_state_start_timestamp = idle_start_timestamp
+            log_line_timestamped(idle_start_timestamp, "IDLE")
             is_active = False
     else:
         # Currently idle
         if idle_seconds < idle_timeout_seconds:
             # Exiting idleness
-            log_line_timestamped(
-                now_timestamp,
-                "ACTIVE; was IDLE for %d" % (now_timestamp - current_state_start_timestamp))
-            current_state_start_timestamp = now_timestamp
+            log_line_timestamped(now_timestamp, "ACTIVE")
             is_active = True
     last_poll_timestamp = now_timestamp
     time.sleep(poll_interval_seconds)
