@@ -1,0 +1,73 @@
+#!/usr/bin/python3
+
+# Logs time when the user is away from keyboard
+# with the help from xprintidle.
+# Usage: afk-logger <idle_timeout_seconds> [log_file]
+# If log_file is not provided, will log to stdout
+
+import sys
+import subprocess
+import time
+
+# Execute a command and return stdout as a string
+def execute(args):
+    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    if p.returncode != 0:
+        raise Exception("%s failed with %d. stdout=%s, stdin=%s" %
+                        (str(args), p.returncode, stdout, stderr))
+    stdout_str = stdout.decode()
+    return stdout_str
+
+def log_line(msg):
+    if log_file == None:
+        print(msg)
+    else:
+        f = open(log_file, "a+")
+        f.write(msg)
+        f.write('\n')
+        f.close()
+
+def log_line_timestamped(timestamp, msg):
+    timestamp_str = time.strftime('%Y-%m-%d %H:%M:%S ', time.localtime(timestamp))
+    log_line(timestamp_str + msg)
+
+if len(sys.argv) < 2:
+    sys.exit('Usage: afk-logger <idle_timeout_seconds> [log_file]')
+
+idle_timeout_seconds = int(sys.argv[1])
+poll_interval_seconds = idle_timeout_seconds / 10.0
+log_file = None
+if len(sys.argv) > 2:
+    log_file = sys.argv[2]
+
+is_active = True
+current_state_start_timestamp = time.time()
+last_poll_timestamp = time.time()
+while True:
+    time.sleep(poll_interval_seconds)
+    now_timestamp = time.time()
+    seconds_since_last_poll = now_timestamp - last_poll_timestamp
+    if seconds_since_last_poll > idle_timeout_seconds:
+        # No poll for too long, probably was sleeping
+        idle_seconds = seconds_since_last_poll
+    else:
+        idle_seconds = int(execute(['xprintidle'])) / 1000.0
+    if is_active:
+        if idle_seconds >= idle_timeout_seconds:
+            idle_start_timestamp = now_timestamp - idle_seconds
+            log_line_timestamped(
+                idle_start_timestamp,
+                "IDLE; was ACTIVE for %d" % (idle_start_timestamp - current_state_start_timestamp))
+            current_state_start_timestamp = idle_start_timestamp
+            is_active = False
+    else:
+        # Currently idle
+        if idle_seconds < idle_timeout_seconds:
+            # Exting idleness
+            log_line_timestamped(
+                now_timestamp,
+                "ACTIVE; was IDLE for %d" % (now_timestamp - current_state_start_timestamp))
+            current_state_start_timestamp = now_timestamp
+            is_active = True
+    last_poll_timestamp = now_timestamp

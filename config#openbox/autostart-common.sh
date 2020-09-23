@@ -2,6 +2,8 @@ $DIR/scripts/start_if_absent.sh urxvtd urxvtd -q -o -f
 $DIR/scripts/start_if_absent.sh xss-lock xss-lock -- $DIR/scripts/lock.sh
 $DIR/scripts/start_if_absent.sh wallpaper-auto-switcher.sh $DIR/scripts/wallpaper-auto-switcher.sh || $DIR/scripts/prepare-wallpaper.sh
 
+$DIR/scripts/start_if_absent.sh afk-logger $DIR/scripts/afk-logger 600 ~/.afk.log
+
 # light-locker is the screen locker from lightdm.
 # I want to use my own locker, so disable it.
 # Alternatively, just "apt-get remove light-locker"
