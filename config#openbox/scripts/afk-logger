@@ -45,11 +45,14 @@ is_active = True
 current_state_start_timestamp = time.time()
 last_poll_timestamp = time.time()
 while True:
-    time.sleep(poll_interval_seconds)
     now_timestamp = time.time()
     seconds_since_last_poll = now_timestamp - last_poll_timestamp
     if seconds_since_last_poll > idle_timeout_seconds:
-        # No poll for too long, probably was sleeping
+        # No poll for too long, the machine was probably sleeping.
+        # Because the X idleness state may have been reset since the
+        # machine woke up, if we simply rely on xprintidle, we may
+        # miss this period.  Therefore, we always count this case
+        # as idleness.
         idle_seconds = seconds_since_last_poll
     else:
         idle_seconds = int(execute(['xprintidle'])) / 1000.0
@@ -64,10 +67,11 @@ while True:
     else:
         # Currently idle
         if idle_seconds < idle_timeout_seconds:
-            # Exting idleness
+            # Exiting idleness
             log_line_timestamped(
                 now_timestamp,
                 "ACTIVE; was IDLE for %d" % (now_timestamp - current_state_start_timestamp))
             current_state_start_timestamp = now_timestamp
             is_active = True
     last_poll_timestamp = now_timestamp
+    time.sleep(poll_interval_seconds)
