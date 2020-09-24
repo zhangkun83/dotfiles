@@ -96,8 +96,12 @@ if events[-1].is_active:
 active_seconds = 0
 prev_event = events.pop(0)
 for event in events:
-    if event.is_active == prev_event.is_active:
-        raise Exception('Unmatched event at ' + event.format_short_timestamp())
+    # Normally IDLE and ACTIVE events should appear alternately.  It's
+    # possible for IDLE to repeat, e.g., if afk-logger is terminated
+    # when in IDLE state, because the termination event also appears
+    # as IDLE.  However, ACTIVE should never duplicate.
+    if event.is_active and prev_event.is_active:
+        raise Exception('ACTIVE event repeating at ' + event.format_short_timestamp())
     if (not event.is_active) and (prev_event.is_active):
         duration_seconds = event.get_timestamp_seconds() - prev_event.get_timestamp_seconds()
         active_seconds += duration_seconds
