@@ -6,9 +6,13 @@ import re
 import sys
 import time
 
+# Format a float as '10.3', '2.5', '.6', '.0' etc.
+def format_float(value):
+    return ('{:.1f}'.format(value)).lstrip('0')
+
 def parse_timestamp(timestamp_str):
     return time.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
-    
+
 log_pattern = re.compile(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) ([A-Z]+)')
 def add_event(events, line):
     print(line.strip())
@@ -97,11 +101,11 @@ for event in events:
     if (not event.is_active) and (prev_event.is_active):
         duration_seconds = event.get_timestamp_seconds() - prev_event.get_timestamp_seconds()
         active_seconds += duration_seconds
-        print('{:>10} -- {:<11}  {:3.1f}'.format(
+        print('{:>10} -- {:<11}  {:>4}'.format(
             prev_event.format_short_timestamp(),
             event.format_short_timestamp(),
-            duration_seconds / 3600.0))
+            format_float(duration_seconds / 3600.0)))
     prev_event = event
 
-print('{:>26}{:4.1f}'.format('TOTAL:', active_seconds / 3600.0))
+print('{:>26} {:>4}'.format('TOTAL:', format_float(active_seconds / 3600.0)))
 print('--------------------------------------')
