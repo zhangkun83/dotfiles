@@ -56,7 +56,6 @@ if date_str.lower() == 'today':
     date_str = today_date_str
 
 
-print('---------------- LOGS ----------------')
 events = []
 prev_line = None
 in_range = False
@@ -73,9 +72,9 @@ with open(log_file_path) as fp:
         prev_line = line
 
 if len(events) == 0:
-    sys.exit('No records')
+    sys.exit('No AFK logs found for {}'.format(date_str))
 
-print('---- ACTIVE PERIODS ----- HOURS ------')
+print('\n{:<23}{}'.format('ACTIVE PERIOD', 'HOURS'))
 
 # If the first event is from the previous day, adjust it to the beginning
 # of the requested day for proper duration calculation
@@ -105,11 +104,11 @@ for event in events:
     if (not event.is_active) and (prev_event.is_active):
         duration_seconds = event.get_timestamp_seconds() - prev_event.get_timestamp_seconds()
         active_seconds += duration_seconds
-        print('{:>10} -- {:<11}  {:>4}'.format(
+        print('{:<5} -- {:<11}  {:>5}'.format(
             prev_event.format_short_timestamp(),
             event.format_short_timestamp(),
             format_float(duration_seconds / 3600.0)))
     prev_event = event
 
-print('{:>26} {:>4}'.format('TOTAL:', format_float(active_seconds / 3600.0)))
-print('--------------------------------------')
+print('{:<20}  {:>5}]'.format('DAILY', '[' + format_float(active_seconds / 3600.0)))
+
