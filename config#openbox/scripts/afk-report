@@ -72,7 +72,8 @@ with open(log_file_path) as fp:
         prev_line = line
 
 if len(events) == 0:
-    sys.exit('No AFK logs found for {}'.format(date_str))
+    print('No AFK logs found for {}'.format(date_str))
+    sys.exit(1)
 
 print('\n{:<23}{}'.format('ACTIVE PERIOD', 'HOURS'))
 
