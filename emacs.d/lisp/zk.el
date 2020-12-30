@@ -344,7 +344,7 @@ or code block or class/function definitions that end with '}'"
             (-map 'zk-project-get-relative-path
                   (process-lines
                    "bash" "-c"
-                   (concat "cd " zk-project-root "; g4 p -s localpath | grep '^  */' | grep -o '^  */[^ ]*' | grep -o '[^ ]*'; echo -n"))))))
+                   (concat "cd " zk-project-root "; g4 whatsout"))))))
     (find-file (zk-project-restore-absolute-path f)))
   (global-set-key (kbd "C-x C-M-f") 'zk-find-g4-opened-file)
 )
