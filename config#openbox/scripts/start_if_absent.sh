@@ -12,8 +12,8 @@ function message {
 if [ -z "$RESULT" ]; then
     $@ &
     message "$EXEC started"
-    return 0
+    exit 0
 else
     message "$EXEC already running"
-    return 1
+    exit 1
 fi

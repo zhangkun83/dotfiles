@@ -1,0 +1,115 @@
+#!/usr/bin/python3
+# Generate a report from an afk-logger log
+# Usage: afk-report <log_file> <date|today>
+
+import re
+import sys
+import time
+
+# Format a float as '10.3', '2.5', '.6', '.0' etc.
+def format_float(value):
+    return ('{:.1f}'.format(value)).lstrip('0')
+
+def parse_timestamp(timestamp_str):
+    return time.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+
+log_pattern = re.compile(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) ([A-Z]+)')
+def add_event(events, line):
+    print(line.strip())
+    m = log_pattern.match(line)
+    timestamp_str = m.group(1)
+    msg = m.group(2)
+    if msg == 'ACTIVE':
+        is_active = True
+    elif msg == 'IDLE':
+        is_active = False
+    else:
+        raise Exception('Unrecognized msg: ' + msg)
+    events.append(Event(timestamp_str, is_active))
+
+class Event:
+    def __init__(self, timestamp_str, is_active):
+        if timestamp_str == 'NOW':
+            self.timestamp = time.localtime()
+            self.is_now = True
+        else:
+            self.timestamp = parse_timestamp(timestamp_str)
+            self.is_now = False
+        self.is_active = is_active
+
+    def get_timestamp_seconds(self):
+        return time.mktime(self.timestamp)
+
+    def format_short_timestamp(self):
+        result = time.strftime('%H:%M', self.timestamp)
+        if self.is_now:
+            result += ' (NOW)'
+        return result
+
+if len(sys.argv) < 3:
+    sys.exit('Usage: afk-report <log_file> <date|today>')
+
+log_file_path = sys.argv[1]
+date_str = sys.argv[2]
+today_date_str = time.strftime('%Y-%m-%d', time.localtime())
+if date_str.lower() == 'today':
+    date_str = today_date_str
+
+
+events = []
+prev_line = None
+in_range = False
+with open(log_file_path) as fp:
+    for line in fp:
+        if line.startswith(date_str):
+            if not in_range and prev_line != None:
+                # First event in the time range
+                add_event(events, prev_line)
+            in_range = True
+            add_event(events, line)
+        elif in_range:
+            break
+        prev_line = line
+
+if len(events) == 0:
+    print('No AFK logs found for {}'.format(date_str))
+    sys.exit(1)
+
+print('\n{:<23}{}'.format('ACTIVE PERIOD', 'HOURS'))
+
+# If the first event is from the previous day, adjust it to the beginning
+# of the requested day for proper duration calculation
+start_of_day_timestamp = parse_timestamp(date_str + ' 00:00:00')
+if events[0].get_timestamp_seconds() < time.mktime(start_of_day_timestamp):
+    events[0].timestamp = start_of_day_timestamp
+
+# Last event is ACTIVE. Need to add a psuedo IDLE event at the end for
+# duration calculation.
+if events[-1].is_active:
+    if date_str == today_date_str:
+        # If the requested day is today, mark now as IDLE.
+        events.append(Event('NOW', False))
+    else:
+        # If the requested day is not today, mark EOD as IDLE.
+        events.append(Event(date_str + ' 23:59:59', False))
+
+active_seconds = 0
+prev_event = events.pop(0)
+for event in events:
+    # Normally IDLE and ACTIVE events should appear alternately.  It's
+    # possible for IDLE to repeat, e.g., if afk-logger is terminated
+    # when in IDLE state, because the termination event also appears
+    # as IDLE.  However, ACTIVE should never duplicate.
+    if event.is_active and prev_event.is_active:
+        raise Exception('ACTIVE event repeating at ' + event.format_short_timestamp())
+    if (not event.is_active) and (prev_event.is_active):
+        duration_seconds = event.get_timestamp_seconds() - prev_event.get_timestamp_seconds()
+        active_seconds += duration_seconds
+        print('{:<5} -- {:<11}  {:>5}'.format(
+            prev_event.format_short_timestamp(),
+            event.format_short_timestamp(),
+            format_float(duration_seconds / 3600.0)))
+    prev_event = event
+
+print('{:<20}  {:>5}]'.format('DAILY', '[' + format_float(active_seconds / 3600.0)))
+

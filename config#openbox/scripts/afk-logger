@@ -1,0 +1,109 @@
+#!/usr/bin/python3
+
+# Logs time when the user is away from keyboard, by detecting
+# screen locker and machine sleeping.
+# Usage: afk-logger [log_file]
+# If log_file is not provided, will log to stdout
+
+import os
+import re
+import signal
+import sys
+import subprocess
+import time
+
+poll_interval_seconds = 60
+ENV_POLL_INTERVAL_SECONDS = os.getenv('AFK_LOGGER_POLL_INTERVAL_SECONDS')
+if ENV_POLL_INTERVAL_SECONDS != None:
+    poll_interval_seconds = int(ENV_POLL_INTERVAL_SECONDS)
+log_file = None
+screen_locker_name = 'xsecurelock'
+desktop_session_name = 'openbox'
+
+# Execute a command and return stdout as a string array
+def execute(args):
+    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    if p.returncode != 0:
+        raise Exception("%s failed with %d. stdout=%s, stdin=%s" %
+                        (str(args), p.returncode, stdout, stderr))
+    stdout_str = stdout.decode()
+    return stdout_str.split("\n")
+
+def log_line(msg):
+    if log_file == None:
+        print(msg)
+    else:
+        f = open(log_file, "a+")
+        f.write(msg)
+        f.write('\n')
+        f.close()
+
+def log_line_timestamped(timestamp, msg):
+    timestamp_str = time.strftime('%Y-%m-%d %H:%M:%S ', time.localtime(timestamp))
+    log_line(timestamp_str + msg)
+    last_log_timestamp = timestamp
+
+def shutdown_handler(signal_number, stack):
+    log_line_timestamped(time.time(), "IDLE (shutdown: {})".format(signal_number))
+    sys.exit(0)
+
+# Entry pattern for the output of 'ps -U $UID', capturing the last word.
+# Example: 378395 tty3     00:00:00 chrome
+ps_entry_pattern = re.compile(r'\d+\s+\S+\s+\d{2}:\d{2}:\d{2}\s+(\S+)')
+
+# Return the list of process names for the current user
+def list_running_processes():
+    ps_list = execute(['ps', '-U', str(os.getuid())])
+    result = []
+    for ps_entry in ps_list:
+        m = ps_entry_pattern.match(ps_entry.strip())
+        if m != None:
+            result.append(m.group(1))
+    return result
+
+if len(sys.argv) > 1:
+    log_file = sys.argv[1]
+
+is_active = True
+last_poll_timestamp = time.time()
+log_line_timestamped(last_poll_timestamp, "ACTIVE (startup)")
+signal.signal(signal.SIGTERM, shutdown_handler)
+signal.signal(signal.SIGINT, shutdown_handler)
+signal.signal(signal.SIGHUP, shutdown_handler)
+
+try:
+    while True:
+        now_timestamp = time.time()
+        if is_active and now_timestamp - last_poll_timestamp > poll_interval_seconds * 4:
+            # No poll for too long, the machine was probably sleeping.
+            # Because the X idleness state may have been reset since
+            # the machine woke up, if we simply rely on xprintidle, we
+            # may miss this period.  Therefore, we always count this
+            # case as idleness.
+            log_line_timestamped(last_poll_timestamp, 'IDLE (sleeping)')
+            is_active = False
+        process_list = list_running_processes()
+        idle_reason = None
+        if screen_locker_name in process_list:
+            new_state_is_active = False
+            idle_reason = '(locked)'
+        elif desktop_session_name not in process_list:
+            # This should be rare, as afk-logger should have been
+            # terminated when desktop logs out.  But just in case,
+            # we don't want to miss this idleness signal.
+            new_state_is_active = False
+            idle_reason = '(logged out)'
+        new_is_active = (idle_reason == None)
+        if is_active != new_is_active:
+            is_active = new_is_active
+            if is_active:
+                msg = "ACTIVE"
+            else:
+                msg = "IDLE " + idle_reason
+            log_line_timestamped(now_timestamp, msg)
+        last_poll_timestamp = now_timestamp
+        time.sleep(poll_interval_seconds)
+except Exception as e:
+    log_line_timestamped(now_timestamp, "IDLE (error: {})".format(e))
+    sys.exit(e)
