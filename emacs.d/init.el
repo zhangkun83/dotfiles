@@ -1,7 +1,6 @@
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp"))
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/groovy-modes"))
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/org/lisp"))
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/slime"))
 
 ;; Disable tool-bar
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
@@ -21,11 +20,6 @@
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 (setq org-agenda-files (find-lisp-find-files "~/org" "\.org$"))
 
-
-;; Slime
-(require 'slime)
-(setq inferior-lisp-program "sbcl")
-(setq slime-contribs '(slime-fancy))
 
 ;;;; etags-select (better ctags search)
 
