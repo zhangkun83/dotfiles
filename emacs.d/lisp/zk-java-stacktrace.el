@@ -1,3 +1,5 @@
+(require 'compile)
+
 ;;; Detection of Java stack traces in compilation-mode and compilation-minor-mode
 (defun zk-java-stacktrace-regexp-to-filename ()
   "Generates a relative filename from zk-java-stacktrace-regexp regexp match data."
