@@ -44,6 +44,20 @@ PARAMS = {
             'FONT_SIZE_SMALL' : '24',
         },
     },
+    'Xresources' : {
+        'hidpi' : {
+            'XFT_DPI' : '200',
+            'XCURSOR_SIZE' : '64',
+        },
+        'middpi' : {
+            'XFT_DPI' : '150',
+            'XCURSOR_SIZE' : '64',
+        },
+        'lodpi' : {
+            'XFT_DPI' : '96',
+            'XCURSOR_SIZE' : '32',
+        },
+    },
 }
 
 KEY_PATTERN = re.compile(r'%([A-Z_]+)%')

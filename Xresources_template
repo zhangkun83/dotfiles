@@ -1,12 +1,17 @@
+! DO NOT EDIT Xresources. It is generated from Xresources_template
+! Edit the template and run tools/process_template.py
+
 Emacs.pane.menubar.font: Liberation Sans 12
 Emacs.menu*.font: Liberation Sans 12
 Emacs.dialog*.font: Liberation Sans 12
 Emacs.useXIM: on
 Xft.antialias: 1
+Xft.dpi: %XFT_DPI%
 Xft.hinting: 0
 Xft.lcdfilter: lcddefault
 Xft.rgba: rgb
 Xcursor.theme: DMZ-Black
+Xcursor.size: %XCURSOR_SIZE%
 !Make urxvt not intercept Contrl-Shift
 URxvt*iso14755: False
 
