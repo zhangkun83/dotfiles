@@ -1,0 +1,4 @@
+gtk-font-name="Liberation Sans 12"
+gtk-theme-name="%THEME_NAME%"
+gtk-icon-theme-name="Tango"
+gtk-icon-sizes="gtk-large-toolbar=%FONT_SIZE_LARGE%,%FONT_SIZE_LARGE%:gtk-small-toolbar=%FONT_SIZE_SMALL%,%FONT_SIZE_SMALL%:gtk-menu=%FONT_SIZE_LARGE%,%FONT_SIZE_LARGE%:gtk-dialog=%FONT_SIZE_LARGE%,%FONT_SIZE_LARGE%:gtk-button=%FONT_SIZE_LARGE%,%FONT_SIZE_LARGE%:gtk-dnd=%FONT_SIZE_LARGE%,%FONT_SIZE_LARGE%"

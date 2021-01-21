@@ -26,7 +26,24 @@ PARAMS = {
             'CASCADE_STEP' : '50',
             'WINDOW_MOVE_STEP' : '30',
         },
-    }
+    },
+    'gtkrc-2.0' : {
+        'hidpi' : {
+            'THEME_NAME' : 'Nodoka-HiDPI',
+            'FONT_SIZE_LARGE' : '64',
+            'FONT_SIZE_SMALL' : '32',
+        },
+        'middpi' : {
+            'THEME_NAME' : 'Clearlooks-Phenix-MidDPI',
+            'FONT_SIZE_LARGE' : '48',
+            'FONT_SIZE_SMALL' : '24',
+        },
+        'lodpi' : {
+            'THEME_NAME' : 'Clearlooks-Phenix',
+            'FONT_SIZE_LARGE' : '32',
+            'FONT_SIZE_SMALL' : '24',
+        },
+    },
 }
 
 KEY_PATTERN = re.compile(r'%([A-Z_]+)%')
