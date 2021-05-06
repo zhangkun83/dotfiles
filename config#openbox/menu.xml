@@ -20,7 +20,7 @@
       <action name="Execute"><execute>thunar</execute></action>
     </item>
     <item label="Dictionary" icon="/usr/share/icons/gnome/48x48/apps/accessories-dictionary.png">
-      <action name="Execute"><execute>~/.config/openbox/scripts/youdao_dict.py</execute></action>
+      <action name="Execute"><execute>~/.config/openbox/scripts/youdao_dict.sh</execute></action>
     </item>
     <item label="Volume control" icon="/usr/share/icons/gnome/48x48/apps/multimedia-volume-control.png">
       <action name="Execute"><execute>pavucontrol</execute></action>

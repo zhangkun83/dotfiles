@@ -701,7 +701,7 @@
     </keybind>
     <keybind key="W-F10">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/youdao_dict.py</command>
+        <command>~/.config/openbox/scripts/youdao_dict.sh</command>
       </action>
     </keybind>
     <keybind key="W-F11">
