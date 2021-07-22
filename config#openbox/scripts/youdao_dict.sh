@@ -7,5 +7,5 @@ ans=$(zenity --entry  --title 'Youdao Dictionary' \
              --text 'Enter a word or phrase:' \
              --ok-label 'Look up' --entry-text "$default_query" \
    ) && (
-    encoded_query=$(python2 -c "import urllib; print(urllib.quote(raw_input()))" <<< "$ans")
-    google-chrome --app="http://dict.youdao.com/search?q=$encoded_query" &)
+    encoded_query=$(python3 -c "import urllib.parse; print(urllib.parse.quote(input()))" <<< "$ans")
+    google-chrome --app="https://dict.youdao.com/w/eng/$encoded_query" &)
