@@ -1,5 +1,3 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-$DIR/scripts/start_if_absent.sh nm-applet nm-applet
-
 . $DIR/autostart-common.sh

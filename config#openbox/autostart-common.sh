@@ -4,6 +4,8 @@ $DIR/scripts/start_if_absent.sh wallpaper-auto-switcher.sh $DIR/scripts/wallpape
 
 $DIR/scripts/start_if_absent.sh afk-logger $DIR/scripts/afk-logger ~/.afk.log
 
+$DIR/scripts/start_if_absent.sh nm-applet nm-applet
+
 # light-locker is the screen locker from lightdm.
 # I want to use my own locker, so disable it.
 # Alternatively, just "apt-get remove light-locker"
