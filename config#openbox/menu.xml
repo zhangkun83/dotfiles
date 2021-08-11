@@ -42,6 +42,9 @@
   <item label="Lock screen" icon="/usr/share/icons/gnome/48x48/actions/system-lock-screen.png">
     <action name="Execute"><execute>~/.config/openbox/scripts/lock.sh</execute></action>
   </item>
+  <item label="Hibernate" icon="/usr/share/icons/gnome/48x48/apps/xscreensaver.png">
+    <action name="Execute"><execute>~/.config/openbox/scripts/hibernate-xterm.sh</execute></action>
+  </item>
   <item label="Log out" icon="/usr/share/icons/gnome/48x48/actions/system-log-out.png">
     <action name="Exit" />
   </item>
