@@ -1,5 +1,5 @@
 #!/bin/bash
-primary_output=$(xrandr | grep primary | awk '{print $1}')
+primary_output=$(xrandr | grep "\\<connected\\>" | head -1 | awk '{print $1}')
 case $1 in
     "night")
         xrandr --output $primary_output --gamma 1:1:1 --brightness 1 &&\
