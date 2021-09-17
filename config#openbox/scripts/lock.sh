@@ -1,4 +1,16 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-(XSECURELOCK_FONT=--courier-bold-r-normal--34------- XSECURELOCK_WANT_FIRST_KEYPRESS=1 xsecurelock; $DIR/hci-adjustments) &
+# Kill compton before starting xsecurelock. Otherwise X11 will burn CPU.
+# I guess xsecurelock aggressily redraws screen for security reasons.
+if killall compton; then
+    export post_lock_cmd="compton"
+fi
+
+(XSECURELOCK_FONT=--courier-bold-r-normal--34------- XSECURELOCK_WANT_FIRST_KEYPRESS=1 xsecurelock; $DIR/hci-adjustments)
+
+if [[ -n "$post_lock_cmd" ]]; then
+    notify-send -i system-run "Starting $post_lock_cmd"
+    $post_lock_cmd &
+fi
+
