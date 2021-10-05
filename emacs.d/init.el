@@ -1,5 +1,4 @@
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp"))
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/org/lisp"))
 
 ;; Disable tool-bar
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
@@ -13,12 +12,6 @@
 ;; Set default browser to chrome
 (setq browse-url-browser-function 'browse-url-generic
       browse-url-generic-program "google-chrome")
-
-;;; Org-mode
-(load-library "find-lisp")
-(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
-(setq org-agenda-files (find-lisp-find-files "~/org" "\.org$"))
-
 
 ;;;; etags-select (better ctags search)
 
