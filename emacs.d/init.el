@@ -174,8 +174,9 @@
  ;; If there is more than one, they won't work right.
  '(c-echo-syntactic-information-p t)
  '(case-fold-search nil)
- (if (display-graphic-p)
-     '(custom-enabled-themes (quote (leuven))))
+ '(custom-enabled-themes
+   (if (display-graphic-p)
+       (quote (leuven))))
  '(dabbrev-case-replace nil)
  '(fci-rule-character 9474)
  '(font-use-system-font t)
