@@ -95,7 +95,6 @@
     (setq outline-regexp "\\(?:\\([ \t]*.*\\(class\\|interface\\)[ \t]+[a-zA-Z0-9_]+[ \t\n]*\\({\\|extends\\|implements\\)\\)\\|[ \t]*.*\\(public\\|private\\|static\\|final\\|native\\|synchronized\\|transient\\|volatile\\|strictfp\\| \\|\t\\)*[ \t]+\\(\\([a-zA-Z0-9_]\\|\\( *\t*< *\t*\\)\\|\\( *\t*> *\t*\\)\\|\\( *\t*, *\t*\\)\\|\\( *\t*\\[ *\t*\\)\\|\\(]\\)\\)+\\)[ \t]+[a-zA-Z0-9_]+[ \t]*(\\(.*\\))[ \t]*\\(throws[ \t]+\\([a-zA-Z0-9_, \t\n]*\\)\\)?[ \t\n]*{\\)")))
 (add-hook 'java-mode-hook 'outline-minor-mode)
 (add-hook 'java-mode-hook 'show-paren-mode)
-(require 'fill-column-indicator)
 (add-hook 'java-mode-hook
           (lambda ()
             "A few code-style parameters for Java"
@@ -187,6 +186,9 @@
             (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_\\|\\.")
 	    (local-set-key (kbd "C-c e") 'zk-editor-stub-open-file)))
 
+(if (display-graphic-p)
+    (require 'fill-column-indicator))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -195,8 +197,7 @@
  '(c-echo-syntactic-information-p t)
  '(case-fold-search nil)
  (if (display-graphic-p)
-     '(custom-enabled-themes (quote (leuven)))
-   '(custom-enabled-themes (quote (whiteboard))))
+     '(custom-enabled-themes (quote (leuven))))
  '(dabbrev-case-replace nil)
  '(fci-rule-character 9474)
  '(font-use-system-font t)
