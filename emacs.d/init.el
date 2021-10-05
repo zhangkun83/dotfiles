@@ -80,7 +80,6 @@
           (lambda ()
             "A few code-style parameters for Java"
             (set-fill-column 100)
-            (fci-mode)
             (setq c-basic-offset 2
                   tab-width 2)
             ;; For newlines in argument list, replace the default indentation that aligns with
