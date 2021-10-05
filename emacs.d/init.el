@@ -89,6 +89,7 @@
 ;;; Turn on outline and showing matching parentheses for these languages.
 (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
 (add-hook 'emacs-lisp-mode-hook 'show-paren-mode)
+
 (add-hook 'java-mode-hook
   (lambda ()
     "Enable Java outline."
@@ -185,9 +186,6 @@
             (make-local-variable 'dabbrev-abbrev-char-regexp)
             (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_\\|\\.")
 	    (local-set-key (kbd "C-c e") 'zk-editor-stub-open-file)))
-
-(if (display-graphic-p)
-    (require 'fill-column-indicator))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
