@@ -173,9 +173,7 @@
  ;; If there is more than one, they won't work right.
  '(c-echo-syntactic-information-p t)
  '(case-fold-search nil)
- '(custom-enabled-themes
-   (if (display-graphic-p)
-       (quote (leuven))))
+ '(custom-enabled-themes (if (display-graphic-p) (quote (leuven))))
  '(dabbrev-case-replace nil)
  '(fci-rule-character 9474)
  '(font-use-system-font t)
@@ -183,7 +181,8 @@
  '(inhibit-startup-screen t)
  '(ns-command-modifier nil)
  '(org-startup-indented t)
- '(tags-revert-without-query t))
+ '(tags-revert-without-query t)
+ '(use-dialog-box nil))
 
 (put 'narrow-to-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
