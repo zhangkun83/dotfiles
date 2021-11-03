@@ -62,18 +62,28 @@ PARAMS = {
 
 KEY_PATTERN = re.compile(r'%([A-Z_]+)%')
 
-if len(sys.argv) < 3:
-    sys.exit('Usage: process_template.py <path> <config>')
+path = None
+config = None
 
-path = sys.argv[1]
-config = sys.argv[2]
+if len(sys.argv) > 1:
+    path = sys.argv[1]
+
+if len(sys.argv) > 2:
+    config = sys.argv[2]
+
+if path == None:
+    sys.exit('Usage: %s <path> <config>\nAvailable paths: %s' % (sys.argv[0], ', '.join(PARAMS)))
 
 if path not in PARAMS:
-    sys.exit('Configs for path "%s" not found' % (path))
+    sys.exit('Configs for path "%s" not found\nAvailable paths: %s' % (path, ', '.join(PARAMS)))
+
 params_for_path = PARAMS[path]
 
+if config == None:
+    sys.exit('Usage: %s <path> <config>\nAvailable configs for %s: %s' % (sys.argv[0], path, ', '.join(params_for_path)))
+
 if config not in params_for_path:
-    sys.exit('Config "%s" for path "%s" not found' % (config, path))
+    sys.exit('Config "%s" for path "%s" not found\nAvailable configs: %s' % (config, path, ', '.join(params_for_path)))
 
 params = params_for_path[config]
 
