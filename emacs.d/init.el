@@ -175,6 +175,9 @@
  '(case-fold-search nil)
  '(custom-enabled-themes (if (display-graphic-p) (quote (leuven))))
  '(dabbrev-case-replace nil)
+ '(explicit-bash-args
+   (quote
+    ("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i")))
  '(fci-rule-character 9474)
  '(font-use-system-font t)
  '(ido-enable-flex-matching nil)
