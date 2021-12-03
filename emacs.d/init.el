@@ -145,6 +145,8 @@
 (global-set-key (kbd "C-x \\") 'compile)
 (global-set-key (kbd "C-x |") 'compilation-minor-mode)
 
+(add-to-list 'compilation-search-path zk-project-root)
+
 (defun zk-prev-window()
   "Switch to previous window"
   (interactive)
