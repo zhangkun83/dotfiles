@@ -119,8 +119,8 @@
 (setenv "ZK_PROJECT_ROOT" zk-project-root)
 (setq frame-title-format '("" command-line-default-directory " - emacs"))
 
-(setenv "EDITOR" "editor-stub")
-(setenv "P4EDITOR" "editor-stub")
+(setenv "EDITOR" "~/.emacs.d/bin/editor-stub")
+(setenv "P4EDITOR" "~/.emacs.d/bin/editor-stub")
 
 (add-hook 'java-mode-hook
 	  (lambda()
