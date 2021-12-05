@@ -145,6 +145,14 @@
 (global-set-key (kbd "C-x \\") 'compile)
 (global-set-key (kbd "C-x |") 'compilation-minor-mode)
 
+;; go-mode for Golang
+(autoload 'go-mode "go-mode" nil t)
+(add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
+(add-hook 'before-save-hook 'gofmt-before-save)
+(add-hook 'go-mode-hook
+          (lambda()
+            (setq tab-width 2)))
+
 (add-to-list 'compilation-search-path zk-project-root)
 
 (defun zk-prev-window()
