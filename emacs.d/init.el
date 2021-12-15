@@ -95,6 +95,9 @@
             (subword-mode)
             ))
 
+;;; Tramp related
+(add-hook 'before-save-hook `zk-save-tramp-file-as-local-copy)
+(setq tramp-default-method "ssh")
 
 ;;; Quickly switch between the startup directory and current file's
 (defun zk-cd-initial()
@@ -147,6 +150,7 @@
 
 ;; go-mode for Golang
 (autoload 'go-mode "go-mode" nil t)
+(autoload 'gofmt-before-save "go-mode" nil t)
 (add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
 (add-hook 'before-save-hook 'gofmt-before-save)
 (add-hook 'go-mode-hook

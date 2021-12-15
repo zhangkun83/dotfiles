@@ -319,6 +319,24 @@ or code block or class/function definitions that end with '}'"
   (setq c-syntactic-indentation (not c-syntactic-indentation))
   (message "Syntactic indentation: %s" (if c-syntactic-indentation "on" "off")))
 
+(defun zk-save-buffer-as-copy (filename)
+  "Save the current buffer to a file as a copy (without visiting the new file)"
+  (interactive "F")
+  (save-restriction
+    (widen)
+    (write-region (point-min) (point-max) filename)))
+
+(defun zk-save-tramp-file-as-local-copy ()
+  "If the current buffer is a tramp file, save a local copy for it"
+  (interactive)
+  (if (file-remote-p (buffer-file-name))
+      (let ((basedir "~/.emacs.d/tramp-copies/"))
+        (make-directory basedir t)
+        (let ((localfile
+               (concat basedir
+                       (replace-regexp-in-string "/" "#" (buffer-file-name)))))
+          (zk-save-buffer-as-copy localfile)))))
+
 (defun zk-insert-mean()
   "Take the leading number from the current line and the previous line,
   and insert the mean value of the two as a new line in between.
