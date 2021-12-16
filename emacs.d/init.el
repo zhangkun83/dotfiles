@@ -80,6 +80,8 @@
           (lambda ()
             "A few code-style parameters for Java"
             (set-fill-column 100)
+            ;; Do case-sensitive search within Java code
+            (setq case-fold-search nil)
             (setq c-basic-offset 2
                   tab-width 2)
             ;; For newlines in argument list, replace the default indentation that aligns with
@@ -180,17 +182,12 @@
             (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_\\|\\.")
 	    (local-set-key (kbd "C-c e") 'zk-editor-stub-open-file)))
 
-(add-hook 'org-mode-hook
-  (lambda ()
-    (setq case-fold-search t)))
-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(c-echo-syntactic-information-p t)
- '(case-fold-search nil)
  '(custom-enabled-themes (if (display-graphic-p) (quote (leuven))))
  '(dabbrev-case-replace nil)
  '(explicit-bash-args
