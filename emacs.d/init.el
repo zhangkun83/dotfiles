@@ -180,6 +180,10 @@
             (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_\\|\\.")
 	    (local-set-key (kbd "C-c e") 'zk-editor-stub-open-file)))
 
+(add-hook 'org-mode-hook
+  (lambda ()
+    (setq case-fold-search t)))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
