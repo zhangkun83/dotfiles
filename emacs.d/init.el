@@ -188,6 +188,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(c-echo-syntactic-information-p t)
+ '(compilation-scroll-output t)
  '(custom-enabled-themes (if (display-graphic-p) (quote (leuven))))
  '(dabbrev-case-replace nil)
  '(explicit-bash-args
