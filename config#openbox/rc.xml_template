@@ -1093,5 +1093,8 @@
       <layer>above</layer>
       <decor>no</decor>
     </application>
+    <application class="Zenity" title="ztimer">
+      <desktop>all</desktop>
+    </application>
   </applications>
 </openbox_config>

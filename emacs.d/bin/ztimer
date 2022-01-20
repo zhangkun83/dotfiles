@@ -7,4 +7,4 @@ echo "Now is $(date)"
 echo "Sleeping for $1 ..."
 sleep $1
 shift
-zenity --info --text="$*" --icon-name=alarm
+zenity --info --title="ztimer" --text="$*" --icon-name=alarm
