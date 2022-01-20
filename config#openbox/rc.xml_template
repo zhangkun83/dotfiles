@@ -1089,5 +1089,9 @@
     <application class="*-chrome" role="browser">
       <decor>no</decor>
     </application>
+    <application class="Zenity">
+      <layer>above</layer>
+      <decor>no</decor>
+    </application>
   </applications>
 </openbox_config>
