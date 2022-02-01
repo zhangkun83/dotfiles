@@ -4,7 +4,8 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 LAST_SWITCH_HOUR=""
-
+sleep 10
+"$DIR/prepare-wallpaper.sh"
 while :
 do
     CURRENT_HOUR="$(date +%Y%m%d%H)"
