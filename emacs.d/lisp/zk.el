@@ -326,11 +326,12 @@ or code block or class/function definitions that end with '}'"
     (widen)
     (write-region (point-min) (point-max) filename)))
 
-(defun zk-save-tramp-file-as-local-copy ()
-  "If the current buffer is a tramp file, save a local copy for it"
+(defun zk-save-remote-file-as-local-copy ()
+  "If the current buffer is a remote file, save a local copy for it"
   (interactive)
-  (if (file-remote-p (buffer-file-name))
-      (let ((basedir "~/.emacs.d/tramp-copies/"))
+  (if (or (file-remote-p (buffer-file-name))
+          (string-prefix-p "/google/data/rw/" buffer-file-name))
+      (let ((basedir "~/.emacs.d/remote-file-copies/"))
         (make-directory basedir t)
         (let ((localfile
                (concat basedir
