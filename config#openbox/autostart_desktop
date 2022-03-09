@@ -1,7 +1,3 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# On nVIDIA driver there is some UI rendering issue, e.g., gtk list widget
-# corrupted when scrolling.  Using a compositor stops it.
-$DIR/scripts/start_if_absent.sh compton compton
-
 . $DIR/autostart-common.sh
