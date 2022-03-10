@@ -702,14 +702,29 @@
         <command>~/.config/openbox/scripts/chrome-personal.sh</command>
       </action>
     </keybind>
+    <keybind key="W-F1">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/volume.sh mute</command>
+      </action>
+    </keybind>
+    <keybind key="W-F2">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/volume.sh down</command>
+      </action>
+    </keybind>
+    <keybind key="W-F3">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/volume.sh up</command>
+      </action>
+    </keybind>
+    <keybind key="W-F4">
+      <action name="Execute">
+        <command>pavucontrol</command>
+      </action>
+    </keybind>
     <keybind key="W-F10">
       <action name="Execute">
         <command>~/.config/openbox/scripts/youdao_dict.sh</command>
-      </action>
-    </keybind>
-    <keybind key="W-F11">
-      <action name="Execute">
-        <command>pavucontrol</command>
       </action>
     </keybind>
     <keybind key="W-F12">
