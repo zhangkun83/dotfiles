@@ -367,6 +367,11 @@
         <menu>client-list-combined-menu</menu>
       </action>
     </keybind>
+    <keybind key="W-l">
+      <action name="ShowMenu">
+        <menu>client-layer-menu</menu>
+      </action>
+    </keybind>
     <keybind key="W-o">
       <action name="ShowMenu">
         <menu>root-menu</menu>
@@ -1041,11 +1046,6 @@
       </mousebind>
       <!-- Menus -->
       <mousebind button="Left" action="Press">
-        <action name="ShowMenu">
-          <menu>client-list-combined-menu</menu>
-        </action>
-      </mousebind>
-      <mousebind button="Right" action="Press">
         <action name="ShowMenu">
           <menu>root-menu</menu>
         </action>
