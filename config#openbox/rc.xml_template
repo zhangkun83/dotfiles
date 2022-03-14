@@ -372,7 +372,7 @@
         <menu>client-layer-menu</menu>
       </action>
     </keybind>
-    <keybind key="W-o">
+    <keybind key="W-a">
       <action name="ShowMenu">
         <menu>root-menu</menu>
       </action>
