@@ -938,8 +938,9 @@
       <mousebind button="Right" action="Press">
         <action name="Focus"/>
         <action name="Raise"/>
+        <action name="Unshade"/>
         <action name="ShowMenu">
-          <menu>client-menu</menu>
+          <menu>client-layer-menu</menu>
         </action>
       </mousebind>
     </context>
