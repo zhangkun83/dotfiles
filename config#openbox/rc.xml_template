@@ -313,7 +313,7 @@
     <keybind key="W-S-d">
       <action name="ToggleShowDesktop"/>
     </keybind>
-    <keybind key="W-s">
+    <keybind key="W-c">
       <action name="Execute">
         <command>~/.config/openbox/scripts/cascade.py %CASCADE_STEP% %CASCADE_STEP%</command>
       </action>
@@ -357,12 +357,12 @@
     <keybind key="W-n">
       <action name="Iconify"/>
     </keybind>
-    <keybind key="W-c">
+    <keybind key="W-w">
       <action name="ShowMenu">
         <menu>client-menu</menu>
       </action>
     </keybind>
-    <keybind key="W-v">
+    <keybind key="W-d">
       <action name="ShowMenu">
         <menu>client-list-combined-menu</menu>
       </action>
@@ -457,7 +457,7 @@
       <action name="MoveToEdgeEast"/>
     </keybind>
     <!-- Chain keybindings for setting resize to a percentage to the screen -->
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="1">
         <action name="MoveResizeTo">
           <width>10%</width>
@@ -465,7 +465,7 @@
         </action>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="2">
         <action name="MoveResizeTo">
           <width>20%</width>
@@ -473,7 +473,7 @@
         </action>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="3">
         <action name="MoveResizeTo">
           <width>30%</width>
@@ -481,7 +481,7 @@
         </action>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="4">
         <action name="MoveResizeTo">
           <width>40%</width>
@@ -489,7 +489,7 @@
         </action>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="5">
         <action name="MoveResizeTo">
           <width>50%</width>
@@ -497,7 +497,7 @@
         </action>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="6">
         <action name="MoveResizeTo">
           <width>60%</width>
@@ -505,7 +505,7 @@
         </action>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="7">
         <action name="MoveResizeTo">
           <width>70%</width>
@@ -513,7 +513,7 @@
         </action>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="8">
         <action name="MoveResizeTo">
           <width>80%</width>
@@ -521,7 +521,7 @@
         </action>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="9">
         <action name="MoveResizeTo">
           <width>90%</width>
@@ -529,7 +529,7 @@
         </action>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="h">
         <keybind key="1">
           <action name="MoveResizeTo">
@@ -538,7 +538,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="h">
         <keybind key="2">
           <action name="MoveResizeTo">
@@ -547,7 +547,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="h">
         <keybind key="3">
           <action name="MoveResizeTo">
@@ -556,7 +556,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="h">
         <keybind key="4">
           <action name="MoveResizeTo">
@@ -565,7 +565,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="h">
         <keybind key="5">
           <action name="MoveResizeTo">
@@ -574,7 +574,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="h">
         <keybind key="6">
           <action name="MoveResizeTo">
@@ -583,7 +583,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="h">
         <keybind key="7">
           <action name="MoveResizeTo">
@@ -592,7 +592,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="h">
         <keybind key="8">
           <action name="MoveResizeTo">
@@ -601,7 +601,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="h">
         <keybind key="9">
           <action name="MoveResizeTo">
@@ -610,7 +610,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="w">
         <keybind key="1">
           <action name="MoveResizeTo">
@@ -619,7 +619,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="w">
         <keybind key="2">
           <action name="MoveResizeTo">
@@ -628,7 +628,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="w">
         <keybind key="3">
           <action name="MoveResizeTo">
@@ -637,7 +637,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="w">
         <keybind key="4">
           <action name="MoveResizeTo">
@@ -646,7 +646,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="w">
         <keybind key="5">
           <action name="MoveResizeTo">
@@ -655,7 +655,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="w">
         <keybind key="6">
           <action name="MoveResizeTo">
@@ -664,7 +664,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="w">
         <keybind key="7">
           <action name="MoveResizeTo">
@@ -673,7 +673,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="w">
         <keybind key="8">
           <action name="MoveResizeTo">
@@ -682,7 +682,7 @@
         </keybind>
       </keybind>
     </keybind>
-    <keybind key="W-x">
+    <keybind key="W-s">
       <keybind key="w">
         <keybind key="9">
           <action name="MoveResizeTo">
