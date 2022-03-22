@@ -9,6 +9,4 @@ xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=int 'libinput Tapping Dra
 # Faster pointer acceleration
 xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=float 'libinput Accel Speed' 0.5
 
-$DIR/scripts/start_if_absent.sh conky conky
-
 . $DIR/autostart-common.sh
