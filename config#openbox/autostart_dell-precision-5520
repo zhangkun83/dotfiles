@@ -8,5 +8,6 @@ xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=int 'libinput Tapping Dra
 
 # Faster pointer acceleration
 xinput set-prop 'DLL07BF:01 06CB:7A13 Touchpad' --type=float 'libinput Accel Speed' 0.5
+xinput set-prop 'USB Optical Mouse' --type=float 'libinput Accel Speed' 1
 
 . $DIR/autostart-common.sh

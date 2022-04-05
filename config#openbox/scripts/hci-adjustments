@@ -8,6 +8,3 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 xset r rate 220 30 && notify-send -i keyboard "Key repeat speed adjusted"
 
 $DIR/color-mode.sh normal
-
-# Original mapping is 1 2 3 4 5 6 7 9 2 8
-xinput set-button-map 'Kingsis Peripherals Evoluent VerticalMouse 4' 1 2 3 4 5 6 7 0 2 0 && notify-send -i mouse "Disabled Forward/Backward buttons"
