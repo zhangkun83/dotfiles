@@ -15,16 +15,13 @@ temps=($(echo "$fullresult" | grep -o '+\?[0-9]*\(([0-9]*)\)\? °C' | sed 's/([0
 
 # Widget displays forecasted weather based on current time
 current_hour=$(date +%H)
-if [[ $current_hour -lt 7 ]]; then
-    temp=${temps[3]}
-    time_label="夜"
-elif [[ $current_hour -lt 12 ]]; then
+if [[ $current_hour -lt 12 ]]; then
     temp=${temps[0]}
     time_label="朝"
-elif [[ $current_hour -lt 17 ]]; then
+elif [[ $current_hour -lt 16 ]]; then
     temp=${temps[1]}
-    time_label="午"
-elif [[ $current_hour -lt 22 ]]; then
+    time_label="昼"
+elif [[ $current_hour -lt 20 ]]; then
     temp=${temps[2]}
     time_label="夕"
 else
