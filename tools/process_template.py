@@ -6,7 +6,7 @@ import sys
 PARAMS = {
     'config#openbox/rc.xml' : {
         'hidpi' : {
-            'THEME_NAME' : 'Nodoka-HiDPI',
+            'THEME_NAME' : 'Clearlooks-Phenix-HiDPI',
             'WINDOW_LIST_ICON_SIZE' : '96',
             'CASCADE_STEP' : '100',
             'WINDOW_MOVE_STEP' : '60',
@@ -26,7 +26,7 @@ PARAMS = {
     },
     'gtkrc-2.0' : {
         'hidpi' : {
-            'THEME_NAME' : 'HighContrast-HiDPI',
+            'THEME_NAME' : 'Clearlooks-Phenix-HiDPI',
             'FONT_SIZE_LARGE' : '64',
             'FONT_SIZE_SMALL' : '32',
         },
