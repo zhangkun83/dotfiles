@@ -828,23 +828,13 @@
         <action name="ToggleMaximize"/>
       </mousebind>
       <mousebind button="Up" action="Click">
-        <action name="if">
-          <shaded>no</shaded>
-          <then>
-            <action name="Shade"/>
-            <action name="FocusToBottom"/>
-            <action name="Unfocus"/>
-            <action name="Lower"/>
-          </then>
+        <action name="SendToDesktop">
+          <to>previous</to>
         </action>
       </mousebind>
       <mousebind button="Down" action="Click">
-        <action name="if">
-          <shaded>yes</shaded>
-          <then>
-            <action name="Unshade"/>
-            <action name="Raise"/>
-          </then>
+        <action name="SendToDesktop">
+          <to>next</to>
         </action>
       </mousebind>
     </context>
@@ -1034,26 +1024,23 @@
     </context>
     <context name="Root">
       <mousebind button="Up" action="Click">
-        <action name="PreviousWindow">
-          <interactive>no</interactive>
-          <linear>yes</linear>
+        <action name="GoToDesktop">
+          <to>previous</to>
         </action>
       </mousebind>
       <mousebind button="Down" action="Click">
-        <action name="NextWindow">
-          <interactive>no</interactive>
-          <linear>yes</linear>
+        <action name="GoToDesktop">
+          <to>next</to>
         </action>
       </mousebind>
-      <mousebind button="Right" action="Press">
-        <action name="Execute">
-          <command>~/.config/openbox/scripts/cascade.py %CASCADE_STEP% %CASCADE_STEP%</command>
-        </action>
-      </mousebind>
-      <!-- Menus -->
-      <mousebind button="Left" action="Press">
+      <mousebind button="Right" action="Click">
         <action name="ShowMenu">
           <menu>root-menu</menu>
+        </action>
+      </mousebind>
+      <mousebind button="Left" action="DoubleClick">
+        <action name="Execute">
+          <command>~/.config/openbox/scripts/cascade.py %CASCADE_STEP% %CASCADE_STEP%</command>
         </action>
       </mousebind>
     </context>
