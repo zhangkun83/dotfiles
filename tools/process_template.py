@@ -12,7 +12,7 @@ PARAMS = {
             'WINDOW_MOVE_STEP' : '60',
         },
         'middpi' : {
-            'THEME_NAME' : 'Bear2-MidDPI',
+            'THEME_NAME' : 'Clearlooks-Phenix-MidDPI',
             'WINDOW_LIST_ICON_SIZE' : '72',
             'CASCADE_STEP' : '100',
             'WINDOW_MOVE_STEP' : '60',
@@ -31,7 +31,7 @@ PARAMS = {
             'FONT_SIZE_SMALL' : '32',
         },
         'middpi' : {
-            'THEME_NAME' : 'HighContrast-MidDPI',
+            'THEME_NAME' : 'Clearlooks-Phenix-MidDPI',
             'FONT_SIZE_LARGE' : '48',
             'FONT_SIZE_SMALL' : '24',
         },

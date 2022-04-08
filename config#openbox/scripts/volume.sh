@@ -25,6 +25,6 @@ get_status
 if [ "$muted" == "Mute: yes" ]; then
   notify-send -i audio-volume-muted "Muted"
 else
-  notify-send -i multimedia-volume-control "$volume"
+  notify-send -i audio-volume-medium "$volume"
 fi
 
