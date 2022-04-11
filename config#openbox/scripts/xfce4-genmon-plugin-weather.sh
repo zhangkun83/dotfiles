@@ -14,7 +14,7 @@ fullresult=$(curl wttr.in/$encoded_location?1ATm | tail +8)
 temps=($(echo "$fullresult" | grep -o '+\?[0-9]*\(([0-9]*)\)\? °C' | sed 's/([0-9]*)//g' | grep -o '[0-9]*'))
 
 # Widget displays forecasted weather based on current time
-current_hour=$(date +%H)
+current_hour=$(date +%H | sed 's/^0*//')
 if [[ $current_hour -lt 12 ]]; then
     temp=${temps[0]}
     time_label="朝"
