@@ -456,6 +456,17 @@
       <action name="MoveToEdgeSouth"/>
       <action name="MoveToEdgeEast"/>
     </keybind>
+    <!-- Emulate mouse scrolling with keyboard -->
+    <keybind key="W-k">
+      <action name="Execute">
+        <command>xdotool click 4</command>
+      </action>
+    </keybind>
+    <keybind key="W-j">
+      <action name="Execute">
+        <command>xdotool click 5</command>
+      </action>
+    </keybind>
     <!-- Chain keybindings for setting resize to a percentage to the screen -->
     <keybind key="W-s">
       <keybind key="1">
@@ -788,36 +799,6 @@
         <action name="Lower"/>
         <action name="FocusToBottom"/>
         <action name="Unfocus"/>
-      </mousebind>
-      <mousebind button="W-Up" action="Click">
-        <action name="GoToDesktop">
-          <to>previous</to>
-        </action>
-      </mousebind>
-      <mousebind button="W-Down" action="Click">
-        <action name="GoToDesktop">
-          <to>next</to>
-        </action>
-      </mousebind>
-      <mousebind button="C-W-Up" action="Click">
-        <action name="GoToDesktop">
-          <to>previous</to>
-        </action>
-      </mousebind>
-      <mousebind button="C-W-Down" action="Click">
-        <action name="GoToDesktop">
-          <to>next</to>
-        </action>
-      </mousebind>
-      <mousebind button="W-S-Up" action="Click">
-        <action name="SendToDesktop">
-          <to>previous</to>
-        </action>
-      </mousebind>
-      <mousebind button="W-S-Down" action="Click">
-        <action name="SendToDesktop">
-          <to>next</to>
-        </action>
       </mousebind>
     </context>
     <context name="Titlebar">
