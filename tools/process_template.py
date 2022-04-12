@@ -20,6 +20,10 @@ PARAMS = {
             'WINDOW_LIST_ICON_SIZE' : '72',
             'CASCADE_STEP' : '100',
             'WINDOW_MOVE_STEP' : '60',
+            'MOUSE_MOVE_STEP_X_LARGE': '120',
+            'MOUSE_MOVE_STEP_Y_LARGE': '80',
+            'MOUSE_MOVE_STEP_X_SMALL': '20',
+            'MOUSE_MOVE_STEP_Y_SMALL': '15',
         },
         'lodpi' : {
             'THEME_NAME' : 'Clearlooks-Phenix',
