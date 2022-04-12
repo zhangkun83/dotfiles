@@ -438,32 +438,37 @@
         <command>xdotool click --clearmodifiers 1</command>
       </action>
     </keybind>
+    <keybind key="W-i">
+      <action name="Execute">
+        <command>xdotool click --clearmodifiers 2</command>
+      </action>
+    </keybind>
     <keybind key="W-o">
       <action name="Execute">
         <command>xdotool click --clearmodifiers 3</command>
       </action>
     </keybind>
-    <keybind key="W-y">
+    <keybind key="W-p">
       <action name="Execute">
         <command>xdotool click --delay 0 --repeat 3 4</command>
       </action>
     </keybind>
-    <keybind key="W-h">
+    <keybind key="W-semicolon">
       <action name="Execute">
         <command>xdotool click --delay 0 --repeat 3 5</command>
       </action>
     </keybind>
-    <keybind key="W-i">
+    <keybind key="W-k">
       <action name="Execute">
         <command>xdotool mousemove_relative --sync --polar 0 %MOUSE_MOVE_STEP_Y_LARGE%</command>
       </action>
     </keybind>
-    <keybind key="W-k">
+    <keybind key="W-j">
       <action name="Execute">
         <command>xdotool mousemove_relative --sync --polar 180 %MOUSE_MOVE_STEP_Y_LARGE%</command>
       </action>
     </keybind>
-    <keybind key="W-j">
+    <keybind key="W-h">
       <action name="Execute">
         <command>xdotool mousemove_relative --sync --polar 270 %MOUSE_MOVE_STEP_X_LARGE%</command>
       </action>
@@ -473,17 +478,17 @@
         <command>xdotool mousemove_relative --sync --polar 90 %MOUSE_MOVE_STEP_X_LARGE%</command>
       </action>
     </keybind>
-    <keybind key="W-S-i">
+    <keybind key="W-S-k">
       <action name="Execute">
         <command>xdotool mousemove_relative --sync --polar 0 %MOUSE_MOVE_STEP_Y_SMALL%</command>
       </action>
     </keybind>
-    <keybind key="W-S-k">
+    <keybind key="W-S-j">
       <action name="Execute">
         <command>xdotool mousemove_relative --sync --polar 180 %MOUSE_MOVE_STEP_Y_SMALL%</command>
       </action>
     </keybind>
-    <keybind key="W-S-j">
+    <keybind key="W-S-h">
       <action name="Execute">
         <command>xdotool mousemove_relative --sync --polar 270 %MOUSE_MOVE_STEP_X_SMALL%</command>
       </action>
