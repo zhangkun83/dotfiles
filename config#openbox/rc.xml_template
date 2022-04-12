@@ -458,24 +458,34 @@
         <command>~/.config/openbox/scripts/xdotool-piped.sh click --clearmodifiers --delay 0 --repeat 5 5</command>
       </action>
     </keybind>
+    <keybind key="W-C-A-k">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/xdotool-piped.sh click --clearmodifiers --delay 0 --repeat 20 4</command>
+      </action>
+    </keybind>
+    <keybind key="W-C-A-j">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/xdotool-piped.sh click --clearmodifiers --delay 0 --repeat 20 5</command>
+      </action>
+    </keybind>
     <keybind key="W-k">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-piped.sh mousemove_relative --sync --polar 0 %MOUSE_MOVE_STEP_Y_LARGE%</command>
+        <command>~/.config/openbox/scripts/xdotool-piped.sh mousemove_relative --sync --polar 0 %MOUSE_MOVE_STEP_Y_NORMAL%</command>
       </action>
     </keybind>
     <keybind key="W-j">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-piped.sh mousemove_relative --sync --polar 180 %MOUSE_MOVE_STEP_Y_LARGE%</command>
+        <command>~/.config/openbox/scripts/xdotool-piped.sh mousemove_relative --sync --polar 180 %MOUSE_MOVE_STEP_Y_NORMAL%</command>
       </action>
     </keybind>
     <keybind key="W-h">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-piped.sh mousemove_relative --sync --polar 270 %MOUSE_MOVE_STEP_X_LARGE%</command>
+        <command>~/.config/openbox/scripts/xdotool-piped.sh mousemove_relative --sync --polar 270 %MOUSE_MOVE_STEP_X_NORMAL%</command>
       </action>
     </keybind>
     <keybind key="W-l">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-piped.sh mousemove_relative --sync --polar 90 %MOUSE_MOVE_STEP_X_LARGE%</command>
+        <command>~/.config/openbox/scripts/xdotool-piped.sh mousemove_relative --sync --polar 90 %MOUSE_MOVE_STEP_X_NORMAL%</command>
       </action>
     </keybind>
     <keybind key="W-S-k">
@@ -496,6 +506,26 @@
     <keybind key="W-S-l">
       <action name="Execute">
         <command>~/.config/openbox/scripts/xdotool-piped.sh mousemove_relative --sync --polar 90 %MOUSE_MOVE_STEP_X_SMALL%</command>
+      </action>
+    </keybind>
+    <keybind key="W-C-k">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/xdotool-piped.sh mousemove_relative --sync --polar 0 %MOUSE_MOVE_STEP_Y_LARGE%</command>
+      </action>
+    </keybind>
+    <keybind key="W-C-j">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/xdotool-piped.sh mousemove_relative --sync --polar 180 %MOUSE_MOVE_STEP_Y_LARGE%</command>
+      </action>
+    </keybind>
+    <keybind key="W-C-h">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/xdotool-piped.sh mousemove_relative --sync --polar 270 %MOUSE_MOVE_STEP_X_LARGE%</command>
+      </action>
+    </keybind>
+    <keybind key="W-C-l">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/xdotool-piped.sh mousemove_relative --sync --polar 90 %MOUSE_MOVE_STEP_X_LARGE%</command>
       </action>
     </keybind>
     <!-- Chain keybindings for setting resize to a percentage to the screen -->
