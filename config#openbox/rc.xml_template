@@ -448,22 +448,22 @@
         <command>~/.config/openbox/scripts/xdotool-piped.sh click --clearmodifiers 3</command>
       </action>
     </keybind>
-    <keybind key="W-A-k">
+    <keybind key="W-p">
       <action name="Execute">
         <command>~/.config/openbox/scripts/xdotool-piped.sh click --clearmodifiers --delay 0 --repeat 5 4</command>
       </action>
     </keybind>
-    <keybind key="W-A-j">
+    <keybind key="W-semicolon">
       <action name="Execute">
         <command>~/.config/openbox/scripts/xdotool-piped.sh click --clearmodifiers --delay 0 --repeat 5 5</command>
       </action>
     </keybind>
-    <keybind key="W-C-A-k">
+    <keybind key="W-C-p">
       <action name="Execute">
         <command>~/.config/openbox/scripts/xdotool-piped.sh click --clearmodifiers --delay 0 --repeat 20 4</command>
       </action>
     </keybind>
-    <keybind key="W-C-A-j">
+    <keybind key="W-C-semicolon">
       <action name="Execute">
         <command>~/.config/openbox/scripts/xdotool-piped.sh click --clearmodifiers --delay 0 --repeat 20 5</command>
       </action>
