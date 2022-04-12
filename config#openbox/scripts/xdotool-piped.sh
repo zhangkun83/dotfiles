@@ -15,6 +15,7 @@ PIPE_FILE="$HOME/.config/openbox/runtime/xdotool-pipe"
 
 if [[ -z "$*" ]]; then
     if [[ ! -p "$PIPE_FILE" ]]; then
+        rm "$PIPE_FILE"
         mkfifo "$PIPE_FILE"
     fi
     while true
@@ -24,5 +25,7 @@ if [[ -z "$*" ]]; then
         fi
     done
 else
-    echo "$*" >"$PIPE_FILE"
+    if [[ -p "$PIPE_FILE" ]]; then
+        echo "$*" >"$PIPE_FILE"
+    fi
 fi
