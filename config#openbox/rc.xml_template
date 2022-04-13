@@ -438,6 +438,11 @@
         <command>~/.config/openbox/scripts/xdotool-piped.sh click --clearmodifiers 1</command>
       </action>
     </keybind>
+    <keybind key="W-S-u">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/xdotool-piped.sh click --clearmodifiers --repeat 2 1</command>
+      </action>
+    </keybind>
     <keybind key="W-i">
       <action name="Execute">
         <command>~/.config/openbox/scripts/xdotool-piped.sh click --clearmodifiers 2</command>
