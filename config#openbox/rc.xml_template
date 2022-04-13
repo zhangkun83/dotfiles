@@ -513,24 +513,105 @@
         <command>~/.config/openbox/scripts/xdotool-pipec.sh mousemove_relative --polar 90 %MOUSE_MOVE_STEP_X_SMALL%</command>
       </action>
     </keybind>
-    <keybind key="W-C-k">
+    <!-- Absolute Mouse Move -->
+    <keybind key="W-A-6">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh mousemove_relative --polar 0 %MOUSE_MOVE_STEP_Y_LARGE%</command>
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% 6</command>
       </action>
     </keybind>
-    <keybind key="W-C-j">
+    <keybind key="W-A-7">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh mousemove_relative --polar 180 %MOUSE_MOVE_STEP_Y_LARGE%</command>
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% 7</command>
       </action>
     </keybind>
-    <keybind key="W-C-h">
+    <keybind key="W-A-8">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh mousemove_relative --polar 270 %MOUSE_MOVE_STEP_X_LARGE%</command>
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% 8</command>
       </action>
     </keybind>
-    <keybind key="W-C-l">
+    <keybind key="W-A-9">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh mousemove_relative --polar 90 %MOUSE_MOVE_STEP_X_LARGE%</command>
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% 9</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-0">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% 0</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-y">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% y</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-u">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% u</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-i">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% i</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-o">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% o</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-p">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% p</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-h">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% h</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-j">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% j</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-k">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% k</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-l">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% l</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-semicolon">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% ';'</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-n">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% n</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-m">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% m</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-comma">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% ','</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-period">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% '.'</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-slash">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/amm.py %SCREEN_WIDTH% %SCREEN_HEIGHT% '/'</command>
       </action>
     </keybind>
     <!-- Chain keybindings for setting resize to a percentage to the screen -->
