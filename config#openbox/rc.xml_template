@@ -455,22 +455,22 @@
     </keybind>
     <keybind key="W-comma">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --clearmodifiers --delay 0 --repeat 5 4</command>
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --delay 0 --repeat 5 4</command>
       </action>
     </keybind>
     <keybind key="W-period">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --clearmodifiers --delay 0 --repeat 5 5</command>
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --delay 0 --repeat 5 5</command>
       </action>
     </keybind>
-    <keybind key="W-C-comma">
+    <keybind key="W-A-comma">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --clearmodifiers --delay 0 --repeat 20 4</command>
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --delay 0 --repeat 20 4</command>
       </action>
     </keybind>
-    <keybind key="W-C-period">
+    <keybind key="W-A-period">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --clearmodifiers --delay 0 --repeat 20 5</command>
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --delay 0 --repeat 20 5</command>
       </action>
     </keybind>
     <keybind key="W-k">
@@ -493,22 +493,22 @@
         <command>~/.config/openbox/scripts/xdotool-pipec.sh mousemove_relative --polar 90 %MOUSE_MOVE_STEP_X_NORMAL%</command>
       </action>
     </keybind>
-    <keybind key="W-S-k">
+    <keybind key="W-C-k">
       <action name="Execute">
         <command>~/.config/openbox/scripts/xdotool-pipec.sh mousemove_relative --polar 0 %MOUSE_MOVE_STEP_Y_SMALL%</command>
       </action>
     </keybind>
-    <keybind key="W-S-j">
+    <keybind key="W-C-j">
       <action name="Execute">
         <command>~/.config/openbox/scripts/xdotool-pipec.sh mousemove_relative --polar 180 %MOUSE_MOVE_STEP_Y_SMALL%</command>
       </action>
     </keybind>
-    <keybind key="W-S-h">
+    <keybind key="W-C-h">
       <action name="Execute">
         <command>~/.config/openbox/scripts/xdotool-pipec.sh mousemove_relative --polar 270 %MOUSE_MOVE_STEP_X_SMALL%</command>
       </action>
     </keybind>
-    <keybind key="W-S-l">
+    <keybind key="W-C-l">
       <action name="Execute">
         <command>~/.config/openbox/scripts/xdotool-pipec.sh mousemove_relative --polar 90 %MOUSE_MOVE_STEP_X_SMALL%</command>
       </action>
@@ -549,37 +549,37 @@
         <command>~/.config/openbox/scripts/amm2.py %SCREEN_WIDTH% %SCREEN_HEIGHT% x "'"</command>
       </action>
     </keybind>
-    <keybind key="W-C-A-g">
+    <keybind key="W-S-g">
       <action name="Execute">
         <command>~/.config/openbox/scripts/amm2.py %SCREEN_WIDTH% %SCREEN_HEIGHT% y g</command>
       </action>
     </keybind>
-    <keybind key="W-C-A-h">
+    <keybind key="W-S-h">
       <action name="Execute">
         <command>~/.config/openbox/scripts/amm2.py %SCREEN_WIDTH% %SCREEN_HEIGHT% y h</command>
       </action>
     </keybind>
-    <keybind key="W-C-A-j">
+    <keybind key="W-S-j">
       <action name="Execute">
         <command>~/.config/openbox/scripts/amm2.py %SCREEN_WIDTH% %SCREEN_HEIGHT% y j</command>
       </action>
     </keybind>
-    <keybind key="W-C-A-k">
+    <keybind key="W-S-k">
       <action name="Execute">
         <command>~/.config/openbox/scripts/amm2.py %SCREEN_WIDTH% %SCREEN_HEIGHT% y k</command>
       </action>
     </keybind>
-    <keybind key="W-C-A-l">
+    <keybind key="W-S-l">
       <action name="Execute">
         <command>~/.config/openbox/scripts/amm2.py %SCREEN_WIDTH% %SCREEN_HEIGHT% y l</command>
       </action>
     </keybind>
-    <keybind key="W-C-A-semicolon">
+    <keybind key="W-S-semicolon">
       <action name="Execute">
         <command>~/.config/openbox/scripts/amm2.py %SCREEN_WIDTH% %SCREEN_HEIGHT% y ";"</command>
       </action>
     </keybind>
-    <keybind key="W-C-A-apostrophe">
+    <keybind key="W-S-apostrophe">
       <action name="Execute">
         <command>~/.config/openbox/scripts/amm2.py %SCREEN_WIDTH% %SCREEN_HEIGHT% y "'"</command>
       </action>
