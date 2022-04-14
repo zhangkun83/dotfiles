@@ -463,16 +463,6 @@
         <command>~/.config/openbox/scripts/xdotool-pipec.sh click --delay 0 --repeat 5 5</command>
       </action>
     </keybind>
-    <keybind key="W-A-comma">
-      <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --delay 0 --repeat 20 4</command>
-      </action>
-    </keybind>
-    <keybind key="W-A-period">
-      <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --delay 0 --repeat 20 5</command>
-      </action>
-    </keybind>
     <keybind key="W-k">
       <action name="Execute">
         <command>~/.config/openbox/scripts/xdotool-pipec.sh mousemove_relative --polar 0 %MOUSE_MOVE_STEP_Y_NORMAL%</command>
