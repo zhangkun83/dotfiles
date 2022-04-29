@@ -435,22 +435,22 @@
     <!-- Emulate mouse actions with keyboard -->
     <keybind key="W-u">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --clearmodifiers 1</command>
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh keyup Super_R+Super_L click 1</command>
       </action>
     </keybind>
     <keybind key="W-S-u">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --clearmodifiers --repeat 2 1</command>
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh keyup Super_R+Super_L+Shift_L+Shift_R click --repeat 2 1</command>
       </action>
     </keybind>
     <keybind key="W-i">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --clearmodifiers 2</command>
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh keyup Super_R+Super_L click 2</command>
       </action>
     </keybind>
     <keybind key="W-o">
       <action name="Execute">
-        <command>~/.config/openbox/scripts/xdotool-pipec.sh click --clearmodifiers 3</command>
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh keyup Super_R+Super_L click 3</command>
       </action>
     </keybind>
     <keybind key="W-comma">
