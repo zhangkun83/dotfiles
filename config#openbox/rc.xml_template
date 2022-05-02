@@ -444,36 +444,34 @@
       </action>
     </keybind>
     <keybind key="W-x">
-      <keybind key="x">
-        <action name="Execute">
-          <command>~/.config/openbox/scripts/xdotool-pipec.sh click 1</command>
-        </action>
-      </keybind>
-      <keybind key="s">
-        <action name="Execute">
-          <command>~/.config/openbox/scripts/xdotool-pipec.sh click --repeat 2 1</command>
-        </action>
-      </keybind>
-      <keybind key="z">
-        <action name="Execute">
-          <command>~/.config/openbox/scripts/xdotool-pipec.sh mousedown 1</command>
-        </action>
-      </keybind>
-      <keybind key="a">
-        <action name="Execute">
-          <command>~/.config/openbox/scripts/xdotool-pipec.sh mouseup 1</command>
-        </action>
-      </keybind>
-      <keybind key="c">
-        <action name="Execute">
-          <command>~/.config/openbox/scripts/xdotool-pipec.sh click 2</command>
-        </action>
-      </keybind>
-      <keybind key="v">
-        <action name="Execute">
-          <command>~/.config/openbox/scripts/xdotool-pipec.sh click 3</command>
-        </action>
-      </keybind>
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh keyup Super_L+Super_R click 1</command>
+      </action>
+    </keybind>
+    <keybind key="W-S-x">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh keyup Super_L+Super_R+Shift_L+Shift_R click --repeat 2 1</command>
+      </action>
+    </keybind>
+    <keybind key="W-A-x">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh keyup Super_L+Super_R+Alt_L+Alt_R click 2</command>
+      </action>
+    </keybind>
+    <keybind key="W-C-x">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh keyup Super_L+Super_R+Control_L+Control+R click 3</command>
+      </action>
+    </keybind>
+    <keybind key="W-comma">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh keyup Super_L+Super_R mousedown 1</command>
+      </action>
+    </keybind>
+    <keybind key="W-period">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/xdotool-pipec.sh keyup Super_L+Super_R mouseup 1</command>
+      </action>
     </keybind>
     <!-- Chain keybindings for setting resize to a percentage to the screen -->
     <keybind key="W-s">
