@@ -338,6 +338,29 @@ or code block or class/function definitions that end with '}'"
                        (replace-regexp-in-string "/" "#" (buffer-file-name)))))
           (zk-save-buffer-as-copy localfile)))))
 
+(defun zk-cycle-bookmark-prev ()
+  "Move the cursor up in the Bookmark List buffer, and jump to it in the current window"
+  (interactive)
+  (zk-cycle-bookmark -1))
+
+(defun zk-cycle-bookmark-next ()
+  "Move the cursor down in the Bookmark List buffer, and jump to it in the current window"
+  (interactive)
+  (zk-cycle-bookmark 1))
+
+(require 'bookmark)
+
+(defun zk-cycle-bookmark (direction)
+  "Move the cursor in the Bookmark List buffer using the given
+  direction (-1 or 1), and jump to it in the current window"
+  ;; bookmark-bmenu-list will reset the cursor position. Call it only if bookmark-bmenu-buffer
+  ;; doesn't exist
+  (unless (get-buffer bookmark-bmenu-buffer)
+    (bookmark-bmenu-list))
+  (switch-to-buffer-other-window bookmark-bmenu-buffer)
+  (forward-line direction)
+  (bookmark-bmenu-other-window))
+
 (defun zk-insert-mean()
   "Take the leading number from the current line and the previous line,
   and insert the mean value of the two as a new line in between.
