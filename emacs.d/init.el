@@ -97,7 +97,6 @@
             (subword-mode)
             ))
 
-          
 ;;; Tramp related
 (add-hook 'before-save-hook `zk-save-remote-file-as-local-copy)
 (setq tramp-default-method "ssh")
@@ -175,9 +174,6 @@
 (global-set-key (kbd "C-c p") 'zk-copy-buffer-file-path)
 (global-set-key (kbd "C-c f") 'zk-open-file-path-from-region)
 (define-key minibuffer-local-map (kbd "C-c p") 'zk-minibuffer-insert-current-file-path)
-
-(global-set-key (kbd "M-g m n") 'zk-cycle-bookmark-next)
-(global-set-key (kbd "M-g m p") 'zk-cycle-bookmark-prev)
 
 (add-hook 'shell-mode-hook
           (lambda()
