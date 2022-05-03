@@ -123,6 +123,7 @@
 (require 'zk)
 (setenv "ZK_PROJECT_ROOT" zk-project-root)
 (setq frame-title-format '("" command-line-default-directory " - emacs"))
+(setq bookmark-default-file (expand-file-name (concat "~/.zk/emacs-bookmarks/" zk-project-root "/bookmarks")))
 
 (setenv "EDITOR" "~/.emacs.d/bin/editor-stub")
 (setenv "P4EDITOR" "~/.emacs.d/bin/editor-stub")
