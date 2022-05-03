@@ -123,7 +123,9 @@
 (require 'zk)
 (setenv "ZK_PROJECT_ROOT" zk-project-root)
 (setq frame-title-format '("" command-line-default-directory " - emacs"))
-(setq bookmark-default-file (expand-file-name (concat "~/.zk/emacs-bookmarks/" zk-project-root "/bookmarks")))
+(let ((bookmark-dir (expand-file-name (concat "~/.zk/emacs-bookmarks/" zk-project-root))))
+  (make-directory bookmark-dir t)
+  (setq bookmark-default-file (concat bookmark-dir "/bookmarks")))
 
 (setenv "EDITOR" "~/.emacs.d/bin/editor-stub")
 (setenv "P4EDITOR" "~/.emacs.d/bin/editor-stub")
@@ -175,6 +177,7 @@
 (global-set-key (kbd "C-c p") 'zk-copy-buffer-file-path)
 (global-set-key (kbd "C-c f") 'zk-open-file-path-from-region)
 (define-key minibuffer-local-map (kbd "C-c p") 'zk-minibuffer-insert-current-file-path)
+(define-key minibuffer-local-map (kbd "C-c n") 'zk-minibuffer-insert-current-file-name)
 
 (add-hook 'shell-mode-hook
           (lambda()
