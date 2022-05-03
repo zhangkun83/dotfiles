@@ -123,9 +123,17 @@
 (require 'zk)
 (setenv "ZK_PROJECT_ROOT" zk-project-root)
 (setq frame-title-format '("" command-line-default-directory " - emacs"))
+
+;; Bookmarks-related
+;; Use per-zk-project bookmark file
 (let ((bookmark-dir (expand-file-name (concat "~/.zk/emacs-bookmarks/" zk-project-root))))
   (make-directory bookmark-dir t)
   (setq bookmark-default-file (concat bookmark-dir "/bookmarks")))
+;; Do not display the file column in the benchmark menu, because zk-bookmark-set
+;; already includes (nicer) file names in the bookmark names.
+(require 'bookmark)
+(bookmark-bmenu-toggle-filenames nil)
+(global-set-key (kbd "C-x r m") 'zk-bookmark-set)
 
 (setenv "EDITOR" "~/.emacs.d/bin/editor-stub")
 (setenv "P4EDITOR" "~/.emacs.d/bin/editor-stub")

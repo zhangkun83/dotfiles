@@ -347,6 +347,31 @@ or code block or class/function definitions that end with '}'"
                        (replace-regexp-in-string "/" "#" (buffer-file-name)))))
           (zk-save-buffer-as-copy localfile)))))
 
+(defun zk-bookmark-set-shorten-filename (absolute-filename)
+  "Shorten the file name for bookmark names"
+  (if (string-prefix-p zk-project-root absolute-filename)
+      ;; Return the path relative to zk-project-root
+      (substring absolute-filename (length zk-project-root) (length absolute-filename))
+    ;; If not prefixed with zk-project-root, use the original absolute path
+    absolute-filename))
+
+(require 'subr-x)
+(defun zk-bookmark-set ()
+  "Set a bookmark with pre-populated name in zk's custom format."
+  (interactive)
+  (let ((file-name-at-point (buffer-file-name))
+        (line-at-point
+         (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
+    (unless file-name-at-point
+      (user-error "Current buffer doesn't have a file"))
+    (bookmark-set
+     (read-string
+      "New bookmark: "
+      (concat
+       (zk-bookmark-set-shorten-filename file-name-at-point)
+       ": "
+       (string-trim line-at-point))))))
+
 (defun zk-insert-mean()
   "Take the leading number from the current line and the previous line,
   and insert the mean value of the two as a new line in between.
