@@ -372,6 +372,17 @@ or code block or class/function definitions that end with '}'"
        ": "
        (string-trim line-at-point))))))
 
+(require 'compile)
+(add-to-list 'compilation-error-regexp-alist '("^#ZK#\\(.*+\\):\\([0-9]+\\)" 1 2))
+(defun zk-diff-navigate (diff-command)
+  "Generic diff navigation with compilation mode."
+  (interactive "sDiff command: ")
+  (let ((output_buf (get-buffer-create "*ZK Diff Navigation*")))
+    (shell-command
+     (concat diff-command " | zk-transform-patch.py") output_buf)
+    (with-current-buffer output_buf
+      (compilation-mode "ZK Diff Navigation"))))
+
 (defun zk-insert-mean()
   "Take the leading number from the current line and the previous line,
   and insert the mean value of the two as a new line in between.
