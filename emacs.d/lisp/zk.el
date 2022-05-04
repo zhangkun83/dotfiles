@@ -347,15 +347,6 @@ or code block or class/function definitions that end with '}'"
                        (replace-regexp-in-string "/" "#" (buffer-file-name)))))
           (zk-save-buffer-as-copy localfile)))))
 
-(defun zk-bookmark-set-shorten-filename (absolute-filename)
-  "Shorten the file name for bookmark names"
-  (if (string-prefix-p zk-project-root absolute-filename)
-      ;; Return the path relative to zk-project-root
-      (substring absolute-filename (length zk-project-root) (length absolute-filename))
-    ;; If not prefixed with zk-project-root, use the original absolute path
-    absolute-filename))
-
-(require 'subr-x)
 (defun zk-bookmark-set ()
   "Set a bookmark with pre-populated name in zk's custom format."
   (interactive)
@@ -368,9 +359,9 @@ or code block or class/function definitions that end with '}'"
      (read-string
       "New bookmark: "
       (concat
-       (zk-bookmark-set-shorten-filename file-name-at-point)
+       (zk-project-get-relative-path file-name-at-point)
        ": "
-       (string-trim line-at-point))))))
+       (zk-trim-string line-at-point))))))
 
 (require 'compile)
 (add-to-list 'compilation-error-regexp-alist '("^\\*\\*\\* \\(.*+\\):\\([0-9]+\\)" 1 2))
