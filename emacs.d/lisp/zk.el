@@ -373,7 +373,7 @@ or code block or class/function definitions that end with '}'"
        (string-trim line-at-point))))))
 
 (require 'compile)
-(add-to-list 'compilation-error-regexp-alist '("^#ZK#\\(.*+\\):\\([0-9]+\\)" 1 2))
+(add-to-list 'compilation-error-regexp-alist '("^\\*\\*\\* \\(.*+\\):\\([0-9]+\\)" 1 2))
 (defun zk-diff-navigate (diff-command)
   "Generic diff navigation with compilation mode."
   (interactive "sDiff command: ")
