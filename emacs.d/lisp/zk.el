@@ -328,6 +328,12 @@ or code block or class/function definitions that end with '}'"
   (setq c-syntactic-indentation (not c-syntactic-indentation))
   (message "Syntactic indentation: %s" (if c-syntactic-indentation "on" "off")))
 
+(defun zk-recenter-top-bottom-other-window ()
+  "Call recenter-top-bottom in the other window."
+  (interactive)
+  (with-selected-window (next-window)
+    (recenter-top-bottom)))
+
 (defun zk-save-buffer-as-copy (filename)
   "Save the current buffer to a file as a copy (without visiting the new file)"
   (interactive "F")
