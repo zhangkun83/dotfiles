@@ -164,6 +164,8 @@
 (global-set-key (kbd "C-x \\") 'compile)
 (global-set-key (kbd "C-x |") 'compilation-minor-mode)
 
+(setq compile-command "runp ")
+
 ;; go-mode for Golang
 (autoload 'go-mode "go-mode" nil t)
 (autoload 'gofmt-before-save "go-mode" nil t)
