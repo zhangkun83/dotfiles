@@ -135,6 +135,9 @@
 (bookmark-bmenu-toggle-filenames nil)
 (global-set-key (kbd "C-x r m") 'zk-bookmark-set)
 
+;; Don't create backup files at all
+(setq make-backup-files nil)
+
 (setenv "EDITOR" "~/.emacs.d/bin/editor-stub")
 (setenv "P4EDITOR" "~/.emacs.d/bin/editor-stub")
 
