@@ -15,15 +15,15 @@ cd "$ZK_PROJECT_ROOT"
 
 echo "Regenerating SRCFILES ... "
 
-if [ -e "zkindex.listsrcs" ]; then
-    echo "Using zkindex.listsrcs to generate src list ... "
-    . zkindex.listsrcs > "$SRC_LIST_FILE"
-else
-    echo "Using default src list rules ..."
+if [[ ! -e "zkindex.listsrcs" ]]; then
+    echo "Writing default zkindex.listsrcs ..."
     # Always generate absolute paths, use $PWD instead of .
-    find "$PWD" -type f | grep '\/src\/.*\.\(\(groovy\)\|\(java\)\|\(proto\)\)$' > "$SRC_LIST_FILE"
-    find "$PWD" -type f | grep '\.gradle$' >> "$SRC_LIST_FILE"
+    echo 'find "$PWD" -type f | grep "\/src\/.*\.\(\(groovy\)\|\(java\)\|\(proto\)\)$"' >> zkindex.listsrcs
+    echo 'find "$PWD" -type f | grep "\.gradle$"' >> zkindex.listsrcs
 fi
+
+echo "Using zkindex.listsrcs to generate src list ... "
+. zkindex.listsrcs > "$SRC_LIST_FILE"
 
 cd "$INDEX_DIR"
 
