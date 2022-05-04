@@ -1,1 +1,0 @@
-find "$PWD" -type f | grep "\.\(\(el\)\|\(py\)\|\(sh\)\)$"

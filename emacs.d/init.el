@@ -190,6 +190,7 @@
 (define-key minibuffer-local-map (kbd "C-c p") 'zk-minibuffer-insert-current-file-path)
 (define-key minibuffer-local-map (kbd "C-c n") 'zk-minibuffer-insert-current-file-name)
 (global-set-key (kbd "C-x g h") 'global-hl-line-mode)
+(global-set-key (kbd "C-x c k") 'zk-clip)
 (global-set-key (kbd "C-M-l") 'zk-recenter-top-bottom-other-window)
 
 (add-hook 'shell-mode-hook

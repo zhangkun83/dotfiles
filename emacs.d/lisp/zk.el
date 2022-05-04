@@ -380,6 +380,12 @@ or code block or class/function definitions that end with '}'"
     (with-current-buffer output_buf
       (compilation-mode "ZK Diff Navigation"))))
 
+(defun zk-clip ()
+  "Save the current region (selection) to the zk clipboard file."
+  (interactive)
+  (write-region (region-beginning) (region-end) (expand-file-name "~/.emacs.d/.zkclip"))
+  (message "Selection written to zkclip"))
+
 (defun zk-insert-mean()
   "Take the leading number from the current line and the previous line,
   and insert the mean value of the two as a new line in between.
