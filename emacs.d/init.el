@@ -189,6 +189,7 @@
 (global-set-key (kbd "C-c f") 'zk-open-file-path-from-region)
 (define-key minibuffer-local-map (kbd "C-c p") 'zk-minibuffer-insert-current-file-path)
 (define-key minibuffer-local-map (kbd "C-c n") 'zk-minibuffer-insert-current-file-name)
+(global-set-key (kbd "C-x g h") 'global-hl-line-mode)
 
 (add-hook 'shell-mode-hook
           (lambda()
@@ -211,6 +212,7 @@
     ("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i")))
  '(fci-rule-character 9474)
  '(font-use-system-font t)
+ '(global-hl-line-sticky-flag t)
  '(ido-enable-flex-matching nil)
  '(inhibit-startup-screen t)
  '(ns-command-modifier nil)
