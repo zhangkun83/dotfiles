@@ -374,7 +374,9 @@ or code block or class/function definitions that end with '}'"
 (defun zk-diff-navigate ()
   "Generic diff navigation with compilation mode."
   (interactive)
-  (let ((diff-command (read-string "Diff command: " nil 'zk-diff-navigate--history))
+  (let ((diff-command (read-string "Diff command: "
+                                   (car zk-diff-navigate--history)
+                                   '(zk-diff-navigate--history . 1)))
         (output_buf (get-buffer-create "*ZK Diff Navigation*")))
     (shell-command
      (concat diff-command " | zk-transform-patch.py") output_buf)
