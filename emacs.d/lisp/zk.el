@@ -393,11 +393,18 @@ or code block or class/function definitions that end with '}'"
       (compilation-minor-mode t))
     (add-to-history 'zk-diff-navigate--history diff-command)))
 
-(defun zk-clip ()
-  "Save the current region (selection) to the zk clipboard file."
+(defconst zk-clip-path (expand-file-name "~/.emacs.d/.zkclip"))
+(defun zk-clip-save ()
+  "Save the current region (selection) to zkclip."
   (interactive)
-  (write-region (region-beginning) (region-end) (expand-file-name "~/.emacs.d/.zkclip"))
-  (message "Selection written to zkclip"))
+  (write-region (region-beginning) (region-end) zk-clip-path)
+  (message "Selection saved to zkclip"))
+
+(defun zk-clip-yank ()
+  "Yank the content of zkclip to the current point."
+  (interactive)
+  (insert-file-contents zk-clip-path)
+  (message "Yanked from zkclip"))
 
 (defun zk-insert-mean()
   "Take the leading number from the current line and the previous line,

@@ -193,7 +193,8 @@
 (define-key minibuffer-local-map (kbd "C-c p") 'zk-minibuffer-insert-current-file-path)
 (define-key minibuffer-local-map (kbd "C-c n") 'zk-minibuffer-insert-current-file-name)
 (global-set-key (kbd "C-x g h") 'global-hl-line-mode)
-(global-set-key (kbd "C-x c k") 'zk-clip)
+(global-set-key (kbd "C-c w") 'zk-clip-save)
+(global-set-key (kbd "C-c y") 'zk-clip-yank)
 (global-set-key (kbd "C-M-l") 'zk-recenter-top-bottom-other-window)
 (global-set-key (kbd "C-x /") 'zk-diff-navigate)
 
