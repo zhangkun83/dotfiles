@@ -370,8 +370,6 @@ or code block or class/function definitions that end with '}'"
        (zk-trim-string line-at-point))))))
 
 (require 'compile)
-(add-to-list 'compilation-error-regexp-alist '("^\\*\\*\\* \\(.*+\\):\\([0-9]+\\)" 1 2))
-
 (defvar zk-diff-navigate--history nil)
 (defun zk-diff-navigate ()
   "Generic diff navigation with compilation mode."
@@ -381,7 +379,20 @@ or code block or class/function definitions that end with '}'"
     (shell-command
      (concat diff-command " | zk-transform-patch.py") output_buf)
     (with-current-buffer output_buf
-      (compilation-mode "ZK Diff Navigation"))
+      (compilation-mode "ZK Diff Navigation")
+      ;; This is the only expected error line format in this
+      ;; buffer. Don't honor any other error regex in this buffer,
+      ;; because sometimes the diff output may have a line that looks
+      ;; like an error line but it's not.
+      ;; 
+      ;; This variable has to be set AFTER the compilation-mode call,
+      ;; because compilation-mode seems to unbind this buffer-local
+      ;; variable. It's surprising to me that it works even if I set
+      ;; the variable after compilation-mode function has returned.
+      ;; From my experiment (by adding an artificial delay here) emacs
+      ;; renders the buffer only after zk-diff-navigate returns, so
+      ;; it's probably when the variable is taken into account.
+      (setq-local compilation-error-regexp-alist '(("^\\*\\*\\* \\(.*+\\):\\([0-9]+\\)" 1 2))))
     (add-to-history 'zk-diff-navigate--history diff-command)))
 
 (defun zk-clip ()
