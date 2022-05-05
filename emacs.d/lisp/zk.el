@@ -398,6 +398,7 @@ or code block or class/function definitions that end with '}'"
   "Save the current region (selection) to zkclip."
   (interactive)
   (write-region (region-beginning) (region-end) zk-clip-path)
+  (deactivate-mark)
   (message "Selection saved to zkclip"))
 
 (defun zk-clip-yank ()
