@@ -38,5 +38,7 @@ for line in sys.stdin:
         if hunk_m:
             line_number = hunk_m.group(1)
             # ZK Diff Navigation annotation
+            sys.stdout.write('=' * 80 + '\n')
             sys.stdout.write('*** ' + current_file + ':' + line_number + '\n')
+            sys.stdout.write('=' * 80 + '\n')
     sys.stdout.write(line)
