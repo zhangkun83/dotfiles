@@ -140,6 +140,7 @@
 
 (setenv "EDITOR" "~/.emacs.d/bin/editor-stub")
 (setenv "P4EDITOR" "~/.emacs.d/bin/editor-stub")
+(setenv "P4DIFF" "diff -u")  ; works with zk-diff-navigate
 
 (add-hook 'java-mode-hook
 	  (lambda()

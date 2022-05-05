@@ -371,14 +371,18 @@ or code block or class/function definitions that end with '}'"
 
 (require 'compile)
 (add-to-list 'compilation-error-regexp-alist '("^\\*\\*\\* \\(.*+\\):\\([0-9]+\\)" 1 2))
-(defun zk-diff-navigate (diff-command)
+
+(defvar zk-diff-navigate--history nil)
+(defun zk-diff-navigate ()
   "Generic diff navigation with compilation mode."
-  (interactive "sDiff command: ")
-  (let ((output_buf (get-buffer-create "*ZK Diff Navigation*")))
+  (interactive)
+  (let ((diff-command (read-string "Diff command: " nil 'zk-diff-navigate--history))
+        (output_buf (get-buffer-create "*ZK Diff Navigation*")))
     (shell-command
      (concat diff-command " | zk-transform-patch.py") output_buf)
     (with-current-buffer output_buf
-      (compilation-mode "ZK Diff Navigation"))))
+      (compilation-mode "ZK Diff Navigation"))
+    (add-to-history 'zk-diff-navigate--history diff-command)))
 
 (defun zk-clip ()
   "Save the current region (selection) to the zk clipboard file."
