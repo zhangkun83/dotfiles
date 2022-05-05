@@ -387,6 +387,7 @@ or code block or class/function definitions that end with '}'"
       ;; buffer. Don't honor any other error regex in this buffer,
       ;; because sometimes the diff output may have a line that looks
       ;; like an error line but it's not.
+      (erase-buffer)
       (setq-local compilation-error-regexp-alist '(("^\\*\\*\\* \\(.*+\\):\\([0-9]+\\)" 1 2)))
       (compilation-minor-mode t))
     (switch-to-buffer-other-window output_buf)
