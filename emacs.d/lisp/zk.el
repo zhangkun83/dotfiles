@@ -10,10 +10,14 @@
 
 (zk-set-project-root zk-project-root)
 
-(defun zk-grep (pattern)
+(defvar zk-grep--history nil)
+(defun zk-grep ()
   "Grep through the files from SRCFILES."
-  (interactive "sGrep in src files: ")
-  (grep-find (concat "zk-grep " pattern)))
+  (interactive)
+  (let ((pattern (read-string "Grep in src files: "
+                              (car zk-grep--history)
+                              '(zk-grep--history . 1))))
+    (grep-find (concat "zk-grep " pattern))))
 
 (require 'dash)
 (defun zk-find-src-file-in-project(f)
