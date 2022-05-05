@@ -382,8 +382,6 @@ or code block or class/function definitions that end with '}'"
                                    (car zk-diff-navigate--history)
                                    '(zk-diff-navigate--history . 1)))
         (output_buf (get-buffer-create "*ZK Diff Navigation*")))
-    (shell-command
-     (concat diff-command " | zk-transform-patch.py") output_buf)
     (with-current-buffer output_buf
       ;; This is the only expected error line format in this
       ;; buffer. Don't honor any other error regex in this buffer,
@@ -391,6 +389,13 @@ or code block or class/function definitions that end with '}'"
       ;; like an error line but it's not.
       (setq-local compilation-error-regexp-alist '(("^\\*\\*\\* \\(.*+\\):\\([0-9]+\\)" 1 2)))
       (compilation-minor-mode t))
+    (switch-to-buffer-other-window output_buf)
+    ;; DO NOT use shell-command function, because it will display
+    ;; output as a message if it's short, and it really messes up the
+    ;; display.
+    (start-process-shell-command "zk-diff-navigate"
+                                 output_buf
+                                 (concat diff-command " | zk-transform-patch.py"))
     (add-to-history 'zk-diff-navigate--history diff-command)))
 
 (defconst zk-clip-path (expand-file-name "~/.emacs.d/.zkclip"))
