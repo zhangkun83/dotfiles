@@ -38,6 +38,8 @@
 ;;; Ido
 (require 'ido)
 (ido-mode t)
+;; Disable the annoying "searching in other directories" behavior of ido-find-file
+(setq ido-auto-merge-work-directories-length -1)
 
 (global-set-key
  "\M-x"
