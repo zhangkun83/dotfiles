@@ -177,6 +177,8 @@
             (setq tab-width 2)))
 
 (add-to-list 'compilation-search-path zk-project-root)
+(require 'grep)
+(add-to-list 'grep-search-path zk-project-root)
 
 (defun zk-prev-window()
   "Switch to previous window"
