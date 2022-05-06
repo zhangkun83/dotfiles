@@ -208,7 +208,8 @@
             "Make dots part of the word so full paths can be expanded by M+/"
             (make-local-variable 'dabbrev-abbrev-char-regexp)
             (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_\\|\\.")
-	    (local-set-key (kbd "C-c e") 'zk-editor-stub-open-file)))
+	    (local-set-key (kbd "C-c e") 'zk-editor-stub-open-file)
+            (local-set-key (kbd "C-c t") 'comint-truncate-buffer)))
 
 (add-hook 'org-mode-hook
 	  (lambda()
