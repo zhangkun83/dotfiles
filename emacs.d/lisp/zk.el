@@ -390,7 +390,7 @@ or code block or class/function definitions that end with '}'"
       (erase-buffer)
       (setq-local compilation-error-regexp-alist '(("^\\*\\*\\* \\(.*+\\):\\([0-9]+\\)" 1 2)))
       (compilation-minor-mode t))
-    (switch-to-buffer-other-window output_buf)
+    (display-buffer output_buf)
     ;; DO NOT use shell-command function, because it will display
     ;; output as a message if it's short, and it really messes up the
     ;; display.
