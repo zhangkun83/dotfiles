@@ -19,6 +19,31 @@
                               '(zk-grep--history . 1))))
     (grep-find (concat "zk-grep " pattern))))
 
+(defun zk-grep-current-file ()
+  "Grep through the current file."
+  (interactive)
+  (let ((file-name (buffer-file-name)))
+    (unless file-name
+      (user-error "Current buffer doesn't visit a file"))
+    (save-some-buffers)
+    (let ((pattern (read-string "Grep in current file:  "
+                                 (car zk-grep--history)
+                                 '(zk-grep--history . 1)))
+          (output_buf (zk-recreate-buffer (concat "*zk-grep:"
+                                                  (zk-project-get-relative-path file-name)
+                                                  "*"))))
+      (with-current-buffer output_buf
+        (setq-local compilation-error-regexp-alist '(("^\\(.*+\\):\\([0-9]+\\):.*" 1 2)))
+        (compilation-minor-mode t)
+        (insert "grep \"" pattern "\" " file-name "\n\n")
+        ;; This makes the point stays at the top only if the buffer is
+        ;; non-empty (made so by the insert above)
+        (beginning-of-buffer))
+      (display-buffer output_buf)
+      (select-window (get-buffer-window output_buf))
+      (start-process "zk-grep" output_buf
+                     "grep" "-H" "-n" pattern (file-name-nondirectory file-name)))))
+
 (require 'dash)
 (defun zk-find-src-file-in-project(f)
   "Find a src file indexed in SRCFILES of this project."
@@ -373,31 +398,43 @@ or code block or class/function definitions that end with '}'"
        ": "
        (zk-trim-string line-at-point))))))
 
+(defun zk-recreate-buffer (name)
+  "Delete the buffer with the given name if it exists, and create one with same name.
+   Return the new buffer.  This is preferred to just get-buffer-create because when
+   a buffer is reused by the latter compilation-minor-mode stops recognizing error
+   lines."
+  (ignore-errors (kill-buffer name))
+  (get-buffer-create name))
+
 (require 'compile)
 (defvar zk-diff-navigate--history nil)
 (defun zk-diff-navigate ()
   "Generic diff navigation with compilation mode."
   (interactive)
+  (save-some-buffers)
   (let ((diff-command (read-string "Diff command: "
                                    (car zk-diff-navigate--history)
                                    '(zk-diff-navigate--history . 1)))
-        (output_buf (get-buffer-create "*ZK Diff Navigation*")))
+        (output_buf (zk-recreate-buffer "*ZK Diff Navigation*")))
     (with-current-buffer output_buf
       ;; This is the only expected error line format in this
       ;; buffer. Don't honor any other error regex in this buffer,
       ;; because sometimes the diff output may have a line that looks
       ;; like an error line but it's not.
-      (erase-buffer)
       (setq-local compilation-error-regexp-alist '(("^\\*\\*\\* \\(.*+\\):\\([0-9]+\\)" 1 2)))
-      (compilation-minor-mode t))
+      (compilation-minor-mode t)
+      (insert "diff-command: " diff-command "\n\n")
+      ;; This makes the point stays at the top only if the buffer is
+      ;; non-empty (made so by the insert above)
+      (beginning-of-buffer))
     (display-buffer output_buf)
+    (select-window (get-buffer-window output_buf))
     ;; DO NOT use shell-command function, because it will display
     ;; output as a message if it's short, and it really messes up the
     ;; display.
     (start-process-shell-command "zk-diff-navigate"
                                  output_buf
-                                 (concat diff-command " | zk-transform-patch.py"))
-    (add-to-history 'zk-diff-navigate--history diff-command)))
+                                 (concat diff-command " | zk-transform-patch.py"))))
 
 (defconst zk-clip-path (expand-file-name "~/.emacs.d/.zkclip"))
 (defun zk-clip-save ()
