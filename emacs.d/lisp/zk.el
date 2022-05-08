@@ -19,6 +19,9 @@
                               '(zk-grep--history . 1))))
     (grep-find (concat "zk-grep " pattern))))
 
+(defun zk-grep-current-file--get-file ()
+  zk-grep-current-file--file-name)
+
 (defun zk-grep-current-file ()
   "Grep through the current file."
   (interactive)
@@ -33,7 +36,10 @@
                                                   (zk-project-get-relative-path file-name)
                                                   "*"))))
       (with-current-buffer output_buf
-        (setq-local compilation-error-regexp-alist '(("^\\(.*+\\):\\([0-9]+\\):.*" 1 2)))
+        (setq-local zk-grep-current-file--file-name file-name)
+        (setq-local compilation-error-regexp-alist '(("^\\([0-9]+\\):.*"
+                                                      zk-grep-current-file--get-file
+                                                      1)))
         (compilation-minor-mode t)
         (insert "grep \"" pattern "\" " file-name "\n\n")
         ;; This makes the point stays at the top only if the buffer is
@@ -42,7 +48,7 @@
       (display-buffer output_buf)
       (select-window (get-buffer-window output_buf))
       (start-process "zk-grep" output_buf
-                     "grep" "-H" "-n" pattern (file-name-nondirectory file-name)))))
+                     "grep" "-n" pattern (file-name-nondirectory file-name)))))
 
 (require 'dash)
 (defun zk-find-src-file-in-project(f)
