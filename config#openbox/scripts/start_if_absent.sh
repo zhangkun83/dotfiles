@@ -1,12 +1,15 @@
 #!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 EXEC="$1"
 shift
 
 RESULT=$(ps -u $USER -o command | grep -F "$EXEC" | grep -v '\(^grep \)\|\(start_if_absent\.sh \)')
 
 function message {
-    echo "start_if_absent: $1"
-    notify-send -i system-run "$1"
+    if [[ ! "$ZK_START_IF_ABSENT_SILENT" == "true" ]]; then
+        echo "start_if_absent: $1"
+        $DIR/zknotify.sh "$1"
+    fi
 }
 
 if [ -z "$RESULT" ]; then

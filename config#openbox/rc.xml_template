@@ -1088,5 +1088,17 @@
     <application class="Zenity" title="ztimer">
       <desktop>all</desktop>
     </application>
+    <application class="XTerm" title="zknotify-console">
+      <position force="yes">
+        <x>center</x>
+        <y>10</y>
+      </position>
+      <layer>above</layer>
+      <skip_pager>yes</skip_pager>
+      <skip_taskbar>yes</skip_taskbar>
+      <focus>no</focus>
+      <desktop>all</desktop>
+      <decor>no</decor>
+    </application>
   </applications>
 </openbox_config>

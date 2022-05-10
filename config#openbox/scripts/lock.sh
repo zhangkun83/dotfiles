@@ -10,7 +10,7 @@ fi
 (XSECURELOCK_FONT=--courier-bold-r-normal--34------- XSECURELOCK_WANT_FIRST_KEYPRESS=1 xsecurelock; $DIR/hci-adjustments)
 
 if [[ -n "$post_lock_cmd" ]]; then
-    notify-send -i system-run "Starting $post_lock_cmd"
+    $DIR/zknotify.sh "Starting $post_lock_cmd"
     $post_lock_cmd &
 fi
 

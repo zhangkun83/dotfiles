@@ -21,5 +21,5 @@ else
 fi
 feh "$option" "$wallpaper_path"
 if [[ "$1" == "--show-notification" ]]; then
-    notify-send -i preferences-desktop-wallpaper "Switched to \"$wallpaper\""
+    $script_dir/zknotify.sh "Wallpaper switched to \"$wallpaper\""
 fi

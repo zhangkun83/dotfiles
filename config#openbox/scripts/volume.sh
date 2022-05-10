@@ -1,4 +1,5 @@
 #!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 get_status() {
   volume=$(pactl -- get-sink-volume 0 | grep -o "[0-9]*%" | head -1)
   muted=$(pactl get-sink-mute 0)
@@ -23,8 +24,7 @@ fi
 get_status
 
 if [ "$muted" == "Mute: yes" ]; then
-  notify-send -i audio-volume-muted "Muted"
+  $DIR/zknotify.sh "Audio muted"
 else
-  notify-send -i audio-volume-medium "$volume"
+  $DIR/zknotify.sh "Audio volume: $volume"
 fi
-
