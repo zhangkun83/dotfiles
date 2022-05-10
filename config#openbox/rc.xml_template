@@ -1081,13 +1081,12 @@
     <!-- show the manage desktops section in the client-list-(combined-)menu -->
   </menu>
   <applications>
+    <!-- for youdao_dict.sh -->
     <application class="Zenity">
       <layer>above</layer>
       <decor>no</decor>
     </application>
-    <application class="Zenity" title="ztimer">
-      <desktop>all</desktop>
-    </application>
+    <!-- for zknotify -->
     <application class="XTerm" title="zknotify-console">
       <position force="yes">
         <x>center</x>
