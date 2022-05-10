@@ -1,7 +1,7 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-xterm -geometry 40x10 \
+xterm -geometry 50x10 \
       -T 'zknotify-console' \
-      -bc -fa 'Terminus' -fs 12 \
+      -ah -bc -fa 'Terminus' -fs 14 \
       -e $DIR/zknotify-console.sh
