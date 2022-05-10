@@ -20,6 +20,7 @@ do
     fi
     if read line <"$ZKNOTIFY_PIPE"; then
         $DIR/start_if_absent.sh zknotify-console-xterm.sh $DIR/zknotify-console-xterm.sh
-        echo "> $line" >"$ZKNOTIFY_CONSOLE_PIPE"
+        timeout 5 bash -c "echo '> $line' >'$ZKNOTIFY_CONSOLE_PIPE'" ||\
+            >&2 echo "zknotifyd: timed out writing '$line' to '$ZKNOTIFY_CONSOLE_PIPE'"
     fi
 done

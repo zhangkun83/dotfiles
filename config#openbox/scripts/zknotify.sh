@@ -4,5 +4,6 @@
 PIPE_FILE="$HOME/.config/openbox/runtime/zknotify-pipe"
 
 if [[ -p "$PIPE_FILE" ]]; then
-    echo "$*" >"$PIPE_FILE"
+    timeout 5 bash -c "echo '$*' >'$PIPE_FILE'" ||\
+        >&2 echo "zknotify: timed out writing '$*' to '$PIPE_FILE'"
 fi
