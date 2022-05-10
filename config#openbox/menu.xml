@@ -36,7 +36,7 @@
     <action name="Execute"><execute>~/.config/openbox/scripts/color-mode.sh outdoor</execute></action>
   </item>
   <item label="Switch wallpaper" icon="/usr/share/icons/Tango/scalable/apps/wallpaper.svg">
-    <action name="Execute"><execute>~/.config/openbox/scripts/prepare-wallpaper.sh --show-notification</execute></action>
+    <action name="Execute"><execute>~/.config/openbox/scripts/prepare-wallpaper.sh</execute></action>
   </item>
   <separator label="System" />
   <item label="Restart panels" icon="/usr/share/icons/Tango/scalable/actions/stock_refresh.svg">

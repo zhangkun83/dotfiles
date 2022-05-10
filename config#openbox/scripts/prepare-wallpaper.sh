@@ -20,6 +20,4 @@ else
     option="--bg-fill"
 fi
 feh "$option" "$wallpaper_path"
-if [[ "$1" == "--show-notification" ]]; then
-    $script_dir/zknotify.sh "Wallpaper switched to \"$wallpaper\""
-fi
+$script_dir/zknotify.sh "Wallpaper switched to \"$wallpaper\""
