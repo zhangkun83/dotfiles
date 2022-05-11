@@ -216,6 +216,10 @@
 	    "Register my own shortcuts for org mode"
 	    (local-set-key (kbd "C-c a") 'org-agenda)))
 
+;; Set font
+(set-face-attribute 'default nil
+		    :family "Liberation Mono")
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -229,7 +233,6 @@
    (quote
     ("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i")))
  '(fci-rule-character 9474)
- '(font-use-system-font t)
  '(global-hl-line-sticky-flag t)
  '(ido-enable-flex-matching nil)
  '(inhibit-startup-screen t)
