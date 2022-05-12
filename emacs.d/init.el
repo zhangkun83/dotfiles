@@ -11,7 +11,9 @@
 
 ;; Set default browser to chrome
 (setq browse-url-browser-function 'browse-url-generic
-      browse-url-generic-program "google-chrome")
+      browse-url-generic-program
+      (cond ((eq system-type 'cygwin) "/cygdrive/c/Program Files/Google/Chrome/Application/chrome.exe")
+            (t "google-chrome")))
 
 ;;;; etags-select (better ctags search)
 
