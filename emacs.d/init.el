@@ -229,11 +229,11 @@
  ;; If there is more than one, they won't work right.
  '(c-echo-syntactic-information-p t)
  '(compilation-scroll-output t)
- '(create-lockfiles nil)
- '(custom-enabled-themes (if (display-graphic-p) '(leuven)))
+ '(custom-enabled-themes (if (display-graphic-p) (quote (leuven))))
  '(dabbrev-case-replace nil)
  '(explicit-bash-args
-   '("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i"))
+   (quote
+    ("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i")))
  '(fci-rule-character 9474)
  '(global-hl-line-sticky-flag t)
  '(ido-enable-flex-matching nil)
