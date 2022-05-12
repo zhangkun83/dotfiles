@@ -1,2 +1,3 @@
 #!/bin/bash
+echo -ne "\e]0;$1\a"
 tmux attach-session -E -d -t "$1"
