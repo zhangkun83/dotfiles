@@ -1,5 +1,5 @@
 #!/bin/bash
-FILE="/usr/local/google/home/zhangkun/DriveFileStream/My Drive/orgwork/work.org"
+FILE="$HOME/DriveFileStream/My Drive/orgwork/work.org"
 
 # Disable create-lockfiles because it doesn't work well with Google Drive
 emacs "$FILE" \
