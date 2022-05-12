@@ -1,6 +1,6 @@
 #!/bin/bash
-FILE="$HOME/DriveFileStream/My Drive/orgwork/work.org"
+FILE="$HOME/orgwork/work.org"
 
 # Disable create-lockfiles because it doesn't work well with Google Drive
 emacs "$FILE" \
-      --eval="(setq create-lockfiles nil org-agenda-files \"$FILE\" frame-title-format \"orgwork\" )"
+      --eval="(setq create-lockfiles nil org-agenda-files '(\"$FILE\") frame-title-format \"orgwork\" )"
