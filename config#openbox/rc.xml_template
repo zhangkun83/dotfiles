@@ -180,6 +180,16 @@
   <keyboard>
     <chainQuitKey>W-g</chainQuitKey>
     <!-- Keybindings for desktop switching -->
+    <keybind key="W-C-Left"> <!-- compatible with win10 -->
+      <action name="GoToDesktop">
+        <to>previous</to>
+      </action>
+    </keybind>
+    <keybind key="W-C-Right"> <!-- compatible with win10 -->
+      <action name="GoToDesktop">
+        <to>next</to>
+      </action>
+    </keybind>
     <keybind key="W-1">
       <action name="GoToDesktop">
         <to>1</to>
@@ -304,7 +314,7 @@
       <action name="Unfocus"/>
     </keybind>
     <!-- Keybindings for window switching -->
-    <keybind key="W-Tab">
+    <keybind key="A-Tab">  <!-- compatible with win10 -->
       <action name="NextWindow">
         <raise>no</raise>
         <finalactions>
