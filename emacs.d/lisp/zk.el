@@ -440,7 +440,8 @@ or code block or class/function definitions that end with '}'"
     ;; display.
     (start-process-shell-command "zk-diff-navigate"
                                  output_buf
-                                 (concat diff-command " | zk-transform-patch.py"))))
+                                 (concat "cd " zk-project-root " && "
+                                         diff-command " | zk-transform-patch.py"))))
 
 (defconst zk-clip-path (expand-file-name "~/.emacs.d/.zkclip"))
 (defun zk-clip-save ()
