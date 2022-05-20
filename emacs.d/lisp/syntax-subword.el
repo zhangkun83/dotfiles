@@ -83,13 +83,11 @@
   changes as word boundaries.  Syntax changes are generally the
   same as face changes when font lock is
   enabled. \\{syntax-subword-mode-map}"
-    nil
-    nil
-    syntax-subword-mode-map
-    (when (and syntax-subword-mode subword-mode)
-      (subword-mode -1)
-      (message "Disabling subword-mode"))
-    )
+  :keymap syntax-subword-mode-map
+  :after-hook (when (and syntax-subword-mode subword-mode)
+                (subword-mode -1)
+                (message "Disabling subword-mode"))
+  )
 
 ;;;###autoload
 (define-global-minor-mode global-syntax-subword-mode syntax-subword-mode
