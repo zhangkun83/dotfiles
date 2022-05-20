@@ -97,9 +97,6 @@
             (c-set-offset 'annotation-var-cont 0)
             ;; case: line wasn't indenting. It should be.
             (c-set-offset 'case-label '+)
-            ;; Treat camelCase as multiple words instead of one
-            (require 'syntax-subword)
-            (syntax-subword-mode)
             ))
 
 ;;; Tramp related
@@ -251,6 +248,10 @@
 (global-set-key (kbd "C-f") 'zk-go-to-char-forward)
 (global-set-key (kbd "C-b") 'zk-go-to-char-backward)
 
+;; Treat camelCase as multiple words instead of one, and treat
+;; punctuation marks as words as well.
+(require 'syntax-subword)
+(global-syntax-subword-mode)
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
