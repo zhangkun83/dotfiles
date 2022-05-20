@@ -98,7 +98,8 @@
             ;; case: line wasn't indenting. It should be.
             (c-set-offset 'case-label '+)
             ;; Treat camelCase as multiple words instead of one
-            (subword-mode)
+            (require 'syntax-subword)
+            (syntax-subword-mode)
             ))
 
 ;;; Tramp related
