@@ -208,6 +208,10 @@ or code block or class/function definitions that end with '}'"
      )))
 
 (defun zk-java-move-to-thing (move-fun)
+  "Invoke the move-fun repeatedly until the point arrives at the
+next (or previous) statement, code block or class/function
+definition (a.k.a. a java thing). The move-fun should eventually
+arrive at the end of java thing for this to work."
   (let ((continue-loop-p t) (last-point -1))
     (while continue-loop-p
       (progn
@@ -238,18 +242,6 @@ or code block or class/function definitions that end with '}'"
   "Jump outward until it's not in a string, () or []."
   (zk-escape-string)
   (zk-escape-parens '(?\( ?\[)))
-
-(defun zk-java-beginning-braces-block ()
-  "Move to the beginning of current braces block"
-  (interactive)
-  (zk-escape-to-braces)
-  (zk-java-move-to-thing 'zk-java-prev-thing))
-
-(defun zk-java-end-braces-block ()
-  "Move to the end of current braces block"
-  (interactive)
-  (zk-escape-to-braces)
-  (zk-java-move-to-thing 'zk-java-next-thing))
 
 (defun zk-java-mark-thing ()
   "Mark the current thing"

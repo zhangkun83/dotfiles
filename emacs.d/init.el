@@ -155,8 +155,6 @@
             (local-set-key (kbd "M-o") 'backward-up-list)
             (local-set-key (kbd "M-n") 'zk-java-next-thing)
             (local-set-key (kbd "M-p") 'zk-java-prev-thing)
-            (local-set-key (kbd "M-a") 'zk-java-beginning-braces-block)
-            (local-set-key (kbd "M-e") 'zk-java-end-braces-block)
             (local-set-key [backtab] (lambda() (interactive) (c-indent-line-or-region -1)))))
 
 (global-set-key (kbd "C-x M-f") 'zk-find-src-file-in-project)
