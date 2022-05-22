@@ -183,8 +183,9 @@ or code block or class/function definitions that end with '}'"
 (defun zk-java-align-to-beginning-of-thing ()
   ;; If moving to a new line won't accidentally enter a thing, do it.
   (if (not (looking-at-p ".*{.*$"))
-      (move-beginning-of-line 2))
-  (zk-goto-next-non-empty-line))
+      (forward-line))
+  (zk-goto-next-non-empty-line)
+  (move-beginning-of-line 1))
 
 (defun zk-java-next-thing ()
   "Move to the next statement, code block or class/function definition"
