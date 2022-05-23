@@ -188,8 +188,7 @@ or code block or class/function definitions that end with '}'"
    (lambda ()
      (condition-case nil
          ;; (forward-sexp) may fail if there is no next sexp
-         (forward-sexp)
-       (error (message "No more next java thing"))))))
+         (forward-sexp)))))
 
 (defun zk-java-prev-thing()
   "Move to the previous statement, code block or class/function definition"
@@ -206,8 +205,13 @@ or code block or class/function definitions that end with '}'"
          (progn
            (backward-sexp)
            (backward-sexp)
-           (forward-sexp))
-       (error (message "No more previous java thing"))))))
+           (forward-sexp))))))
+
+(defun zk-move-to-next-char (char)
+  "Move point to where the char appears next"
+  (if (search-forward (char-to-string char) nil t)
+      ;; search-forward stops after the char. Move the point to at the char
+      (backward-char)))
 
 (defun zk-java-move-to-thing (move-fun)
   "Invoke the move-fun repeatedly until the point arrives at the
@@ -215,22 +219,28 @@ next (or previous) statement, code block or class/function
 definition (a.k.a. a java thing). The move-fun should eventually
 arrive at the end of java thing for this to work."
   ;; Move the point to the end of the current java thing.
-  (let ((continue-loop-p t) (last-point -1))
+  (let ((continue-loop-p t) (last-point (point)))
     (while continue-loop-p
-      (progn
-        (funcall move-fun)
-        (if (or (eq (point) last-point)
-                (zk-java-at-end-of-thing-p))
-            (setq continue-loop-p nil))
-        (setq last-point (point))
-        )))
-  ;; Move the point to the beginning of the next thing.
-  (condition-case nil
-      ;; (forward-sexp) may fail if there is no next sexp.
-      (progn
-        (forward-sexp)
-        (backward-sexp))
-    (error nil)))
+      (condition-case nil
+          (funcall move-fun)
+        (error (message "Cannot move any further before finding a thing")))
+      (if (or (eq (point) last-point)
+              (zk-java-at-end-of-thing-p))
+          (setq continue-loop-p nil))
+      (setq last-point (point)))
+    (if (zk-java-at-end-of-thing-p)
+        ;; Success! Move the point to the beginning of the next thing.
+        (condition-case nil
+            (progn
+              (forward-sexp)
+              (unless (eq (point) last-point)
+                (backward-sexp)))
+          ;; (forward-sexp) could fail because we are already after the
+          ;; last thing in the current braces block. Move to the closing
+          ;; brace so that zk-java-mark-thing can select the whole line.
+          (error (progn
+                   (zk-move-to-next-char ?})
+                   (message "Went past the last thing")))))))
 
 (defun zk-escape-string ()
   "Escape the current string if the point is currently in one"
@@ -264,8 +274,7 @@ try-catch-finally constructs as a single thing."
   (interactive)
   (let ((start-of-line-p
          (zk-point-start-of-line-p)))
-    ;; If selection starts at the start of a line , move to the real
-    ;; start of the line to select the whole line
+    ;; Start with a clean new-line if possible
     (if start-of-line-p
         (move-beginning-of-line nil))
     ;; Start marking only if the mark is not active, allowing for incremental
@@ -281,6 +290,7 @@ try-catch-finally constructs as a single thing."
         ;; its siblings.
         (while (looking-at-p "[[:blank:]]*\\(else\\([[:blank:]]+if[[:blank:]]*(.*)[[:blank:]]*\\)?\\|catch[[:blank:]]*(.*)[[:blank:]]*\\|finally\\)[[:blank:]]*{")
           (zk-java-next-thing))))
+  ;; Ends at a clean new-line
   (if (zk-point-start-of-line-p)
       (move-beginning-of-line nil)))
 
