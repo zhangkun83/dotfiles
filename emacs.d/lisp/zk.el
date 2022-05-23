@@ -252,14 +252,37 @@ arrive at the end of java thing for this to work."
   (zk-escape-string)
   (zk-escape-parens '(?\( ?\[)))
 
+(defun zk-point-start-of-line-p ()
+  "Return non-nil if the characters before the point are only white spaces."
+  (string-match
+   "^[[:blank:]]*$"
+   (buffer-substring-no-properties (line-beginning-position) (point))))
+
 (defun zk-java-mark-thing ()
-  "Mark the current thing"
+  "Mark the java thing following the point. Treat if-else,
+try-catch-finally constructs as a single thing."
   (interactive)
-  (zk-escape-to-braces)
-  (set-mark (point))
-  (zk-java-next-thing)
-  (set-mark-command nil)
-  (zk-java-prev-thing))
+  (let ((start-of-line-p
+         (zk-point-start-of-line-p)))
+    ;; If selection starts at the start of a line , move to the real
+    ;; start of the line to select the whole line
+    (if start-of-line-p
+        (move-beginning-of-line nil))
+    ;; Start marking only if the mark is not active, allowing for incremental
+    ;; growth of the selection.
+    (if (not mark-active)
+        (set-mark (point)))
+    (zk-java-next-thing)
+    (when start-of-line-p
+        ;; Continue if an else/catch/finally follows if we started
+        ;; from line start, which means if we started selection at
+        ;; "if" or "try", include all the else's and catch/finals, but
+        ;; if we started selection at "else" or "catch", don't include
+        ;; its siblings.
+        (while (looking-at-p "[[:blank:]]*\\(else\\([[:blank:]]+if[[:blank:]]*(.*)[[:blank:]]*\\)?\\|catch[[:blank:]]*(.*)[[:blank:]]*\\|finally\\)[[:blank:]]*{")
+          (zk-java-next-thing))))
+  (if (zk-point-start-of-line-p)
+      (move-beginning-of-line nil)))
 
 (defun zk-java-exit-bracesblock()
   "Exit the current braces block and move point to the beginning"
