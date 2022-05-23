@@ -180,13 +180,6 @@ or code block or class/function definitions that end with '}'"
     )
   )
 
-(defun zk-java-align-to-beginning-of-thing ()
-  ;; Forward lines only if we won't enter a new braces block.
-  (when (not (looking-at-p ".*{.*$"))
-    (forward-line)
-    (zk-goto-next-non-empty-line)
-    (back-to-indentation)))
-
 (defun zk-java-next-thing ()
   "Move to the next statement, code block or class/function definition"
   (interactive)
@@ -224,7 +217,8 @@ arrive at the end of java thing for this to work."
         (setq last-point (point))
         )))
   ;; Move the point to the beginning of the next thing.
-  (zk-java-align-to-beginning-of-thing))
+  (forward-sexp)
+  (backward-sexp))
 
 (defun zk-escape-string ()
   "Escape the current string if the point is currently in one"
