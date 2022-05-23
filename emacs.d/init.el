@@ -152,7 +152,7 @@
             (local-set-key (kbd "M-;") 'recenter-top-bottom)
             (local-set-key (kbd "M-h") 'zk-java-mark-thing)
             (local-set-key (kbd "M-i") 'zk-java-enter-braces-block)
-            (local-set-key (kbd "M-o") 'backward-up-list)
+            (local-set-key (kbd "M-o") 'zk-java-exit-bracesblock)
             (local-set-key (kbd "M-n") 'zk-java-next-thing)
             (local-set-key (kbd "M-p") 'zk-java-prev-thing)
             (local-set-key [backtab] (lambda() (interactive) (c-indent-line-or-region -1)))))

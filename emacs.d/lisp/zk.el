@@ -184,7 +184,12 @@ or code block or class/function definitions that end with '}'"
   "Move to the next statement, code block or class/function definition"
   (interactive)
   (zk-escape-to-braces)
-  (zk-java-move-to-thing  'forward-sexp))
+  (zk-java-move-to-thing
+   (lambda ()
+     (condition-case nil
+         ;; (forward-sexp) may fail if there is no next sexp
+         (forward-sexp)
+       (error (message "No more next java thing"))))))
 
 (defun zk-java-prev-thing()
   "Move to the previous statement, code block or class/function definition"
@@ -196,10 +201,13 @@ or code block or class/function definitions that end with '}'"
      ;; stop at the same locations that zk-java-next-thing would
      ;; stop at, which allows us to use the same method to identify
      ;; the end of thing.
-     (backward-sexp)
-     (backward-sexp)
-     (forward-sexp)
-     )))
+     (condition-case nil
+         ;; (backward-sexp) may fail if there is no prev sexp
+         (progn
+           (backward-sexp)
+           (backward-sexp)
+           (forward-sexp))
+       (error (message "No more previous java thing"))))))
 
 (defun zk-java-move-to-thing (move-fun)
   "Invoke the move-fun repeatedly until the point arrives at the
@@ -217,8 +225,12 @@ arrive at the end of java thing for this to work."
         (setq last-point (point))
         )))
   ;; Move the point to the beginning of the next thing.
-  (forward-sexp)
-  (backward-sexp))
+  (condition-case nil
+      ;; (forward-sexp) may fail if there is no next sexp.
+      (progn
+        (forward-sexp)
+        (backward-sexp))
+    (error nil)))
 
 (defun zk-escape-string ()
   "Escape the current string if the point is currently in one"
@@ -247,6 +259,16 @@ arrive at the end of java thing for this to work."
   (set-mark (point))
   (zk-java-next-thing)
   (set-mark-command nil)
+  (zk-java-prev-thing))
+
+(defun zk-java-exit-bracesblock()
+  "Exit the current braces block and move point to the beginning"
+  (interactive)
+  (backward-up-list)
+  (while (not (char-equal ?{ (following-char)))
+    (backward-up-list))
+  ;; Move the point to the beginning of a java thing
+  (zk-java-next-thing)
   (zk-java-prev-thing))
 
 (defun zk-java-enter-braces-block ()
