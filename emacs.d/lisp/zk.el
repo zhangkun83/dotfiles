@@ -181,11 +181,11 @@ or code block or class/function definitions that end with '}'"
   )
 
 (defun zk-java-align-to-beginning-of-thing ()
-  ;; If moving to a new line won't accidentally enter a thing, do it.
-  (if (not (looking-at-p ".*{.*$"))
-      (forward-line))
-  (zk-goto-next-non-empty-line)
-  (move-beginning-of-line 1))
+  ;; Forward lines only if we won't enter a new braces block.
+  (when (not (looking-at-p ".*{.*$"))
+    (forward-line)
+    (zk-goto-next-non-empty-line)
+    (back-to-indentation)))
 
 (defun zk-java-next-thing ()
   "Move to the next statement, code block or class/function definition"
@@ -213,6 +213,7 @@ or code block or class/function definitions that end with '}'"
 next (or previous) statement, code block or class/function
 definition (a.k.a. a java thing). The move-fun should eventually
 arrive at the end of java thing for this to work."
+  ;; Move the point to the end of the current java thing.
   (let ((continue-loop-p t) (last-point -1))
     (while continue-loop-p
       (progn
@@ -222,6 +223,7 @@ arrive at the end of java thing for this to work."
             (setq continue-loop-p nil))
         (setq last-point (point))
         )))
+  ;; Move the point to the beginning of the next thing.
   (zk-java-align-to-beginning-of-thing))
 
 (defun zk-escape-string ()
