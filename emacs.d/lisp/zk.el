@@ -278,7 +278,13 @@ beginning of the comment block."
     ;; single-line comments ("//"), or a combination of multi-line
     ;; comments ("/* */") and single-line comments.  We keep moving up
     ;; until we moved over all adjacent comments.
-    (while (forward-comment -1)
+    (while (and
+             (forward-comment -1)
+             ;; A comment block only consists of comments that occupy
+             ;; whole lines, so each move should land the point at the
+             ;; start of line. Otherwise, it's a comment that follows
+             ;; some code in the same line, and it should not count.
+             (zk-point-start-of-line-p))
       ;; When there is no more comment to move over, forward-comment
       ;; returns nil, but may still move the point over some blank
       ;; characters. We don't want the point to move at all in that
