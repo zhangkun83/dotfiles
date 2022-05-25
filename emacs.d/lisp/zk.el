@@ -268,19 +268,39 @@ arrive at the end of java thing for this to work."
    "^[[:blank:]]*$"
    (buffer-substring-no-properties (line-beginning-position) (point))))
 
+(defun zk-java-move-up-over-comment-block ()
+  "If point is just after a comment block, move it up to the
+beginning of the comment block."
+  (interactive)
+  (let ((final-point (point)))
+    ;; forward-comment goes one comment at a time. A comment block may
+    ;; consist of multiple adjacent comments, e.g., multiple
+    ;; single-line comments ("//"), or a combination of multi-line
+    ;; comments ("/* */") and single-line comments.  We keep moving up
+    ;; until we moved over all adjacent comments.
+    (while (forward-comment -1)
+      ;; When there is no more comment to move over, forward-comment
+      ;; returns nil, but may still move the point over some blank
+      ;; characters. We don't want the point to move at all in that
+      ;; case.
+      (setq final-point (point)))
+    (goto-char final-point)))
+
 (defun zk-java-mark-thing ()
   "Mark the java thing following the point. Treat if-else,
 try-catch-finally constructs as a single thing."
   (interactive)
   (let ((start-of-line-p
          (zk-point-start-of-line-p)))
-    ;; Start with a clean new-line if possible
-    (if start-of-line-p
-        (move-beginning-of-line nil))
-    ;; Start marking only if the mark is not active, allowing for incremental
-    ;; growth of the selection.
-    (if (not mark-active)
-        (set-mark (point)))
+    ;; Start marking only if the mark is not active, allowing for
+    ;; incremental growth of the selection.
+    (unless mark-active
+      ;; Include leading comment block
+      (zk-java-move-up-over-comment-block)
+      ;; Start with a clean new-line if possible
+      (if start-of-line-p
+          (move-beginning-of-line nil))
+      (set-mark (point)))
     (zk-java-next-thing)
     (when start-of-line-p
         ;; Continue if an else/catch/finally follows if we started
@@ -290,6 +310,8 @@ try-catch-finally constructs as a single thing."
         ;; its siblings.
         (while (looking-at-p "[[:blank:]]*\\(else\\([[:blank:]]+if[[:blank:]]*(.*)[[:blank:]]*\\)?\\|catch[[:blank:]]*(.*)[[:blank:]]*\\|finally\\)[[:blank:]]*{")
           (zk-java-next-thing))))
+  ;; Exclude trailing comment block
+  (zk-java-move-up-over-comment-block)
   ;; Ends at a clean new-line
   (if (zk-point-start-of-line-p)
       (move-beginning-of-line nil)))
