@@ -557,6 +557,17 @@ try-catch-finally constructs as a single thing."
                    (concat "cd " zk-project-root "; g4 whatsout"))))))
     (find-file (zk-project-restore-absolute-path f)))
   (global-set-key (kbd "C-x C-M-f") 'zk-find-g4-opened-file)
+
+  (defun zk-get-codesearch-url()
+    "Open the current file in codesearch and focus on the current line."
+    (interactive)
+    (let ((url (concat "http://cs/piper///depot/google3/"
+                       (zk-project-get-relative-path (buffer-file-name))
+                       ";l="
+                       (number-to-string (line-number-at-pos)))))
+      (message url)))
+
+  (global-set-key (kbd "C-x C-M-s") 'zk-get-codesearch-url)
 )
 
 (provide 'zk)
