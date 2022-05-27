@@ -34,6 +34,7 @@ hunk_start_line_number = None
 hunk_buffered_common_lines = []
 for line in sys.stdin:
     filename_m = None
+    write_line = True
     if not format:
         for f,p in FILENAME_LINE_PATTERNS.items():
             filename_m = re.match(p, line)
@@ -60,6 +61,7 @@ for line in sys.stdin:
             common_line_m = re.match(COMMON_LINE_PATTERNS[format], line)
             if common_line_m:
                 hunk_buffered_common_lines.append(line)
+                write_line = False
             else:
                 # ZK Diff Navigation annotation
                 write('=' * 80 + '\n')
@@ -73,7 +75,8 @@ for line in sys.stdin:
                 # Subsequent lines of this hunk will not be buffered
                 hunk_start_line_number = None
                 hunk_buffered_common_lines = []
-    write(line)
+    if write_line:
+        write(line)
 
 assert not hunk_start_line_number
 assert not hunk_buffered_common_lines
