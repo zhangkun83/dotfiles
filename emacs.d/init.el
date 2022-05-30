@@ -10,10 +10,7 @@
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 
 ;; Set default browser to chrome
-(setq browse-url-browser-function 'browse-url-generic
-      browse-url-generic-program
-      (cond ((eq system-type 'cygwin) "/cygdrive/c/Program Files/Google/Chrome/Application/chrome.exe")
-            (t "google-chrome")))
+(setq browse-url-browser-function 'zk-browse-url)
 
 ;;;; etags-select (better ctags search)
 
@@ -192,6 +189,7 @@
 (global-set-key (kbd "C-'") 'switch-to-buffer)
 (global-set-key (kbd "C-c p") 'zk-copy-buffer-file-path)
 (global-set-key (kbd "C-c f") 'zk-open-file-path-from-region)
+(global-set-key (kbd "C-c b") 'browse-url)
 (define-key minibuffer-local-map (kbd "C-c p") 'zk-minibuffer-insert-current-file-path)
 (define-key minibuffer-local-map (kbd "C-c n") 'zk-minibuffer-insert-current-file-name)
 (global-set-key (kbd "C-x g h") 'global-hl-line-mode)

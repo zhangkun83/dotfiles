@@ -545,8 +545,12 @@ try-catch-finally constructs as a single thing."
 (global-set-key (kbd "C-s") 'zk-isearch-forward-to-beginning)
 (define-key isearch-mode-map (kbd "C-s") 'zk-isearch-repeat-forward-to-beginning)
 
+(defun zk-browse-url (url &optional _new-window)
+  ;; new-window ignored
+  (shell-command (concat "desktop-helper-client.py open-url " url)))
+
 (when (string-prefix-p "/google/src/cloud" command-line-default-directory)
-  (defun zk-find-g4-opened-file(f)
+  (defun zk-google3-find-g4-opened-file(f)
     "Find an opened file in the g4 client"
     (interactive
      (list (ido-completing-read
@@ -556,18 +560,17 @@ try-catch-finally constructs as a single thing."
                    "bash" "-c"
                    (concat "cd " zk-project-root "; g4 whatsout"))))))
     (find-file (zk-project-restore-absolute-path f)))
-  (global-set-key (kbd "C-x C-M-f") 'zk-find-g4-opened-file)
+  (global-set-key (kbd "C-x C-M-f") 'zk-google3-find-g4-opened-file)
 
-  (defun zk-get-codesearch-url()
+  (defun zk-google3-open-in-codesearch()
     "Open the current file in codesearch and focus on the current line."
     (interactive)
-    (let ((url (concat "http://cs/piper///depot/google3/"
-                       (zk-project-get-relative-path (buffer-file-name))
-                       ";l="
-                       (number-to-string (line-number-at-pos)))))
-      (message url)))
+    (browse-url (concat "http://cs/piper///depot/google3/"
+            (zk-project-get-relative-path (buffer-file-name))
+            ";l="
+            (number-to-string (line-number-at-pos)))))
 
-  (global-set-key (kbd "C-x C-M-s") 'zk-get-codesearch-url)
+  (global-set-key (kbd "C-x C-M-s") 'zk-google3-open-in-codesearch)
 )
 
 (provide 'zk)
