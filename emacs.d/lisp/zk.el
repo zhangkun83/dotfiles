@@ -547,7 +547,7 @@ try-catch-finally constructs as a single thing."
 
 (defun zk-browse-url (url &optional _new-window)
   ;; new-window ignored
-  (shell-command (concat "desktop-helper-client.py open-url " url)))
+  (shell-command (concat "desktop-helper-client.py open-url '" url "'")))
 
 (when (string-prefix-p "/google/src/cloud" command-line-default-directory)
   (defun zk-google3-find-g4-opened-file(f)
