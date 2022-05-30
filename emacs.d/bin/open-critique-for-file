@@ -1,0 +1,11 @@
+#!/bin/bash
+# FILE is the path relative to ZK_PROJECT_ROOT
+FILE="$1"
+cd $ZK_PROJECT_ROOT
+CL_NUMBER=$(get-cl-for-opened-file.py "$FILE")
+if [[ -z "$CL_NUMBER" ]]; then
+    echo "$FILE is not opened in any CL"
+    exit 1
+else
+    desktop-helper-client.py open-url "https://critique.corp.google.com/cl/$CL_NUMBER/depot/google3/$FILE"
+fi

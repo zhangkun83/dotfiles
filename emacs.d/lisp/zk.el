@@ -583,8 +583,16 @@ try-catch-finally constructs as a single thing."
                 (search-forward "sponge2")
                 (zk-browse-url (thing-at-point 'url)))))
         (message "*compilation* buffer not found"))))
-
   (global-set-key (kbd "C-x C-M-p") 'zk-google3-open-build-sponge-link)
+
+  (defun zk-google3-open-critique()
+    "Open the critique page of the current file."
+    (interactive)
+    (let ((file-name (buffer-file-name)))
+      (unless file-name
+        (user-error "Current buffer doesn't visit a file"))
+      (shell-command (concat "open-critique-for-file '" (zk-project-get-relative-path file-name) "'"))))
+  (global-set-key (kbd "C-x C-M-c") 'zk-google3-open-critique)
 )
 
 (provide 'zk)
