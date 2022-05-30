@@ -569,8 +569,22 @@ try-catch-finally constructs as a single thing."
             (zk-project-get-relative-path (buffer-file-name))
             ";l="
             (number-to-string (line-number-at-pos)))))
-
   (global-set-key (kbd "C-x C-M-s") 'zk-google3-open-in-codesearch)
+
+  (defun zk-google3-open-build-sponge-link()
+    "Open the sponge link in the compilation buffer."
+    (interactive)
+    (let ((buffer (get-buffer "*compilation*")))
+      (if buffer
+          (with-current-buffer (get-buffer "*compilation*")
+            (save-excursion
+              (goto-char (point-min))
+              (when (search-forward "Streaming build results to: http://sponge2")
+                (search-forward "sponge2")
+                (zk-browse-url (thing-at-point 'url)))))
+        (message "*compilation* buffer not found"))))
+
+  (global-set-key (kbd "C-x C-M-p") 'zk-google3-open-build-sponge-link)
 )
 
 (provide 'zk)
