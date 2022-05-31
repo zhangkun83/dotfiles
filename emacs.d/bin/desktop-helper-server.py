@@ -9,43 +9,66 @@
 # prefixed with a 4-byte header that represent the string length.
 
 import socket
-import struct
 import os
+import net_messaging
+from subprocess import Popen, PIPE, STDOUT, TimeoutExpired
 
 HOST = "localhost"
 PORT = 5032
-SIZE_FORMAT = "!i"
 
 BROWSER_PATHS = [
     "/cygdrive/c/Program Files/Google/Chrome/Application/chrome.exe",
     "/usr/bin/google-chrome",
 ]
 
-def recv_all(socket, size):
-    buf = b''
-    while len(buf) < size:
-        buf += socket.recv(size - len(buf))
-    return buf
-
-def read_msg(socket):
-    buffer = recv_all(socket, struct.calcsize(SIZE_FORMAT))
-    size = struct.unpack(SIZE_FORMAT, buffer)[0]
-    buffer = recv_all(socket, size)
-    return buffer.decode()
-
 def handle(command, data):
     if command == "open-url":
-        handle_open_url(data)
+        return handle_open_url(data)
+    if command == "store-to-clipboard":
+        return handle_store_to_clipboard(str.encode(data))
+    if command == "retrieve-from-clipboard":
+        return handle_retrieve_from_clipboard()
     else:
-        print("Unsupported command: " + command)
+        return ("ERROR", "Unsupported command: " + command)
 
 def handle_open_url(url):
     for browser_path in BROWSER_PATHS:
         if os.path.exists(browser_path):
             print(f"Opening {url} with {browser_path}")
             os.spawnl(os.P_NOWAIT, browser_path, browser_path, url)
-            return
-    print("Cannot find a usable browser to open the URL")
+            return ("OK", "URL sent to " + browser_path)
+    return ("ERROR", "Cannot find a usable browser to open the URL")
+
+def handle_store_to_clipboard(data):
+    if os.path.exists("/usr/bin/xclip"):
+        print("Using xclip")
+        p = Popen(['xclip', '-i', '-selection', 'clip-board'], stdout=None, stdin=PIPE, stderr=None)
+        p.communicate(input=data)
+        p.stdin.close()
+        try:
+            p.wait()
+        except TimeoutExpired:
+            p.kill()
+            print("xclip timed out")
+        if p.returncode == 0:
+            return ("OK", "xclip suceeded")
+        else:
+            return ("ERROR", f"xclip failed: {p.returncode}")
+
+def handle_retrieve_from_clipboard():
+    if os.path.exists("/usr/bin/xclip"):
+        print("Using xclip")
+        p = Popen(['xclip', '-o', '-selection', 'clip-board'], stdout=PIPE, stdin=None, stderr=None)
+        outs, errs = p.communicate(timeout=15)
+        try:
+            p.wait()
+        except TimeoutExpired:
+            p.kill()
+            print("xclip timed out")
+        if p.returncode == 0:
+            return ("OK", outs.decode('utf-8'))
+        else:
+            return ("ERROR", f"xclip failed: {p.returncode}")
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
     server_socket.bind((HOST, PORT))
@@ -57,9 +80,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         socket, addr = server_socket.accept()
         print("New connection")
         with socket:
-            command = read_msg(socket)
+            command = net_messaging.read_msg(socket)
             print("[C]" + command)
-            data = read_msg(socket)
+            data = net_messaging.read_msg(socket)
             print("[D]" + data)
-            handle(command, data)
-        print("Connection closed")
+            status, data = handle(command, data)
+            net_messaging.write_msg(socket, status)
+            net_messaging.write_msg(socket, data)
+        print("Connection closed\n")
