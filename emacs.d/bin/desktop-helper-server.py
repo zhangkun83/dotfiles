@@ -18,6 +18,7 @@ SIZE_FORMAT = "!i"
 
 BROWSER_PATHS = [
     "/cygdrive/c/Program Files/Google/Chrome/Application/chrome.exe",
+    "/usr/bin/google-chrome",
 ]
 
 def recv_all(socket, size):
