@@ -49,6 +49,8 @@ def handle_open_url(url):
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
     server_socket.bind((HOST, PORT))
     print(f"desktop-helper-server started on port {PORT}")
+    print("Local clients will work. To make remote clients work, use")
+    print(f"'ssh -L{PORT}:localhost:{PORT}' to create a forwarding tunnel")
     server_socket.listen()
     while True:
         socket, addr = server_socket.accept()
