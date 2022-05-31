@@ -25,7 +25,7 @@ def handle(command, data):
     if command == "open-url":
         return handle_open_url(data)
     if command == "store-to-clipboard":
-        return handle_store_to_clipboard(str.encode(data))
+        return handle_store_to_clipboard(data)
     if command == "retrieve-from-clipboard":
         return handle_retrieve_from_clipboard()
     else:
@@ -39,11 +39,14 @@ def handle_open_url(url):
             return ("OK", "URL sent to " + browser_path)
     return ("ERROR", "Cannot find a usable browser to open the URL")
 
+# Fallback clipboard if none of the real mechanisms are available
+clipboard = ''
+
 def handle_store_to_clipboard(data):
     if os.path.exists("/usr/bin/xclip"):
         print("Using xclip")
         p = Popen(['xclip', '-i', '-selection', 'clip-board'], stdout=None, stdin=PIPE, stderr=None)
-        p.communicate(input=data)
+        p.communicate(input=data.encode('utf-8'))
         p.stdin.close()
         try:
             p.wait()
@@ -54,6 +57,9 @@ def handle_store_to_clipboard(data):
             return ("OK", "xclip suceeded")
         else:
             return ("ERROR", f"xclip failed: {p.returncode}")
+    else:
+        clipboard = data
+        return ("OK", "stored to fallback clipboard")
 
 def handle_retrieve_from_clipboard():
     if os.path.exists("/usr/bin/xclip"):
@@ -68,7 +74,9 @@ def handle_retrieve_from_clipboard():
         if p.returncode == 0:
             return ("OK", outs.decode('utf-8'))
         else:
-            return ("ERROR", f"xclip failed: {p.returncode}")
+            return ("ERROR", f"xclip failed: {p.returncode}: {errs.decode()}")
+    else:
+        return ("OK", clipboard)
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
     server_socket.bind((HOST, PORT))

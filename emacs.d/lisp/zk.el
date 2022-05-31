@@ -497,19 +497,43 @@ try-catch-finally constructs as a single thing."
                                  (concat "cd " zk-project-root " && "
                                          diff-command " | zk-transform-patch.py"))))
 
-(defconst zk-clip-path (expand-file-name "~/.emacs.d/.zkclip"))
-(defun zk-clip-save ()
-  "Save the current region (selection) to zkclip."
+(defun zk-clipboard-kill ()
+  "Kill the current region (selection) and send it to clipboard using desktop-helper."
   (interactive)
-  (write-region (region-beginning) (region-end) zk-clip-path)
-  (deactivate-mark)
-  (message "Selection saved to zkclip"))
+  (zk-clipboard-save)
+  (kill-region (region-beginning) (region-end)))
 
-(defun zk-clip-yank ()
-  "Yank the content of zkclip to the current point."
+(defun zk-clipboard-save ()
+  "Save the current region (selection) to clipboard using desktop-helper."
   (interactive)
-  (insert-file-contents zk-clip-path)
-  (message "Yanked from zkclip"))
+  (if (= (region-beginning) (region-end))
+      (user-error "No region selected"))
+  (let ((buffer (current-buffer)))
+    (with-temp-buffer
+      ;; Use a temp-buffer for client output
+      (let ((temp-buffer (current-buffer)))
+        (with-current-buffer buffer
+          (call-process-region
+           (region-beginning) (region-end)
+           "desktop-helper-client.py"
+           nil temp-buffer nil
+           "store-to-clipboard")))
+      (message (buffer-string)))
+  (deactivate-mark)))
+
+(defun zk-clipboard-yank ()
+  "Retrieve the clipboard from desktop-helper and yank to the current point."
+  (interactive)
+  ;; Use a temp file for client output that is not the content
+  (let ((temp-file (make-temp-file "zk-clipboard-yank")))
+    (call-process
+     "desktop-helper-client.py"
+     nil (list t temp-file) nil
+     "retrieve-from-clipboard")
+    (with-temp-buffer
+      (insert-file-contents temp-file)
+      (message (buffer-string)))
+    (delete-file temp-file)))
 
 (defun zk-insert-mean()
   "Take the leading number from the current line and the previous line,

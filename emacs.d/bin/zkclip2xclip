@@ -1,2 +1,0 @@
-#!/bin/bash
-cat ~/.emacs.d/.zkclip | xclip -i -selection clip-board
