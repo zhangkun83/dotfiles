@@ -362,24 +362,6 @@ try-catch-finally constructs as a single thing."
                 (goto-char original-point))
             (setq last-point (point))))))))
 
-
-;; The default isearch stops the point at the end of search-term, which is not
-;; useful at all.  Here we change it to stop at the beginning of search-term,
-;; making isearch a powerful tool to move around.
-(defun zk-isearch-forward-to-beginning ()
-  "Do a forward search and jump to the beginning of the search-term."
-  (interactive)
-  (isearch-forward)
-  (if isearch-other-end
-      (goto-char isearch-other-end)))
-
-(defun zk-isearch-repeat-forward-to-beginning ()
-  "Do a forward repeat search and jump to the beginning of the search-term."
-  (interactive)
-  (isearch-repeat 'forward)
-  (if isearch-other-end
-    (goto-char isearch-other-end)))
-
 (defun zk-copy-buffer-file-path ()
   "Copy the full path of a buffer's file to kill ring"
   (interactive)
@@ -541,9 +523,6 @@ try-catch-finally constructs as a single thing."
     (let ((b (thing-at-point 'number t)))
       (open-line 1)
       (insert (number-to-string (/ (+ a b) 2))))))
-
-(global-set-key (kbd "C-s") 'zk-isearch-forward-to-beginning)
-(define-key isearch-mode-map (kbd "C-s") 'zk-isearch-repeat-forward-to-beginning)
 
 (defun zk-browse-url (url &optional _new-window)
   ;; new-window ignored
