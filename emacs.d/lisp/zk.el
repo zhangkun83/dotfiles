@@ -560,7 +560,7 @@ try-catch-finally constructs as a single thing."
                    "bash" "-c"
                    (concat "cd " zk-project-root "; g4 whatsout"))))))
     (find-file (zk-project-restore-absolute-path f)))
-  (global-set-key (kbd "C-x C-M-f") 'zk-google3-find-g4-opened-file)
+  (global-set-key (kbd "C-x g f") 'zk-google3-find-g4-opened-file)
 
   (defun zk-google3-open-in-codesearch()
     "Open the current file in codesearch and focus on the current line."
@@ -569,7 +569,7 @@ try-catch-finally constructs as a single thing."
             (zk-project-get-relative-path (buffer-file-name))
             ";l="
             (number-to-string (line-number-at-pos)))))
-  (global-set-key (kbd "C-x C-M-s") 'zk-google3-open-in-codesearch)
+  (global-set-key (kbd "C-x g s") 'zk-google3-open-in-codesearch)
 
   (defun zk-google3-open-build-sponge-link()
     "Open the sponge link in the compilation buffer."
@@ -582,7 +582,7 @@ try-catch-finally constructs as a single thing."
               (when (search-forward "Streaming build results to: http://sponge2")
                 (zk-browse-url (thing-at-point 'url)))))
         (message "*compilation* buffer not found"))))
-  (global-set-key (kbd "C-x C-M-p") 'zk-google3-open-build-sponge-link)
+  (global-set-key (kbd "C-x g p") 'zk-google3-open-build-sponge-link)
 
   (defun zk-google3-open-critique()
     "Open the critique page of the current file."
@@ -591,7 +591,7 @@ try-catch-finally constructs as a single thing."
       (unless file-name
         (user-error "Current buffer doesn't visit a file"))
       (shell-command (concat "open-critique-for-file '" (zk-project-get-relative-path file-name) "'"))))
-  (global-set-key (kbd "C-x C-M-c") 'zk-google3-open-critique)
+  (global-set-key (kbd "C-x g c") 'zk-google3-open-critique)
 )
 
 (provide 'zk)
