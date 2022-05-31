@@ -580,7 +580,6 @@ try-catch-finally constructs as a single thing."
             (save-excursion
               (goto-char (point-min))
               (when (search-forward "Streaming build results to: http://sponge2")
-                (search-forward "sponge2")
                 (zk-browse-url (thing-at-point 'url)))))
         (message "*compilation* buffer not found"))))
   (global-set-key (kbd "C-x C-M-p") 'zk-google3-open-build-sponge-link)
