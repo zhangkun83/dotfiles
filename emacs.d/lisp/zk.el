@@ -535,6 +535,12 @@ try-catch-finally constructs as a single thing."
       (message (zk-trim-string (buffer-string))))
     (delete-file temp-file)))
 
+(defun zk-clipboard-get-string ()
+  "Retrieve the clipboard and return as a string."
+  (with-temp-buffer
+    (zk-clipboard-yank)
+    (buffer-string)))
+
 (defun zk-insert-mean()
   "Take the leading number from the current line and the previous line,
   and insert the mean value of the two as a new line in between.
@@ -598,7 +604,8 @@ try-catch-finally constructs as a single thing."
 
   (defun zk-google3-open-file-from-codesearch-link (link)
     "Open a file indicated by the given codesearch link"
-    (interactive "sCodesearch link: ")
+    (interactive (list
+                  (read-string "CodeSearch link: " (zk-clipboard-get-string))))
     (string-match "https://[a-z.]*/piper///depot/google3/\\([^;?]+\\)\\(;l=[0-9]+\\)?" link)
     (let* ((path (match-string 1 link))
            (line-substring (match-string 2 link))
