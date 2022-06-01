@@ -617,6 +617,20 @@ try-catch-finally constructs as a single thing."
             (if line (goto-line line)))
         (user-error "Cannot parse the link"))))
   (global-set-key (kbd "C-x g M-f") 'zk-google3-open-file-from-codesearch-link)
+
+  (defun zk-google3-g4-edit ()
+    "g4-edit the given path."
+    (interactive)
+    (let ((output nil)
+          (return-status nil)
+          (buffer (current-buffer)))
+      (with-temp-buffer
+        (setq return-status (call-process "g4" nil t nil "edit" (file-name-nondirectory (buffer-file-name buffer))))
+        (setq output (zk-trim-string (buffer-string))))
+      (if (= 0 return-status)
+          (revert-buffer))
+        (message output)))
+  (global-set-key (kbd "C-x g e") 'zk-google3-g4-edit)
 )
 
 (provide 'zk)
