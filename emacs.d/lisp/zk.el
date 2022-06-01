@@ -595,6 +595,21 @@ try-catch-finally constructs as a single thing."
         (user-error "Current buffer doesn't visit a file"))
       (shell-command (concat "open-critique-for-file '" (zk-project-get-relative-path file-name) "'"))))
   (global-set-key (kbd "C-x g c") 'zk-google3-open-critique)
+
+  (defun zk-google3-open-file-from-codesearch-link (link)
+    "Open a file indicated by the given codesearch link"
+    (interactive "sCodesearch link: ")
+    (string-match "https://[a-z.]*/piper///depot/google3/\\([^;?]+\\)\\(;l=[0-9]+\\)?" link)
+    (let* ((path (match-string 1 link))
+           (line-substring (match-string 2 link))
+           (line (if line-substring
+                     (string-to-number (substring line-substring 3)))))
+      (if path
+          (progn
+            (switch-to-buffer (find-file-noselect (zk-project-restore-absolute-path path)))
+            (if line (goto-line line)))
+        (user-error "Cannot parse the link"))))
+  (global-set-key (kbd "C-x g M-f") 'zk-google3-open-file-from-codesearch-link)
 )
 
 (provide 'zk)
