@@ -817,15 +817,17 @@
         <action name="Move"/>
       </mousebind>
       <mousebind button="Left" action="DoubleClick">
-        <action name="ToggleMaximize"/>
+        <action name="Execute">
+          <command>~/.config/openbox/scripts/cascade.py %CASCADE_STEP% %CASCADE_STEP%</command>
+        </action>
       </mousebind>
       <mousebind button="Up" action="Click">
-        <action name="SendToDesktop">
+        <action name="GoToDesktop">
           <to>previous</to>
         </action>
       </mousebind>
       <mousebind button="Down" action="Click">
-        <action name="SendToDesktop">
+        <action name="GoToDesktop">
           <to>next</to>
         </action>
       </mousebind>
@@ -845,7 +847,7 @@
         <action name="Focus"/>
         <action name="Raise"/>
         <action name="ShowMenu">
-          <menu>client-menu</menu>
+          <menu>root-menu</menu>
         </action>
       </mousebind>
     </context>
