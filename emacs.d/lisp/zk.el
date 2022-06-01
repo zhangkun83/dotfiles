@@ -518,7 +518,7 @@ try-catch-finally constructs as a single thing."
            "desktop-helper-client.py"
            nil temp-buffer nil
            "store-to-clipboard")))
-      (message (buffer-string)))
+      (message (zk-trim-string (buffer-string))))
   (deactivate-mark)))
 
 (defun zk-clipboard-yank ()
@@ -532,7 +532,7 @@ try-catch-finally constructs as a single thing."
      "retrieve-from-clipboard")
     (with-temp-buffer
       (insert-file-contents temp-file)
-      (message (buffer-string)))
+      (message (zk-trim-string (buffer-string))))
     (delete-file temp-file)))
 
 (defun zk-insert-mean()
