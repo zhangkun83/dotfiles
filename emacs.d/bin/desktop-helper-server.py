@@ -12,6 +12,7 @@ import socket
 import os
 import net_messaging
 import sys
+import time
 from subprocess import Popen, PIPE, STDOUT, TimeoutExpired
 
 HOST = "localhost"
@@ -80,11 +81,16 @@ def handle_retrieve_from_clipboard():
     else:
         return ("OK", this.clipboard)
 
+if len(sys.argv) > 1 and sys.argv[1] == "stub":
+    print("Entering stub mode. This should only be used inside ssh.")
+    while True:
+        time.sleep(1000)
+
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
     server_socket.bind((HOST, PORT))
     print(f"desktop-helper-server started on port {PORT}")
     print("Local clients will work. To make remote clients work, use")
-    print(f"'ssh -L{PORT}:localhost:{PORT}' to create a forwarding tunnel")
+    print(f"`ssh <host> -L{PORT}:localhost:{PORT} desktop-helper-server.py stub` to create a forwarding tunnel")
     server_socket.listen()
     while True:
         socket, addr = server_socket.accept()
