@@ -46,7 +46,7 @@ this = sys.modules[__name__]
 this.clipboard = ''
 
 def handle_store_to_clipboard(data):
-    if os.path.exists("/usr/bin/xclip"):
+    if os.path.exists("/usr/bin/xclip"):  # linux
         print("Using xclip")
         p = Popen(['xclip', '-i', '-selection', 'clip-board'], stdout=None, stdin=PIPE, stderr=None)
         p.communicate(input=data.encode('utf-8'))
@@ -60,6 +60,11 @@ def handle_store_to_clipboard(data):
             return ("OK", "xclip suceeded")
         else:
             return ("ERROR", f"xclip failed: {p.returncode}")
+    elif os.path.exists("/dev/clipboard"):  # cygwin
+        print("Using /dev/clipboard")
+        with open("/dev/clipboard", "w", encoding="utf-8") as f:
+            f.write(data)
+        return ("OK", "wrote to /dev/clipboard")
     else:
         this.clipboard = data
         return ("OK", "stored to fallback clipboard")
@@ -78,6 +83,9 @@ def handle_retrieve_from_clipboard():
             return ("OK", outs.decode('utf-8'))
         else:
             return ("ERROR", f"xclip failed: {p.returncode}: {errs.decode()}")
+    elif os.path.exists("/dev/clipboard"):
+        with open("/dev/clipboard", "r", encoding="utf-8") as f:
+            return ("OK", f.read())
     else:
         return ("OK", this.clipboard)
 

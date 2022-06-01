@@ -30,7 +30,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket:
     status = net_messaging.read_msg(socket)
     data = net_messaging.read_msg(socket)
     if status == "OK" and command == 'retrieve-from-clipboard':
-        sys.stderr.write("OK: (content retreived)\n")
+        sys.stderr.write("OK: (content retrieved)\n")
         sys.stdout.write(data)
     else:
         sys.stderr.write(f"{status}: {data}\n")
