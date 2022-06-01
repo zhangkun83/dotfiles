@@ -11,6 +11,7 @@
 import socket
 import os
 import net_messaging
+import sys
 from subprocess import Popen, PIPE, STDOUT, TimeoutExpired
 
 HOST = "localhost"
@@ -40,7 +41,8 @@ def handle_open_url(url):
     return ("ERROR", "Cannot find a usable browser to open the URL")
 
 # Fallback clipboard if none of the real mechanisms are available
-clipboard = ''
+this = sys.modules[__name__]
+this.clipboard = ''
 
 def handle_store_to_clipboard(data):
     if os.path.exists("/usr/bin/xclip"):
@@ -58,7 +60,7 @@ def handle_store_to_clipboard(data):
         else:
             return ("ERROR", f"xclip failed: {p.returncode}")
     else:
-        clipboard = data
+        this.clipboard = data
         return ("OK", "stored to fallback clipboard")
 
 def handle_retrieve_from_clipboard():
@@ -76,7 +78,7 @@ def handle_retrieve_from_clipboard():
         else:
             return ("ERROR", f"xclip failed: {p.returncode}: {errs.decode()}")
     else:
-        return ("OK", clipboard)
+        return ("OK", this.clipboard)
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
     server_socket.bind((HOST, PORT))
