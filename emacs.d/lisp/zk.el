@@ -556,7 +556,21 @@ try-catch-finally constructs as a single thing."
 
 (defun zk-browse-url (url &optional _new-window)
   ;; new-window ignored
-  (shell-command (concat "desktop-helper-client.py open-url '" url "'")))
+  (shell-command (concat "desktop-helper-client.py open-url "
+                         (prin1-to-string url))))
+
+(defvar zk-shell-command-on-file-at-point--history nil)
+(defun zk-shell-command-on-file-at-point ()
+  "Run a shell command on the file at the point."
+  (interactive)
+  (let ((file-name (thing-at-point 'filename)))
+    (unless file-name
+      (user-error "No filename at point"))
+    (let ((command (read-string (concat "FILE: " file-name "\n CMD: ")
+                                (car zk-shell-command-on-file-at-point--history)
+                                '(zk-shell-command-on-file-at-point--history . 1))))
+      (shell-command (concat command " "
+                             (prin1-to-string (substring-no-properties file-name)))))))
 
 (when (string-prefix-p "/google/src/cloud" command-line-default-directory)
   (defun zk-google3-find-g4-opened-file(f)
@@ -599,7 +613,8 @@ try-catch-finally constructs as a single thing."
     (let ((file-name (buffer-file-name)))
       (unless file-name
         (user-error "Current buffer doesn't visit a file"))
-      (shell-command (concat "open-critique-for-file '" (zk-project-get-relative-path file-name) "'"))))
+      (shell-command (concat "open-critique-for-file "
+                             (prin1-to-string (zk-project-get-relative-path file-name))))))
   (global-set-key (kbd "C-x g c") 'zk-google3-open-critique)
 
   (defun zk-google3-open-file-from-codesearch-link (link)
