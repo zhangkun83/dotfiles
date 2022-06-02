@@ -189,7 +189,6 @@
 (global-set-key (kbd "M-~") 'revert-buffer)
 (global-set-key (kbd "C-'") 'switch-to-buffer)
 (global-set-key (kbd "C-c p") 'zk-copy-buffer-file-path)
-(global-set-key (kbd "C-c f") 'zk-open-file-path-from-region)
 (global-set-key (kbd "C-c b") 'browse-url)
 (define-key minibuffer-local-map (kbd "C-c p") 'zk-minibuffer-insert-current-file-path)
 (define-key minibuffer-local-map (kbd "C-c n") 'zk-minibuffer-insert-current-file-name)
@@ -205,7 +204,7 @@
             "Make dots part of the word so full paths can be expanded by M+/"
             (make-local-variable 'dabbrev-abbrev-char-regexp)
             (setq dabbrev-abbrev-char-regexp "\\sw\\|\\s_\\|\\.")
-            (local-set-key (kbd "C-c e") 'zk-editor-stub-open-file)
+            (local-set-key (kbd "C-c o") 'zk-open-file-path-from-region-or-at-point)
             (local-set-key (kbd "C-c c") 'zk-shell-command-on-file-at-point)
             (local-set-key (kbd "C-c t") 'comint-truncate-buffer)))
 

@@ -1,15 +1,11 @@
 #!/bin/bash
 # To be run in the shell-mode as the default editor
 
-abs_path () {    
-   echo "$(cd $(dirname "$1");pwd)/$(basename "$1")"
-}
-
 echo '######################################################'
-echo 'To open the file in current emacs session, press C-c e'
+echo 'To open the file in current emacs session, press C-c o'
 echo 'Press Enter to continue after finishing editing.'
 echo '######################################################'
 mkdir -p $(dirname "$1")
 touch "$1"
-echo -n '#ZKEDIT#' $(abs_path "$1")
+echo -n $1
 read
