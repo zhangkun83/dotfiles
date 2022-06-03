@@ -572,6 +572,11 @@ file name at point."
                              'zk-youdao-dict--history)))
   (eww-browse-url (concat "https://dict.youdao.com/w/eng/" (url-hexify-string word))) t)
 
+(defun zk-switch-to-other-buffer ()
+  "Switch to the other buffer without asking."
+  (interactive)
+  (switch-to-buffer (other-buffer (current-buffer))))
+
 (when (string-prefix-p "/google/src/cloud" command-line-default-directory)
   (defun zk-google3-find-g4-opened-file(f)
     "Find an opened file in the g4 client"

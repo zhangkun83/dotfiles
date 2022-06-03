@@ -159,7 +159,6 @@
 (require 'zk-java-stacktrace)
 (zk-java-stacktrace-detection-enable)
 (global-set-key (kbd "C-x \\") 'compile)
-(global-set-key (kbd "C-x |") 'compilation-minor-mode)
 
 (setq compile-command "runp ")
 
@@ -181,10 +180,11 @@
   (interactive)
   (other-window -1))
 
-(global-set-key (kbd "M-_") 'zk-prev-window)
-(global-set-key (kbd "M-+") 'other-window)
-(global-set-key (kbd "M-*") 'switch-to-buffer)
-(global-set-key (kbd "M-~") 'revert-buffer)
+(global-set-key (kbd "C-x C-p") 'zk-prev-window)
+(global-set-key (kbd "C-x C-n") 'other-window)
+(global-set-key (kbd "C-x C-b") 'zk-switch-to-other-buffer)
+(global-set-key (kbd "C-x C-l") 'zk-recenter-top-bottom-other-window)
+(global-set-key (kbd "C-x , r") 'revert-buffer)
 (global-set-key (kbd "C-x , f") 'zk-find-src-file-in-project)
 (global-set-key (kbd "C-x , p") 'zk-copy-buffer-file-path)
 (global-set-key (kbd "C-x , b") 'browse-url)
@@ -195,9 +195,9 @@
 (global-set-key (kbd "C-x , C-w") 'zk-clipboard-kill)
 (global-set-key (kbd "C-x , C-y") 'zk-clipboard-yank)
 (define-key minibuffer-local-map (kbd "C-x , C-y") 'zk-clipboard-yank)
-(global-set-key (kbd "C-M-l") 'zk-recenter-top-bottom-other-window)
 (global-set-key (kbd "C-x , d") 'zk-diff-navigate)
 (global-set-key (kbd "C-x , y") 'zk-youdao-dict)
+(global-set-key (kbd "C-x , h") 'global-hl-line-mode)
 
 (add-hook 'shell-mode-hook
           (lambda()
