@@ -627,15 +627,16 @@ file name at point."
     (interactive (list
                   (read-string "CodeSearch or Critique link: " (zk-clipboard-get-string))))
     (cond ((string-prefix-p "https://critique.corp.google.com" link)
-           (string-match "https://[a-z.]*/cl/[0-9]+/depot/google3/\\([^;?]+\\)[^#]*\\(#[0-9]+\\)?" link))
+           (string-match "https://[a-z.]*/cl/[0-9]+/depot/google3/\\([^;?]+\\)\\(.*\\)" link))
           ((string-prefix-p "https://source.corp.google.com" link)
-           (string-match "https://[a-z.]*/piper///depot/google3/\\([^;?]+\\)\\(;l=[0-9]+\\)?" link))
+           (string-match "https://[a-z.]*/piper///depot/google3/\\([^;?]+\\)\\(.*\\)" link))
           (t (user-error "Not a CodeSearch or Critique link")))
     (let* ((path (match-string 1 link))
-           (line-substring (match-string 2 link))
-           (line (when line-substring
-                   (string-match "[^0-9]*\\([0-9]+\\)" line-substring)
-                   (string-to-number (match-string 1 line-substring)))))
+           (params-substring (match-string 2 link))
+           (line-string (cond ((string-match ";l=\\([0-9]+\\)" params-substring) (match-string 1 params-substring))
+                              ((string-match "#\\([0-9]+\\)" params-substring) (match-string 1 params-substring))
+                              (t nil)))
+           (line (if line-string (string-to-number line-string))))
       (if path
           (progn
             (switch-to-buffer (find-file-noselect (zk-project-restore-absolute-path path)))
