@@ -622,21 +622,26 @@ file name at point."
                              (prin1-to-string (zk-project-get-relative-path file-name))))))
   (global-set-key (kbd "C-x g c") 'zk-google3-open-critique)
 
-  (defun zk-google3-open-file-from-codesearch-link (link)
-    "Open a file indicated by the given codesearch link"
+  (defun zk-google3-open-file-from-codesearch-or-critique-link (link)
+    "Open a file indicated by the given codesearch or critique link"
     (interactive (list
-                  (read-string "CodeSearch link: " (zk-clipboard-get-string))))
-    (string-match "https://[a-z.]*/piper///depot/google3/\\([^;?]+\\)\\(;l=[0-9]+\\)?" link)
+                  (read-string "CodeSearch or Critique link: " (zk-clipboard-get-string))))
+    (cond ((string-prefix-p "https://critique.corp.google.com" link)
+           (string-match "https://[a-z.]*/cl/[0-9]+/depot/google3/\\([^;?]+\\)[^#]*\\(#[0-9]+\\)?" link))
+          ((string-prefix-p "https://source.corp.google.com" link)
+           (string-match "https://[a-z.]*/piper///depot/google3/\\([^;?]+\\)\\(;l=[0-9]+\\)?" link))
+          (t (user-error "Not a CodeSearch or Critique link")))
     (let* ((path (match-string 1 link))
            (line-substring (match-string 2 link))
-           (line (if line-substring
-                     (string-to-number (substring line-substring 3)))))
+           (line (when line-substring
+                   (string-match "[^0-9]*\\([0-9]+\\)" line-substring)
+                   (string-to-number (match-string 1 line-substring)))))
       (if path
           (progn
             (switch-to-buffer (find-file-noselect (zk-project-restore-absolute-path path)))
             (if line (goto-line line)))
         (user-error "Cannot parse the link"))))
-  (global-set-key (kbd "C-x g M-f") 'zk-google3-open-file-from-codesearch-link)
+  (global-set-key (kbd "C-x g M-f") 'zk-google3-open-file-from-codesearch-or-critique-link)
 
   (defun zk-google3-g4-edit ()
     "g4-edit the given path."
