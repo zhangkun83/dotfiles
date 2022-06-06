@@ -220,6 +220,10 @@
 ;; Set font
 (set-face-attribute 'default nil
 		    :family "Liberation Mono")
+(set-fontset-font t 'chinese-gbk
+                  (font-spec :family (cond ((eq system-type 'cygwin) "Microsoft YaHei")
+                                           ((eq system-type 'gnu/linux) "Droid Sans Fallback")))
+                  nil t)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
