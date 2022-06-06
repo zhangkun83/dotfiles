@@ -516,12 +516,12 @@ within paragraphs in the saved content."
           (let ((temp-buffer (current-buffer)))
             (with-current-buffer buffer
               (call-process-region
-               (region-beginning) (region-end)
+               begin end
                "desktop-helper-client.py"
                nil temp-buffer nil
                "store-to-clipboard")))
-          (message (zk-trim-string (buffer-string))))
-        (deactivate-mark))))
+          (message (zk-trim-string (buffer-string)))))
+      (deactivate-mark)))
 
 (defun zk-remove-line-breaks-within-paragraphs-region ()
   "Join all lines, except empty lines, within the region.  This
