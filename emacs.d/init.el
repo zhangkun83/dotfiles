@@ -191,12 +191,13 @@
 (define-key minibuffer-local-map (kbd "C-x , p") 'zk-minibuffer-insert-current-file-path)
 (define-key minibuffer-local-map (kbd "C-x , n") 'zk-minibuffer-insert-current-file-name)
 (global-set-key (kbd "C-x , s") 'shell)
-(global-set-key (kbd "C-x , M-w") 'zk-clipboard-save)
-(global-set-key (kbd "C-x , C-w") 'zk-clipboard-kill)
-(global-set-key (kbd "C-x , C-y") 'zk-clipboard-yank)
-(define-key minibuffer-local-map (kbd "C-x , C-y") 'zk-clipboard-yank)
+(global-set-key (kbd "C-x , C-c") 'zk-clipboard-copy)
+(global-set-key (kbd "C-x , C-x") 'zk-clipboard-cut)
+(global-set-key (kbd "C-x , C-v") 'zk-clipboard-paste)
+(define-key minibuffer-local-map (kbd "C-x , C-v") 'zk-clipboard-paste)
 (global-set-key (kbd "C-x , d") 'zk-diff-navigate)
 (global-set-key (kbd "C-x , y") 'zk-youdao-dict)
+(global-set-key (kbd "C-x , C-y") 'zk-clipboard-youdao-dict)
 (global-set-key (kbd "C-x , h") 'global-hl-line-mode)
 
 (add-hook 'shell-mode-hook

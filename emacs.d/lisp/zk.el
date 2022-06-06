@@ -488,40 +488,42 @@ file name at point."
                                  (concat "cd " zk-project-root " && "
                                          diff-command " | zk-transform-patch.py"))))
 
-(defun zk-clipboard-kill (arg)
-  "Kill the current region (selection) and send it to clipboard
+(defun zk-clipboard-cut (arg)
+  "Delete the current region (selection) and send it to clipboard
 using desktop-helper. With prefix argument (C-u), remove line
 breaks within paragraphs in the saved content."
   (interactive "P")
-  (zk-clipboard-save arg)
+  (zk-clipboard-copy arg)
   (delete-region (region-beginning) (region-end)))
 
-(defun zk-clipboard-save (arg)
+(defun zk-clipboard-copy (arg)
   "Save the current region (selection) to clipboard using
 desktop-helper. With prefix argument (C-u), remove line breaks
 within paragraphs in the saved content."
   (interactive "P")
-  (if (= (region-beginning) (region-end))
-      (user-error "No region selected"))
+  (unless mark-active
+    (user-error "Region not active"))
   (let ((buffer (current-buffer))
         (begin (region-beginning))
         (end (region-end)))
-      (if arg (with-temp-buffer
-                (insert-buffer-substring buffer begin end)
-                (mark-whole-buffer)
-                (zk-remove-line-breaks-within-paragraphs-region)
-                (zk-clipboard-save nil))
-        (with-temp-buffer
-          ;; Use a temp-buffer for client output
-          (let ((temp-buffer (current-buffer)))
-            (with-current-buffer buffer
-              (call-process-region
-               begin end
-               "desktop-helper-client.py"
-               nil temp-buffer nil
-               "store-to-clipboard")))
-          (message (zk-trim-string (buffer-string)))))
-      (deactivate-mark)))
+    (if (= begin end)
+        (user-error "No region selected"))
+    (if arg (with-temp-buffer
+              (insert-buffer-substring buffer begin end)
+              (mark-whole-buffer)
+              (zk-remove-line-breaks-within-paragraphs-region)
+              (zk-clipboard-copy nil))
+      (with-temp-buffer
+        ;; Use a temp-buffer for client output
+        (let ((temp-buffer (current-buffer)))
+          (with-current-buffer buffer
+            (call-process-region
+             begin end
+             "desktop-helper-client.py"
+             nil temp-buffer nil
+             "store-to-clipboard")))
+        (message (zk-trim-string (buffer-string)))))
+    (deactivate-mark)))
 
 (defun zk-remove-line-breaks-within-paragraphs-region ()
   "Join all lines, except empty lines, within the region.  This
@@ -538,11 +540,11 @@ text suitable for copying to line-wraping text editors."
               "\\([[:graph:]]\\)[[:blank:]]*\n[[:blank:]]*\\([[:graph:]]\\)" end t)
         (replace-match "\\1 \\2")))))
 
-(defun zk-clipboard-yank ()
-  "Retrieve the clipboard from desktop-helper and yank to the current point."
+(defun zk-clipboard-paste ()
+  "Retrieve the clipboard from desktop-helper and insert to the current point."
   (interactive)
   ;; Use a temp file for client output that is not the content
-  (let ((temp-file (make-temp-file "zk-clipboard-yank")))
+  (let ((temp-file (make-temp-file "zk-clipboard-paste")))
     (call-process
      "desktop-helper-client.py"
      nil (list t temp-file) nil
@@ -555,7 +557,7 @@ text suitable for copying to line-wraping text editors."
 (defun zk-clipboard-get-string ()
   "Retrieve the clipboard and return as a string."
   (with-temp-buffer
-    (zk-clipboard-yank)
+    (zk-clipboard-paste)
     (buffer-string)))
 
 (defun zk-insert-mean()
@@ -597,6 +599,14 @@ text suitable for copying to line-wraping text editors."
                              nil
                              'zk-youdao-dict--history)))
   (eww-browse-url (concat "https://dict.youdao.com/w/eng/" (url-hexify-string word))) t)
+
+(defun zk-clipboard-youdao-dict (word)
+  "Look up the word in Youdao dictionary. The input is prefilled from clipboard."
+  (interactive (list
+                (read-string "Youdao: "
+                             (zk-clipboard-get-string)
+                             'zk-youdao-dict--history)))
+  (zk-youdao-dict word))
 
 (defun zk-switch-to-other-buffer ()
   "Switch to the other buffer without asking."
