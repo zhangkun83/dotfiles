@@ -1,6 +1,7 @@
 #!/bin/bash
-FILE="$HOME/orgwork/work.org"
+DIR="$HOME/orgwork"
+FILE="$DIR/work.org"
 
 # Disable create-lockfiles because it doesn't work well with Google Drive
 emacs "$FILE" \
-      --eval="(setq create-lockfiles nil org-agenda-files '(\"$FILE\") frame-title-format \"orgwork\" )"
+      --eval="(setq create-lockfiles nil org-agenda-files '(\"$DIR\") frame-title-format \"orgwork\" )"
