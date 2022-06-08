@@ -324,7 +324,7 @@
         </finalactions>
       </action>
     </keybind>
-    <keybind key="W-grave">
+    <keybind key="A-grave">
       <action name="PreviousWindow">
         <raise>no</raise>
         <finalactions>
