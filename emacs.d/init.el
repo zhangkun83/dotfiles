@@ -12,6 +12,8 @@
 ;; Set default browser to chrome
 (setq browse-url-browser-function 'zk-browse-url)
 
+(setq echo-keystrokes 0.01)
+
 ;;;; etags-select (better ctags search)
 
 (load "etags-select.el")
