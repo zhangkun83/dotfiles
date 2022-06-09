@@ -369,15 +369,21 @@ try-catch-finally constructs as a single thing."
     (kill-new file-name)
     (message "Copied \"%s\"" file-name)))
 
-(defun zk-org-goto-end-of-latest-note-file ()
-  "Go to the end of latest note org file under the same directory."
+(defun zk-orgwork-goto-latest-note-file ()
+  "Go to the latest note org file under the same directory."
   (interactive)
   (let* ((file-list (directory-files default-directory nil "notes.*\\.org"))
          ;; directory-files sort the files alphabeticaly
          (latest-file (car (last file-list))))
     (unless latest-file (user-error "No notes file found"))
-    (switch-to-buffer (find-file-noselect latest-file))
-    (goto-char (point-max))))
+    (switch-to-buffer (find-file-noselect latest-file))))
+
+(defun zk-orgwork-goto-orgwork-file ()
+  "Go to the work.org file under the same directory if it exists."
+  (interactive)
+  (let ((file-name "work.org"))
+    (unless (file-exists-p file-name) (user-error "%s does not exist" file-name))
+    (switch-to-buffer (find-file-noselect file-name))))
 
 (defun zk-org-generate-custom-id-from-text (text)
   "Generate a plain ID that only contains alphanumerics and

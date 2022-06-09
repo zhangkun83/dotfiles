@@ -218,7 +218,8 @@
 	  (lambda()
 	    "Register my own shortcuts for org mode"
 	    (local-set-key (kbd "C-c a") 'org-agenda)
-            (local-set-key (kbd "C-c n") 'zk-org-goto-end-of-latest-note-file)
+            (local-set-key (kbd "C-c g n") 'zk-orgwork-goto-latest-note-file)
+            (local-set-key (kbd "C-c g w") 'zk-orgwork-goto-orgwork-file)
             (local-set-key (kbd "C-c l") 'zk-org-set-generated-custom-id-and-copy-external-link)))
 
 ;; Set font
@@ -248,6 +249,7 @@
  '(ns-command-modifier nil)
  '(org-startup-indented t)
  '(org-log-into-drawer t)
+ '(org-agenda-sticky t)
  '(tags-revert-without-query t)
  '(use-dialog-box nil))
 
