@@ -99,7 +99,7 @@
             ))
 
 ;;; Tramp related
-(add-hook 'before-save-hook `zk-save-remote-file-as-local-copy)
+(add-hook 'before-save-hook `zk-save-local-copy-if-remote-file)
 (setq tramp-default-method "ssh")
 
 ;;; Quickly switch between the startup directory and current file's

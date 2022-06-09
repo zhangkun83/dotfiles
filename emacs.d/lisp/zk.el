@@ -495,17 +495,24 @@ file name at point."
     (widen)
     (write-region (point-min) (point-max) filename)))
 
-(defun zk-save-remote-file-as-local-copy ()
+(defun zk-save-local-copy-if-remote-file ()
   "If the current buffer is a remote file, save a local copy for it"
   (interactive)
   (if (or (file-remote-p (buffer-file-name))
           (string-prefix-p "/google/data/rw/" buffer-file-name))
-      (let ((basedir "~/.emacs.d/remote-file-copies/"))
-        (make-directory basedir t)
-        (let ((localfile
-               (concat basedir
-                       (replace-regexp-in-string "/" "#" (buffer-file-name)))))
-          (zk-save-buffer-as-copy localfile)))))
+      (zk-save-local-copy-for-remote-file)))
+
+(defun zk-save-local-copy-for-remote-file ()
+  "Save a local copy for the current buffer as if it's a remote
+file.  This can be used for saving an emergency backup when the
+remote directory suddenly becomes inaccessible."
+  (interactive)
+  (let ((basedir "~/.emacs.d/remote-file-copies/"))
+    (make-directory basedir t)
+    (let ((localfile
+           (concat basedir
+                   (replace-regexp-in-string "/" "#" (buffer-file-name)))))
+      (zk-save-buffer-as-copy localfile))))
 
 (defun zk-bookmark-set ()
   "Set a bookmark with pre-populated name in zk's custom format."
