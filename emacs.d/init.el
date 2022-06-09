@@ -247,6 +247,7 @@
  '(inhibit-startup-screen t)
  '(ns-command-modifier nil)
  '(org-startup-indented t)
+ '(org-log-into-drawer t)
  '(tags-revert-without-query t)
  '(use-dialog-box nil))
 
