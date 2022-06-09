@@ -369,6 +369,64 @@ try-catch-finally constructs as a single thing."
     (kill-new file-name)
     (message "Copied \"%s\"" file-name)))
 
+(defun zk-org-generate-custom-id-from-text (text)
+  "Generate a plain ID that only contains alphanumerics and
+underscores from a natural text. Throw an error if the generated
+CUSTOM_ID already exists in the file."
+  (let ((new-id
+         (downcase
+          (replace-regexp-in-string
+           "\\`_*" ""  ; remove leading underscores
+           (replace-regexp-in-string
+            "_*\\'" ""  ; remove trailing underscores
+            (replace-regexp-in-string  ; replace non alphanumerics to underscores
+             "[^a-zA-Z0-9_]+" "_" text))))))
+    (if (zk-custom-id-exists-p new-id)
+        (user-error "CUSTOM_ID \"%s\" already exists in the file. Try changing the headline to make it unique."
+                    new-id))
+    new-id))
+
+(defun zk-custom-id-exists-p (custom-id)
+  "Check if the given CUSTOM_ID already exists in the current org file."
+  (require 'org)
+  (let ((found-p nil))
+    (org-map-entries (lambda ()
+                       (if (string= custom-id
+                               (org-element-property :CUSTOM_ID (org-element-at-point)))
+                           (setq found-p t))))
+    found-p))
+  
+(defun zk-org-set-generated-custom-id-and-copy-external-link ()
+  "If CUSTOM_ID of the current org headline doesn't exist,
+generate one based on the text of the headline and set it. This
+will also move to that headline. Return the external link based
+on the CUSTOM_ID."
+  (interactive)
+  (require 'org)
+  (require 'org-element)
+  (zk-org-move-to-current-heading)
+  (let* ((headline (org-element-at-point))
+         (custom-id (or
+                     (org-element-property :CUSTOM_ID headline)
+                     (let ((new-id
+                            (zk-org-generate-custom-id-from-text
+                             (substring-no-properties (org-get-heading t t t t)))))
+                       (org-set-property "CUSTOM_ID" new-id)
+                       new-id)))
+         (link (concat "file:"
+                       (file-name-nondirectory (buffer-file-name (current-buffer)))
+                       "::#"
+                       custom-id)))
+    (kill-new link)
+    (message "Copied \"%s\"" link)))
+
+(defun zk-org-move-to-current-heading ()
+  "Move to the current heading if not already at a heading."
+  (interactive)
+  (require 'org-element)
+  (unless (eq 'headline (org-element-type (org-element-at-point)))
+    (org-previous-visible-heading 1)))
+
 (defun zk-minibuffer-insert-current-file-path ()
   "Get the full file path of original buffer and insert it to minibuffer."
   (interactive)

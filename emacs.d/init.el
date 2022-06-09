@@ -217,7 +217,8 @@
 (add-hook 'org-mode-hook
 	  (lambda()
 	    "Register my own shortcuts for org mode"
-	    (local-set-key (kbd "C-c a") 'org-agenda)))
+	    (local-set-key (kbd "C-c a") 'org-agenda)
+            (local-set-key (kbd "C-c c l") 'zk-org-set-generated-custom-id-and-copy-external-link)))
 
 ;; Set font
 (set-face-attribute 'default nil
