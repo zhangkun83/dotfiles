@@ -498,9 +498,20 @@ file name at point."
 (defun zk-save-local-copy-if-remote-file ()
   "If the current buffer is a remote file, save a local copy for it"
   (interactive)
-  (if (or (file-remote-p (buffer-file-name))
-          (string-prefix-p "/google/data/rw/" buffer-file-name))
+  (if (zk-file-remote-p (buffer-file-name))
       (zk-save-local-copy-for-remote-file)))
+
+(defvar zk-remote-file-prefix-list (list "/google/data/rw")
+  "The list of file prefixes to be used by
+zk-save-local-copy-if-remote-file to decide whether a file is a
+remote file.")
+
+(defun zk-file-remote-p (path)
+  (require 'dash)
+  (or (file-remote-p path)
+      (-contains? (mapcar #'(lambda (prefix)
+                              (string-prefix-p prefix path))
+                          zk-remote-file-prefix-list) t)))
 
 (defun zk-save-local-copy-for-remote-file ()
   "Save a local copy for the current buffer as if it's a remote

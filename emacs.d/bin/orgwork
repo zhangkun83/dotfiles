@@ -4,4 +4,8 @@ FILE="$DIR/work.org"
 
 # Disable create-lockfiles because it doesn't work well with Google Drive
 emacs "$FILE" \
-      --eval="(setq create-lockfiles nil org-agenda-files '(\"$DIR\") frame-title-format \"orgwork\" )"
+      --eval="(progn \
+                (setq create-lockfiles nil\
+                      org-agenda-files '(\"$DIR\")\
+                      frame-title-format \"orgwork\" )\
+                (add-to-list 'zk-remote-file-prefix-list \"$DIR\"))"
