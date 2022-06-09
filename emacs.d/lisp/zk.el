@@ -369,6 +369,16 @@ try-catch-finally constructs as a single thing."
     (kill-new file-name)
     (message "Copied \"%s\"" file-name)))
 
+(defun zk-org-goto-end-of-latest-note-file ()
+  "Go to the end of latest note org file under the same directory."
+  (interactive)
+  (let* ((file-list (directory-files default-directory nil "notes.*\\.org"))
+         ;; directory-files sort the files alphabeticaly
+         (latest-file (car (last file-list))))
+    (unless latest-file (user-error "No notes file found"))
+    (switch-to-buffer (find-file-noselect latest-file))
+    (goto-char (point-max))))
+
 (defun zk-org-generate-custom-id-from-text (text)
   "Generate a plain ID that only contains alphanumerics and
 underscores from a natural text. Throw an error if the generated
@@ -381,12 +391,12 @@ CUSTOM_ID already exists in the file."
             "_*\\'" ""  ; remove trailing underscores
             (replace-regexp-in-string  ; replace non alphanumerics to underscores
              "[^a-zA-Z0-9_]+" "_" text))))))
-    (if (zk-custom-id-exists-p new-id)
+    (if (zk-org-custom-id-exists-p new-id)
         (user-error "CUSTOM_ID \"%s\" already exists in the file. Try changing the headline to make it unique."
                     new-id))
     new-id))
 
-(defun zk-custom-id-exists-p (custom-id)
+(defun zk-org-custom-id-exists-p (custom-id)
   "Check if the given CUSTOM_ID already exists in the current org file."
   (require 'org)
   (let ((found-p nil))

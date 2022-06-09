@@ -218,7 +218,8 @@
 	  (lambda()
 	    "Register my own shortcuts for org mode"
 	    (local-set-key (kbd "C-c a") 'org-agenda)
-            (local-set-key (kbd "C-c c l") 'zk-org-set-generated-custom-id-and-copy-external-link)))
+            (local-set-key (kbd "C-c n") 'zk-org-goto-end-of-latest-note-file)
+            (local-set-key (kbd "C-c l") 'zk-org-set-generated-custom-id-and-copy-external-link)))
 
 ;; Set font
 (set-face-attribute 'default nil
