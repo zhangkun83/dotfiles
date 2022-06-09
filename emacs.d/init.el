@@ -214,13 +214,14 @@
             (local-set-key (kbd "C-c c") 'zk-shell-command-on-file-at-point)
             (local-set-key (kbd "C-c t") 'comint-truncate-buffer)))
 
-(add-hook 'org-mode-hook
-	  (lambda()
-	    "Register my own shortcuts for org mode"
-	    (local-set-key (kbd "C-c a") 'org-agenda)
-            (local-set-key (kbd "C-c g n") 'zk-orgwork-goto-latest-note-file)
-            (local-set-key (kbd "C-c g w") 'zk-orgwork-goto-orgwork-file)
-            (local-set-key (kbd "C-c l") 'zk-org-set-generated-custom-id-and-copy-external-link)))
+(defun zk-bindings-for-org-mode ()
+  "Register my own shortcuts for org mode"
+  (local-set-key (kbd "C-c a") 'org-agenda)
+  (local-set-key (kbd "C-c g n") 'zk-orgwork-goto-latest-note-file)
+  (local-set-key (kbd "C-c g w") 'zk-orgwork-goto-orgwork-file)
+  (local-set-key (kbd "C-c l") 'zk-org-set-generated-custom-id-and-copy-external-link))
+(add-hook 'org-mode-hook 'zk-bindings-for-org-mode)
+(add-hook 'org-agenda-mode-hook 'zk-bindings-for-org-mode)
 
 ;; Set font
 (set-face-attribute 'default nil
