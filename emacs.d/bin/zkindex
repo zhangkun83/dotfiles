@@ -28,7 +28,7 @@ echo "Using zkindex.listsrcs to generate src list ... "
 cd "$INDEX_DIR"
 
 # ctags.io is the best ctags implementation that I know
-echo "Regenerating TAGS ... "
+echo "Regenerating TAGS using ctags.io ... "
 ctags -e -L - < "$SRC_LIST_FILE"
 
 echo "Regenerating JAVA_IMPORTS ..."

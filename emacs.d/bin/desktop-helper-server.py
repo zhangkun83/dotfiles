@@ -57,7 +57,7 @@ def handle_store_to_clipboard(data):
             p.kill()
             print("xclip timed out")
         if p.returncode == 0:
-            return ("OK", "xclip suceeded")
+            return ("OK", "xclip succeeded")
         else:
             return ("ERROR", f"xclip failed: {p.returncode}")
     elif os.path.exists("/dev/clipboard"):  # cygwin
