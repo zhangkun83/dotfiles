@@ -36,22 +36,12 @@
 ;;(semantic-mode 1)
 
 
-;;; Ido
-(require 'ido)
-(ido-mode t)
-;; Disable the annoying "searching in other directories" behavior of ido-find-file
-(setq ido-auto-merge-work-directories-length -1)
-
-(global-set-key
- "\M-x"
- (lambda ()
-   (interactive)
-   (call-interactively
-    (intern
-     (ido-completing-read
-      "M-x "
-      (all-completions "" obarray 'commandp))))))
-
+(require 'vertico)
+(vertico-mode t)
+(setq completion-styles '(basic substring)
+      read-file-name-completion-ignore-case t
+      read-buffer-completion-ignore-case t
+      completion-ignore-case t)
 
 ;;; Load markdown-mode
 (autoload 'markdown-mode "markdown-mode"
@@ -238,19 +228,17 @@
  ;; If there is more than one, they won't work right.
  '(c-echo-syntactic-information-p t)
  '(compilation-scroll-output t)
- '(custom-enabled-themes (if (display-graphic-p) (quote (leuven))))
+ '(custom-enabled-themes (if (display-graphic-p) '(leuven)))
  '(dabbrev-case-replace nil)
  '(explicit-bash-args
-   (quote
-    ("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i")))
+   '("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i"))
  '(fci-rule-character 9474)
  '(global-hl-line-sticky-flag t)
- '(ido-enable-flex-matching nil)
  '(inhibit-startup-screen t)
  '(ns-command-modifier nil)
- '(org-startup-indented t)
- '(org-log-into-drawer t)
  '(org-agenda-sticky t)
+ '(org-log-into-drawer t)
+ '(org-startup-indented t)
  '(tags-revert-without-query t)
  '(use-dialog-box nil))
 

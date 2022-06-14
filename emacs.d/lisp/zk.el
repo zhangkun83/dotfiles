@@ -54,9 +54,9 @@
 (defun zk-find-src-file-in-project(f)
   "Find a src file indexed in SRCFILES of this project."
   (interactive
-   (list (ido-completing-read "Find a src file: "
-                              (-map 'zk-project-get-relative-path
-                               (process-lines "bash" "-c" (concat "cat '" zk-project-index-path "/SRCFILES'; echo -n"))))))
+   (list (completing-read "Find a src file: "
+                          (-map 'zk-project-get-relative-path
+                                (process-lines "bash" "-c" (concat "cat '" zk-project-index-path "/SRCFILES'; echo -n"))))))
   (find-file (zk-project-restore-absolute-path f)))
 
 (defun zk-project-get-relative-path(absolute-path)
@@ -110,7 +110,7 @@ They must not be equal, and must start with 'import '."
 		  (read-string (format "Insert import for (%s): " default-input)
 			     nil nil default-input))))
   (let ((result
-	 (ido-completing-read "Insert import: "
+	 (completing-read "Insert import: "
 			  (process-lines "grep" "-F" (concat "." class-name ";") (concat zk-project-index-path "/JAVA_IMPORTS")))))
     (progn
       ;; Find the insertion point
@@ -709,7 +709,7 @@ text suitable for copying to line-wraping text editors."
   (defun zk-google3-find-g4-opened-file(f)
     "Find an opened file in the g4 client"
     (interactive
-     (list (ido-completing-read
+     (list (completing-read
             "Find an g4 opened file: "
             (-map 'zk-project-get-relative-path
                   (process-lines
