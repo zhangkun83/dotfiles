@@ -115,16 +115,18 @@
 (setenv "ZK_PROJECT_ROOT" zk-project-root)
 (setq frame-title-format '("" command-line-default-directory " - emacs"))
 
-;; Bookmarks-related
-;; Use per-zk-project bookmark file
-(let ((bookmark-dir (expand-file-name (concat "~/.zk/emacs-bookmarks/" zk-project-root))))
-  (make-directory bookmark-dir t)
-  (setq bookmark-default-file (concat bookmark-dir "/bookmarks")))
-;; Do not display the file column in the benchmark menu, because zk-bookmark-set
-;; already includes (nicer) file names in the bookmark names.
+(require 'savehist)
 (require 'bookmark)
-(bookmark-bmenu-toggle-filenames nil)
-(global-set-key (kbd "C-x r m") 'zk-bookmark-set)
+;; Save session data in per-zk-project directories
+(let ((session-data-dir (expand-file-name (concat "~/.zk/emacs/" zk-project-root))))
+  (make-directory session-data-dir t)
+  (setq savehist-file (concat session-data-dir "history"))
+  (savehist-mode t)
+  (setq bookmark-default-file (concat session-data-dir "bookmarks"))
+  ;; Do not display the file column in the benchmark menu, because zk-bookmark-set
+  ;; already includes (nicer) file names in the bookmark names.
+  (bookmark-bmenu-toggle-filenames nil)
+  (global-set-key (kbd "C-x r m") 'zk-bookmark-set))
 
 ;; Don't create backup files at all
 (setq make-backup-files nil)
