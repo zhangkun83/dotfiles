@@ -13,6 +13,7 @@
 (setq browse-url-browser-function 'zk-browse-url)
 
 (setq echo-keystrokes 0.01)
+(global-unset-key (kbd "C-z"))
 
 ;;;; etags-select (better ctags search)
 
@@ -174,7 +175,6 @@
   (interactive)
   (other-window -1))
 
-(global-unset-key (kbd "C-z"))
 (global-set-key (kbd "C-x C-p") 'zk-prev-window)
 (global-set-key (kbd "C-x C-n") 'other-window)
 (global-set-key (kbd "C-x C-b") 'zk-switch-to-other-buffer)
