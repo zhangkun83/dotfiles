@@ -716,7 +716,7 @@ text suitable for copying to line-wraping text editors."
                    "bash" "-c"
                    (concat "cd " zk-project-root "; g4 whatsout"))))))
     (find-file (zk-project-restore-absolute-path f)))
-  (global-set-key (kbd "C-x g f") 'zk-google3-find-g4-opened-file)
+  (global-set-key (kbd "C-z g f") 'zk-google3-find-g4-opened-file)
 
   (defun zk-google3-open-in-codesearch()
     "Open the current file in codesearch and focus on the current line."
@@ -725,7 +725,7 @@ text suitable for copying to line-wraping text editors."
             (zk-project-get-relative-path (buffer-file-name))
             ";l="
             (number-to-string (line-number-at-pos)))))
-  (global-set-key (kbd "C-x g s") 'zk-google3-open-in-codesearch)
+  (global-set-key (kbd "C-z g s") 'zk-google3-open-in-codesearch)
 
   (defun zk-google3-open-build-sponge-link()
     "Open the sponge link in the compilation buffer."
@@ -738,7 +738,7 @@ text suitable for copying to line-wraping text editors."
               (when (search-forward "Streaming build results to: http://sponge2")
                 (zk-browse-url (thing-at-point 'url)))))
         (message "*compilation* buffer not found"))))
-  (global-set-key (kbd "C-x g p") 'zk-google3-open-build-sponge-link)
+  (global-set-key (kbd "C-z g p") 'zk-google3-open-build-sponge-link)
 
   (defun zk-google3-open-critique()
     "Open the critique page of the current file."
@@ -748,7 +748,7 @@ text suitable for copying to line-wraping text editors."
         (user-error "Current buffer doesn't visit a file"))
       (shell-command (concat "open-critique-for-file "
                              (prin1-to-string (zk-project-get-relative-path file-name))))))
-  (global-set-key (kbd "C-x g c") 'zk-google3-open-critique)
+  (global-set-key (kbd "C-z g c") 'zk-google3-open-critique)
 
   (defun zk-google3-open-file-from-codesearch-or-critique-link (link)
     "Open a file indicated by the given codesearch or critique link"
@@ -770,7 +770,7 @@ text suitable for copying to line-wraping text editors."
             (switch-to-buffer (find-file-noselect (zk-project-restore-absolute-path path)))
             (if line (goto-line line)))
         (user-error "Cannot parse the link"))))
-  (global-set-key (kbd "C-x g M-f") 'zk-google3-open-file-from-codesearch-or-critique-link)
+  (global-set-key (kbd "C-z g M-f") 'zk-google3-open-file-from-codesearch-or-critique-link)
 
   (defun zk-google3-g4-edit ()
     "g4-edit the given path."
@@ -784,7 +784,7 @@ text suitable for copying to line-wraping text editors."
       (if (= 0 return-status)
           (revert-buffer))
         (message output)))
-  (global-set-key (kbd "C-x g e") 'zk-google3-g4-edit)
+  (global-set-key (kbd "C-z g e") 'zk-google3-g4-edit)
 )
 
 (provide 'zk)
