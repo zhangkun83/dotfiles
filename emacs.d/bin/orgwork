@@ -2,6 +2,7 @@
 DIR="$HOME/orgwork"
 FILE="$DIR/work.org"
 
+cd $DIR
 # Disable create-lockfiles because it doesn't work well with Google Drive
 emacs "$FILE" \
       --eval="(progn \
