@@ -1,5 +1,7 @@
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp"))
 
+(require 'kotlin-mode)
+
 ;; Disable tool-bar
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 
