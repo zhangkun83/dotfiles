@@ -242,6 +242,7 @@
  '(org-agenda-sticky t)
  '(org-log-into-drawer t)
  '(org-startup-indented t)
+ '(org-fontify-quote-and-verse-blocks t)
  '(tags-revert-without-query t)
  '(use-dialog-box nil))
 
