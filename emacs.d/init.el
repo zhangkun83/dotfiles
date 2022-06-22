@@ -12,6 +12,9 @@
 ;; Disable menu bar	
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 
+;; Make cursor blink forever
+(setq blink-cursor-blinks 0)
+
 ;; Set default browser to chrome
 (setq browse-url-browser-function 'zk-browse-url)
 
