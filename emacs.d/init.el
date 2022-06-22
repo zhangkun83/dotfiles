@@ -1,6 +1,7 @@
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp"))
 
 (require 'kotlin-mode)
+(require 'syntax-subword)
 
 ;; Disable tool-bar
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
@@ -89,6 +90,9 @@
             (c-set-offset 'annotation-var-cont 0)
             ;; case: line wasn't indenting. It should be.
             (c-set-offset 'case-label '+)
+            ;; Treat camelCase as multiple words instead of one, and treat
+            ;; punctuation marks as words as well.
+            (syntax-subword-mode t)
             ))
 
 ;;; Tramp related
@@ -197,6 +201,12 @@
 (global-set-key (kbd "C-z C-y") 'zk-clipboard-youdao-dict)
 (global-set-key (kbd "C-z h") 'global-hl-line-mode)
 
+(add-hook 'minibuffer-setup-hook
+          (lambda()
+            ;; Treat camelCase as multiple words instead of one, and treat
+            ;; punctuation marks as words as well.
+            (syntax-subword-mode)))
+
 (add-hook 'shell-mode-hook
           (lambda()
             ;; Make dots part of the word so full paths can be expanded by M+/
@@ -205,6 +215,9 @@
             ;; Make default-directory track the PWD of the shell
             (setq dirtrack-list '("^(\\([^)]*\\))" 1))
             (dirtrack-mode t)
+            ;; Treat camelCase as multiple words instead of one, and treat
+            ;; punctuation marks as words as well.
+            (syntax-subword-mode t)
             (local-set-key (kbd "C-c o") 'zk-open-file-path-from-region-or-at-point)
             (local-set-key (kbd "C-c c") 'zk-shell-command-on-file-at-point)
             (local-set-key (kbd "C-c t") 'comint-truncate-buffer)))
@@ -255,11 +268,6 @@
 (require 'zk-go-to-char)
 (global-set-key (kbd "C-f") 'zk-go-to-char-forward)
 (global-set-key (kbd "C-b") 'zk-go-to-char-backward)
-
-;; Treat camelCase as multiple words instead of one, and treat
-;; punctuation marks as words as well.
-(require 'syntax-subword)
-(global-syntax-subword-mode)
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
