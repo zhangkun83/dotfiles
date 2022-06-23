@@ -473,6 +473,42 @@ the current file for completion."
                    t)))
     (org-toggle-tag new-tag 'on)))
 
+(require 'dash)
+(defun zk-org-rename-tag-command ()
+  "Rename a tag throughout the agenda files."
+  (interactive)
+  (let* ((all-tags (mapcar #'car (org-global-tags-completion-table)))
+         (from-tag (completing-read
+                    "Rename tag: "
+                    all-tags
+                    nil
+                    t
+                    nil
+                    t))
+         (to-tag (zk-trim-string
+                  (read-string (format "Rename tag \"%s\" to: " from-tag) from-tag t)))
+         (counter 0))
+    (when (cond ((string= from-tag to-tag)
+                 (progn (message "The new tag is the same as the old tag") nil))
+                ((string= "" to-tag)
+                 (yes-or-no-p
+                  (format "Do you want to remove tag \"%s\" from all entries?" from-tag)))
+                ((-contains? all-tags to-tag)
+                 (yes-or-no-p
+                  (format "Do you want to merge \"%s\" into \"%s\"?" from-tag to-tag)))
+                (t t))
+      (org-map-entries
+       (lambda ()
+         (when (-contains? (org-get-tags nil t) from-tag)
+           (org-toggle-tag from-tag 'off)
+           (setq counter (+ 1 counter))
+           (unless (string= "" to-tag)
+             (org-toggle-tag to-tag 'on))))
+       t
+       'agenda-with-archives)
+      (message "Changed %d entries" counter))))
+         
+
 (defun zk-minibuffer-insert-current-file-path ()
   "Get the full file path of original buffer and insert it to minibuffer."
   (interactive)
