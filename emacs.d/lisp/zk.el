@@ -458,7 +458,6 @@ without asking."
           (select-window (get-buffer-window view-buffer)))
       (org-tags-view arg))))
 
-(require 'dash)
 (defun zk-org-set-tags-command ()
   "Set tags to the current entry. It's better than
 org-set-tags-command in that it uses the agenda files instead of
@@ -472,11 +471,7 @@ the current file for completion."
                    nil
                    nil
                    t)))
-    (unless (-contains? current-tags new-tag)
-      (save-excursion
-        (zk-org-move-to-current-heading)
-        (add-to-list 'current-tags new-tag)
-        (org-set-tags current-tags)))))
+    (org-toggle-tag new-tag 'on)))
 
 (defun zk-minibuffer-insert-current-file-path ()
   "Get the full file path of original buffer and insert it to minibuffer."
