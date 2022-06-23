@@ -443,6 +443,21 @@ on the CUSTOM_ID."
   (unless (eq 'headline (org-element-type (org-element-at-point)))
     (org-previous-visible-heading 1)))
 
+(defun zk-org-tags-view (arg)
+  "org-tags-view will always ask for the tags before switching to
+an existing view buffer if available, but it doesn't use the
+entered tags anyway if org-agenda-sticky is turned
+on. zk-org-tags-view will try to switch to the existing buffer
+without asking."
+  (interactive "P")
+  (let* ((view-buffer-name (if arg "*Org Agenda(M)*" "*Org Agenda(m)*"))
+         (view-buffer (get-buffer view-buffer-name)))
+    (if view-buffer
+        (progn
+          (display-buffer view-buffer)
+          (select-window (get-buffer-window view-buffer)))
+      (org-tags-view arg))))
+    
 (defun zk-minibuffer-insert-current-file-path ()
   "Get the full file path of original buffer and insert it to minibuffer."
   (interactive)

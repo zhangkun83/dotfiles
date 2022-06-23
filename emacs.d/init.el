@@ -228,7 +228,7 @@
 (defun zk-bindings-for-org-mode ()
   "Register my own shortcuts for org mode"
   (local-set-key (kbd "C-c a") 'org-agenda-list)
-  (local-set-key (kbd "C-c m") 'org-tags-view)
+  (local-set-key (kbd "C-c m") 'zk-org-tags-view)
   (local-set-key (kbd "C-c g n") 'zk-orgwork-goto-latest-note-file)
   (local-set-key (kbd "C-c g w") 'zk-orgwork-goto-orgwork-file)
   (local-set-key (kbd "C-c l") 'zk-org-set-generated-custom-id-and-copy-external-link))
