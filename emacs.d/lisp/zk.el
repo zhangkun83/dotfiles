@@ -477,6 +477,9 @@ the current file for completion."
 (defun zk-org-rename-tag-command ()
   "Rename a tag throughout the agenda files."
   (interactive)
+  ;; Save all files before the renaming, to give the user a chance to
+  ;; discard the rename if they change their mind.
+  (save-some-buffers)
   (let* ((all-tags (mapcar #'car (org-global-tags-completion-table)))
          (from-tag (completing-read
                     "Rename tag: "
@@ -486,7 +489,7 @@ the current file for completion."
                     nil
                     t))
          (to-tag (zk-trim-string
-                  (read-string (format "Rename tag \"%s\" to: " from-tag) from-tag t)))
+                  (read-string (format "Rename tag \"%s\" to (empty string to delete): " from-tag) from-tag t)))
          (counter 0))
     (when (cond ((string= from-tag to-tag)
                  (progn (message "The new tag is the same as the old tag") nil))
@@ -506,8 +509,9 @@ the current file for completion."
              (org-toggle-tag to-tag 'on))))
        t
        'agenda-with-archives)
-      (message "Changed %d entries" counter))))
-         
+      (if (string= "" to-tag)
+          (message "Removed \"%s\" in %d entries" from-tag counter)
+        (message "Changed \"%s\" to \"%s\" in %d entries" from-tag to-tag counter)))))
 
 (defun zk-minibuffer-insert-current-file-path ()
   "Get the full file path of original buffer and insert it to minibuffer."
