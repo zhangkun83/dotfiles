@@ -142,6 +142,7 @@
 (setq make-backup-files nil)
 
 (setenv "EDITOR" "~/.emacs.d/bin/editor-stub")
+(setenv "PAGER" "cat")
 (setenv "P4EDITOR" "~/.emacs.d/bin/editor-stub")
 (setenv "P4DIFF" "diff -u")  ; works with zk-diff-navigate
 (setenv "G4PENDINGSTYLE" "relativepath")
