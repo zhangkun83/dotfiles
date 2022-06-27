@@ -325,6 +325,7 @@ try-catch-finally constructs as a single thing."
 (defun zk-java-exit-bracesblock()
   "Exit the current braces block and move point to the beginning"
   (interactive)
+  (push-mark)
   (backward-up-list)
   (while (not (char-equal ?{ (following-char)))
     (backward-up-list))
