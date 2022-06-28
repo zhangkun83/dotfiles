@@ -102,6 +102,9 @@
 (add-hook 'before-save-hook `zk-save-local-copy-if-remote-file)
 (setq tramp-default-method "ssh")
 
+;; Completely disable left-right split
+(setq split-width-threshold nil)
+
 ;;; Quickly switch between the startup directory and current file's
 (defun zk-cd-initial()
   "Change to the initial directory from which emacs was started"
@@ -189,6 +192,8 @@
 (global-set-key (kbd "C-x C-n") 'other-window)
 (global-set-key (kbd "C-x C-b") 'zk-switch-to-other-buffer)
 (global-set-key (kbd "C-x C-l") 'zk-recenter-top-bottom-other-window)
+(require 'transpose-frame)
+(global-set-key (kbd "C-x 9") 'transpose-frame)
 (global-set-key (kbd "C-z r") 'revert-buffer)
 (global-set-key (kbd "C-z f") 'zk-find-src-file-in-project)
 (global-set-key (kbd "C-z p") 'zk-copy-buffer-file-path)
