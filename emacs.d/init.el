@@ -257,7 +257,7 @@
  ;; If there is more than one, they won't work right.
  '(c-echo-syntactic-information-p t)
  '(compilation-scroll-output t)
- '(custom-enabled-themes (if (display-graphic-p) '(leuven)))
+ '(custom-enabled-themes '(leuven))
  '(dabbrev-case-replace nil)
  '(explicit-bash-args
    '("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i"))
