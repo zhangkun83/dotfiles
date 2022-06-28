@@ -93,6 +93,8 @@
             (c-set-offset 'annotation-var-cont 0)
             ;; case: line wasn't indenting. It should be.
             (c-set-offset 'case-label '+)
+            ;; Use whitespace-mode to visualize characters exceeding fill-column
+            (whitespace-mode t)
             ;; Treat camelCase as multiple words instead of one, and treat
             ;; punctuation marks as words as well.
             (syntax-subword-mode t)
