@@ -7,7 +7,7 @@ import socket
 import sys
 import net_messaging
 
-HOST = "localhost"
+HOST = "127.0.0.1"
 PORT = 5032
 
 command = sys.argv[1]

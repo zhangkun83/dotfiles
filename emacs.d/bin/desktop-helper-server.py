@@ -15,7 +15,7 @@ import sys
 import time
 from subprocess import Popen, PIPE, STDOUT, TimeoutExpired
 
-HOST = "localhost"
+HOST = "127.0.0.1"
 PORT = 5032
 
 BROWSER_PATHS = [
@@ -101,7 +101,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
     server_socket.bind((HOST, PORT))
     print(f"desktop-helper-server started on port {PORT}")
     print("Local clients will work. To make remote clients work, use")
-    print(f"`ssh <host> -R localhost:{PORT}:localhost:{PORT} -t ~/.emacs.d/bin/desktop-helper-server.py stub` to create a forwarding tunnel")
+    print(f"`ssh <host> -R {HOST}:{PORT}:{HOST}:{PORT} -t ~/.emacs.d/bin/desktop-helper-server.py stub` to create a forwarding tunnel")
     server_socket.listen()
     while True:
         socket, addr = server_socket.accept()
