@@ -1,8 +1,0 @@
-#!/bin/bash
-pids=$(ps -u $USER -o pid,exe,command |\
-          grep "^ *[0-9]\\+ \\+/usr/bin/python.*desktop-helper-server\\.py" |\
-          awk '{print $1}')
-for pid in $pids; do
-    echo "Killing process $pid"
-    kill $pid
-done

@@ -89,19 +89,11 @@ def handle_retrieve_from_clipboard():
     else:
         return ("OK", this.clipboard)
 
-if len(sys.argv) > 1 and sys.argv[1] == "stub":
-    print("desktop-helper-server: stub mode. This is used to keep an ssh tunnel.")
-    print("Press Enter to test connection. EOF to exit.")
-    for line in sys.stdin:
-        print("desktop-helper-server stub: I am still here.")
-    print("Exiting ...")
-    sys.exit(0)
-
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
     server_socket.bind((HOST, PORT))
     print(f"desktop-helper-server started on port {PORT}")
     print("Local clients will work. To make remote clients work, use")
-    print(f"`ssh <host> -R {HOST}:{PORT}:{HOST}:{PORT} -t ~/.emacs.d/bin/desktop-helper-server.py stub` to create a forwarding tunnel")
+    print(f"`ssh <host> -R {HOST}:{PORT}:{HOST}:{PORT} -t ~/.emacs.d/bin/ssh-tunnel-stub.py` to create a forwarding tunnel")
     server_socket.listen()
     while True:
         socket, addr = server_socket.accept()
