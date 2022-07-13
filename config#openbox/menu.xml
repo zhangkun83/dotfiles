@@ -25,6 +25,9 @@
     <item label="Volume control" icon="/usr/share/icons/Tango/scalable/status/stock_volume.svg">
       <action name="Execute"><execute>pavucontrol</execute></action>
     </item>
+    <item label="Run command ...">
+      <action name="Execute"><execute>gmrun</execute></action>
+    </item>
   <separator label="HCI" />
   <item label="Reset HCI settings" icon="/usr/share/icons/Tango/scalable/actions/stock_refresh.svg">
     <action name="Execute"><execute>~/.config/openbox/scripts/hci-adjustments</execute></action>

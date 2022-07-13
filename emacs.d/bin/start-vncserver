@@ -1,2 +1,2 @@
 #!/bin/bash
-tigervncserver :1 -xstartup openbox-session
+tigervncserver :1 -xstartup openbox-session -geometry 1600x1200
