@@ -1,0 +1,2 @@
+#!/bin/bash
+tigervncserver :1 -xstartup openbox-session
