@@ -1,5 +1,4 @@
 $DIR/scripts/start_if_absent.sh zknotifyd.sh $DIR/scripts/zknotifyd.sh
-$DIR/scripts/start_if_absent.sh xdotool-piped.sh $DIR/scripts/xdotool-piped.sh
 $DIR/scripts/start_if_absent.sh urxvtd urxvtd -q -o -f
 $DIR/scripts/start_if_absent.sh xss-lock xss-lock -- $DIR/scripts/lock.sh
 $DIR/scripts/start_if_absent.sh wallpaper-auto-switcher.sh $DIR/scripts/wallpaper-auto-switcher.sh || $DIR/scripts/prepare-wallpaper.sh
