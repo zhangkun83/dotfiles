@@ -790,6 +790,16 @@
           <to>next</to>
         </action>
       </mousebind>
+      <mousebind button="W-Up" action="Click">
+        <action name="SendToDesktop">
+          <to>previous</to>
+        </action>
+      </mousebind>
+      <mousebind button="W-Down" action="Click">
+        <action name="SendToDesktop">
+          <to>next</to>
+        </action>
+      </mousebind>
     </context>
     <context name="Titlebar Top Right Bottom Left TLCorner TRCorner BRCorner BLCorner">
       <mousebind button="Left" action="Press">
@@ -956,16 +966,6 @@
       </mousebind>
     </context>
     <context name="Desktop">
-      <mousebind button="W-Up" action="Click">
-        <action name="GoToDesktop">
-          <to>previous</to>
-        </action>
-      </mousebind>
-      <mousebind button="W-Down" action="Click">
-        <action name="GoToDesktop">
-          <to>next</to>
-        </action>
-      </mousebind>
       <mousebind button="Left" action="Press">
         <action name="Focus"/>
         <action name="Raise"/>
