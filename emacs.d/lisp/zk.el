@@ -514,6 +514,18 @@ the current file for completion."
           (message "Removed \"%s\" in %d entries" from-tag counter)
         (message "Changed \"%s\" to \"%s\" in %d entries" from-tag to-tag counter)))))
 
+(defun zk-days-between-dates (dates)
+  "Given a list of dates formatted in \"YYYY-MM-DD\" and
+  calculate the days between them"
+  (require 'org)
+  (when (> (length dates) 1)
+    (let* ((first (car dates))
+           (rest (cdr dates))
+           (second (car rest)))
+      (append (list (- (org-time-string-to-absolute second)
+                       (org-time-string-to-absolute first)))
+              (zk-days-between-dates rest)))))
+
 (defun zk-minibuffer-insert-current-file-path ()
   "Get the full file path of original buffer and insert it to minibuffer."
   (interactive)
