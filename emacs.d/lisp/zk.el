@@ -515,15 +515,16 @@ the current file for completion."
         (message "Changed \"%s\" to \"%s\" in %d entries" from-tag to-tag counter)))))
 
 (defun zk-days-between-dates (dates)
-  "Given a list of dates formatted in \"YYYY-MM-DD\" and
-  calculate the days between them"
+  "Given a list of dates and calculate the days between
+  them. Dates are in the format that org-read-date supports, such
+  as \"YYYY-MM-DD\", \"+1\", \"today\""
   (require 'org)
   (when (> (length dates) 1)
     (let* ((first (car dates))
            (rest (cdr dates))
            (second (car rest)))
-      (append (list (- (org-time-string-to-absolute second)
-                       (org-time-string-to-absolute first)))
+      (append (list (- (org-time-string-to-absolute (org-read-date nil nil second))
+                       (org-time-string-to-absolute (org-read-date nil nil first))))
               (zk-days-between-dates rest)))))
 
 (defun zk-minibuffer-insert-current-file-path ()
