@@ -1,0 +1,12 @@
+! Affected modifer keys need to be cleared before reassigning the key codes
+clear Mod1
+clear Mod4
+
+! Originally the Super_L key. Now mapped to Alt_L
+keycode 133 = Alt_L Meta_L Alt_L Meta_L
+! Originally the Menu key. Now mapped to Super_L
+keycode 135 = Super_L NoSymbol Super_L
+
+! Now re-assign the modifer keys
+add Mod1 = Alt_L Alt_R
+add Mod4 = Super_L Super_R

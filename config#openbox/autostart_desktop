@@ -1,3 +1,4 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 . $DIR/autostart-common.sh
+(sleep 5; xmodmap $DIR/ms-ergo-kbd.xmodmap && $DIR/scripts/zknotify.sh "Remapped modifier keys for Microsoft Ergonomic Keyboard") &
