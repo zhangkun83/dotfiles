@@ -1,4 +1,10 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 . $DIR/autostart-common.sh
-(sleep 5; xmodmap $DIR/ms-ergo-kbd.xmodmap && $DIR/scripts/zknotify.sh "Remapped modifier keys for Microsoft Ergonomic Keyboard") &
+
+if [[ -n "$(xinput | grep "Microsoft Ergonomic Keyboard")" ]]; then
+  $DIR/scripts/zknotify.sh "Using Microsoft Ergonomic Keyboard"
+  (sleep 5; xmodmap $DIR/ms-ergo-kbd.xmodmap && $DIR/scripts/zknotify.sh "Remapped modifier keys for the keyboard") &
+else
+  $DIR/scripts/zknotify.sh "Not using Microsoft Ergonomic Keyboard"
+fi
