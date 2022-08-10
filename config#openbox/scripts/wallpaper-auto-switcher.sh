@@ -12,7 +12,7 @@ while :
 do
     CURRENT_MINUTE="$(date +%Y%m%d%H%M)"
     if [[ "$LAST_NOTIFY_MINUTE" != "$CURRENT_MINUTE" && "$CURRENT_MINUTE" =~ .*(30|00)$ ]]; then
-        $DIR/zknotify.sh "The time is $(date +"%I:%M %p")."
+        $DIR/whattime.sh
         LAST_NOTIFY_MINUTE="$CURRENT_MINUTE"
     fi
     CURRENT_HOUR="$(date +%Y%m%d%H)"

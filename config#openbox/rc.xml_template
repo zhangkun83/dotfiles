@@ -733,6 +733,11 @@
         <command>thunar</command>
       </action>
     </keybind>
+    <keybind key="W-t">
+      <action name="Execute">
+        <command>~/.config/openbox/scripts/whattime.sh</command>
+      </action>
+    </keybind>
   </keyboard>
   <mouse>
     <dragThreshold>1</dragThreshold>
