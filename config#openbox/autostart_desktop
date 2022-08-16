@@ -7,4 +7,5 @@ if [[ -n "$(xinput | grep "Microsoft Ergonomic Keyboard")" ]]; then
   (sleep 5; xmodmap $DIR/ms-ergo-kbd.xmodmap && $DIR/scripts/zknotify.sh "Remapped modifier keys for the keyboard") &
 else
   $DIR/scripts/zknotify.sh "Not using Microsoft Ergonomic Keyboard"
+  (sleep 5; xmodmap $DIR/filco.xmodmap && $DIR/scripts/zknotify.sh "Remapped modifier keys for Filco") &
 fi
