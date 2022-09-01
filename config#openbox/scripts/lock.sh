@@ -7,7 +7,7 @@ if killall compton; then
     export post_lock_cmd="compton"
 fi
 
-(XSECURELOCK_FONT=--courier-bold-r-normal--34------- XSECURELOCK_WANT_FIRST_KEYPRESS=1 xsecurelock; $DIR/hci-adjustments)
+(XSECURELOCK_FONT=--courier-bold-r-normal--34------- XSECURELOCK_WANT_FIRST_KEYPRESS=1 xsecurelock; $DIR/hci-adjustments; $DIR/whattime.sh)
 
 if [[ -n "$post_lock_cmd" ]]; then
     $DIR/zknotify.sh "Starting $post_lock_cmd"
