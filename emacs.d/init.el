@@ -196,6 +196,8 @@
 (global-set-key (kbd "C-x C-l") 'zk-recenter-top-bottom-other-window)
 (require 'transpose-frame)
 (global-set-key (kbd "C-x 9") 'transpose-frame)
+(require 'goto-last-change)
+(global-set-key (kbd "C-x C-\\") 'goto-last-change-with-auto-marks)
 (global-set-key (kbd "C-z r") 'revert-buffer)
 (global-set-key (kbd "C-z f") 'zk-find-src-file-in-project)
 (global-set-key (kbd "C-z p") 'zk-copy-buffer-file-path)
