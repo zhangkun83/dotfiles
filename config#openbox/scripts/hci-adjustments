@@ -10,4 +10,4 @@ xset r rate 220 30 && $DIR/zknotify.sh "Key repeat speed adjusted"
 $DIR/color-mode.sh normal
 
 # Original mapping is 1 2 3 4 5 6 7 9 2 8
-xinput set-button-map 'Kingsis Peripherals Evoluent VerticalMouse 4' 1 2 3 4 5 6 7 0 2 0 && $DIR/zknotify.sh "Disabled Forward/Backward buttons for VerticalMouse"
+xinput set-button-map 'Kingsis Peripherals Evoluent VerticalMouse 4' 1 2 3 4 5 6 7 0 2 0 && $DIR/zknotify.sh "Disabled navigation buttons for VerticalMouse"
