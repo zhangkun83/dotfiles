@@ -23,6 +23,9 @@ BROWSER_PATHS = [
     "/usr/bin/google-chrome",
 ]
 
+def log(msg):
+    sys.stderr.write(msg + "\n");
+
 def handle(command, data):
     if command == "open-url":
         return handle_open_url(data)
@@ -36,7 +39,7 @@ def handle(command, data):
 def handle_open_url(url):
     for browser_path in BROWSER_PATHS:
         if os.path.exists(browser_path):
-            print(f"Opening {url} with {browser_path}")
+            log(f"Opening {url} with {browser_path}")
             os.spawnl(os.P_NOWAIT, browser_path, browser_path, url)
             return ("OK", "URL sent to " + browser_path)
     return ("ERROR", "Cannot find a usable browser to open the URL")
@@ -47,7 +50,7 @@ this.clipboard = ''
 
 def handle_store_to_clipboard(data):
     if os.path.exists("/usr/bin/xclip"):  # linux
-        print("Using xclip")
+        log("Using xclip")
         p = Popen(['xclip', '-i', '-selection', 'clip-board'], stdout=None, stdin=PIPE, stderr=None)
         p.communicate(input=data.encode('utf-8'))
         p.stdin.close()
@@ -55,13 +58,13 @@ def handle_store_to_clipboard(data):
             p.wait()
         except TimeoutExpired:
             p.kill()
-            print("xclip timed out")
+            log("xclip timed out")
         if p.returncode == 0:
             return ("OK", "xclip succeeded")
         else:
             return ("ERROR", f"xclip failed: {p.returncode}")
     elif os.path.exists("/dev/clipboard"):  # cygwin
-        print("Using /dev/clipboard")
+        log("Using /dev/clipboard")
         with open("/dev/clipboard", "w", encoding="utf-8") as f:
             f.write(data)
         return ("OK", "wrote to /dev/clipboard")
@@ -71,14 +74,14 @@ def handle_store_to_clipboard(data):
 
 def handle_retrieve_from_clipboard():
     if os.path.exists("/usr/bin/xclip"):
-        print("Using xclip")
+        log("Using xclip")
         p = Popen(['xclip', '-o', '-selection', 'clip-board'], stdout=PIPE, stdin=None, stderr=None)
         outs, errs = p.communicate(timeout=15)
         try:
             p.wait()
         except TimeoutExpired:
             p.kill()
-            print("xclip timed out")
+            log("xclip timed out")
         if p.returncode == 0:
             return ("OK", outs.decode('utf-8'))
         else:
@@ -91,19 +94,19 @@ def handle_retrieve_from_clipboard():
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
     server_socket.bind((HOST, PORT))
-    print(f"desktop-helper-server started on port {PORT}")
-    print("Local clients will work. To make remote clients work, use")
-    print(f"`ssh <host> -R {HOST}:{PORT}:{HOST}:{PORT} -t ~/.emacs.d/bin/ssh-tunnel-stub.py` to create a forwarding tunnel")
+    log(f"desktop-helper-server started on port {PORT}")
+    log("Local clients will work. To make remote clients work, use")
+    log(f"`ssh <host> -R {HOST}:{PORT}:{HOST}:{PORT} -t ~/.emacs.d/bin/ssh-tunnel-stub.py` to create a forwarding tunnel")
     server_socket.listen()
     while True:
         socket, addr = server_socket.accept()
-        print("New connection")
+        log("New connection")
         with socket:
             command = net_messaging.read_msg(socket)
-            print("[C]" + command)
+            log("[C]" + command)
             data = net_messaging.read_msg(socket)
-            print("[D]" + data)
+            log("[D]" + data)
             status, data = handle(command, data)
             net_messaging.write_msg(socket, status)
             net_messaging.write_msg(socket, data)
-        print("Connection closed\n")
+        log("Connection closed\n")
