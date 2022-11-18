@@ -1057,6 +1057,13 @@
       <layer>above</layer>
       <decor>no</decor>
     </application>
+    <!-- for JClock -->
+    <application class="zk-jclock-JClock">
+      <skip_pager>yes</skip_pager>
+      <skip_taskbar>yes</skip_taskbar>
+      <focus>no</focus>
+      <desktop>all</desktop>
+    </application>
     <!-- for zknotify -->
     <application class="XTerm" title="zknotify-console">
       <position force="yes">
