@@ -1,0 +1,11 @@
+#!/bin/bash
+# Run the rest of the command line and format the output of the
+# command by prefixing the command to each line.  This is useful for
+# revealing the original command line of a long-running command that
+# has flushed the original command line out of the screen with its
+# output.
+
+# Escape double quotes to make the prefix a valid awk string literal
+prefix=$(sed 's/"/\\"/g' <<< "[$*] ")
+
+"$@" 2>&1 | awk '$0="'"$prefix"'"$0'
