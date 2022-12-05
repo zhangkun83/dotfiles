@@ -789,6 +789,27 @@ text suitable for copying to line-wraping text editors."
   (interactive)
   (switch-to-buffer (other-buffer (current-buffer))))
 
+;;; Advice compilation-find-file to replace "\" with "/" in file names
+;;; if the system is cygwin.  javac under windows produces error
+;;; messages where file names use "\" as separators. While emacs can
+;;; still open it thanks to cygwin, but emacs treats the whole path as
+;;; the file name because it doesn't recognize "\" as the path
+;;; separator. compilation-find-file is the function compilation-mode
+;;; uses to open a file from the error message. We filter its file
+;;; name argument and fix its separators.
+(defun zk-filter-compilation-find-file-args (args)
+  ;; Second argument is the file name
+  (let* ((args-copy (copy-sequence args))
+        (orig-file-name (nth 1 args))
+        (new-file-name (replace-regexp-in-string "\\\\" "/" orig-file-name)))
+    (setf (nth 1 args-copy) new-file-name)
+    (message "zk-filter-compilation-find-file-args: changed file name \"%s\" to \"%s\""
+             orig-file-name new-file-name)
+    args-copy))
+(when (eq system-type 'cygwin)
+  (message "cygwin detected, installing zk-filter-compilation-find-file-args advice")
+  (advice-add 'compilation-find-file :filter-args #'zk-filter-compilation-find-file-args))
+
 (when (string-prefix-p "/google/src/cloud" command-line-default-directory)
   (defun zk-google3-find-g4-opened-file(f)
     "Find an opened file in the g4 client"
