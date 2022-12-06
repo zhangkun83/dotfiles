@@ -514,7 +514,7 @@ the current file for completion."
           (message "Removed \"%s\" in %d entries" from-tag counter)
         (message "Changed \"%s\" to \"%s\" in %d entries" from-tag to-tag counter)))))
 
-(defun zk-days-between-dates (dates)
+(defun zk-days-between-dates (&rest dates)
   "Given a list of dates and calculate the days between
   them. Dates are in the format that org-read-date supports, such
   as \"YYYY-MM-DD\", \"+1\", \"today\""
@@ -525,7 +525,7 @@ the current file for completion."
            (second (car rest)))
       (append (list (- (org-time-string-to-absolute (org-read-date nil nil second))
                        (org-time-string-to-absolute (org-read-date nil nil first))))
-              (zk-days-between-dates rest)))))
+              (apply 'zk-days-between-dates rest)))))
 
 (defun zk-minibuffer-insert-current-file-path ()
   "Get the full file path of original buffer and insert it to minibuffer."
