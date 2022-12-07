@@ -20,6 +20,9 @@
 (setq echo-keystrokes 0.01)
 (global-unset-key (kbd "C-z"))
 
+;; Treat camelCase as multiple words instead of one
+(global-subword-mode)
+
 ;;;; etags-select (better ctags search)
 
 (load "etags-select.el")
@@ -94,8 +97,6 @@
             (c-set-offset 'case-label '+)
             ;; Use whitespace-mode to visualize characters exceeding fill-column
             (whitespace-mode t)
-            ;; Treat camelCase as multiple words instead of one
-            (subword-mode t)
             ))
 
 ;;; Tramp related
@@ -212,11 +213,6 @@
 (global-set-key (kbd "C-z C-y") 'zk-clipboard-youdao-dict)
 (global-set-key (kbd "C-z h") 'global-hl-line-mode)
 
-(add-hook 'minibuffer-setup-hook
-          (lambda()
-            ;; Treat camelCase as multiple words instead of one
-            (subword-mode)))
-
 (add-hook 'shell-mode-hook
           (lambda()
             ;; Make dots part of the word so full paths can be expanded by M+/
@@ -225,8 +221,6 @@
             ;; Make default-directory track the PWD of the shell
             (setq dirtrack-list '("^(\\([^)]*\\))" 1))
             (dirtrack-mode t)
-            ;; Treat camelCase as multiple words instead of one
-            (subword-mode t)
             (local-set-key (kbd "C-c o") 'zk-open-file-path-from-region-or-at-point)
             (local-set-key (kbd "C-c c") 'zk-shell-command-on-file-at-point)
             (local-set-key (kbd "C-c t") 'comint-truncate-buffer)))
