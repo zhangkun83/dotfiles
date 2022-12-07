@@ -1,7 +1,6 @@
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp"))
 
 (require 'kotlin-mode)
-(require 'syntax-subword)
 
 ;; Disable tool-bar
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
@@ -95,9 +94,8 @@
             (c-set-offset 'case-label '+)
             ;; Use whitespace-mode to visualize characters exceeding fill-column
             (whitespace-mode t)
-            ;; Treat camelCase as multiple words instead of one, and treat
-            ;; punctuation marks as words as well.
-            (syntax-subword-mode t)
+            ;; Treat camelCase as multiple words instead of one
+            (subword-mode t)
             ))
 
 ;;; Tramp related
@@ -216,9 +214,8 @@
 
 (add-hook 'minibuffer-setup-hook
           (lambda()
-            ;; Treat camelCase as multiple words instead of one, and treat
-            ;; punctuation marks as words as well.
-            (syntax-subword-mode)))
+            ;; Treat camelCase as multiple words instead of one
+            (subword-mode)))
 
 (add-hook 'shell-mode-hook
           (lambda()
@@ -228,9 +225,8 @@
             ;; Make default-directory track the PWD of the shell
             (setq dirtrack-list '("^(\\([^)]*\\))" 1))
             (dirtrack-mode t)
-            ;; Treat camelCase as multiple words instead of one, and treat
-            ;; punctuation marks as words as well.
-            (syntax-subword-mode t)
+            ;; Treat camelCase as multiple words instead of one
+            (subword-mode t)
             (local-set-key (kbd "C-c o") 'zk-open-file-path-from-region-or-at-point)
             (local-set-key (kbd "C-c c") 'zk-shell-command-on-file-at-point)
             (local-set-key (kbd "C-c t") 'comint-truncate-buffer)))
