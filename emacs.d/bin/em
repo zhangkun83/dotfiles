@@ -1,5 +1,2 @@
 #!/bin/bash
-if [[ "$TERM" != "rxvt-unicode-256color" ]]; then
-   export TERM=xterm-direct
-fi
 exec emacs -nw "$@"
