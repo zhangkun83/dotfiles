@@ -8,6 +8,8 @@
 # Escape double quotes to make the prefix a valid awk string literal
 prefix=$(sed 's/"/\\"/g' <<< "[$*] ")
 
-tmux rename-window "$*"
-trap "tmux set automatic-rename on" EXIT
+if [[ -n "$TMUX" ]]; then
+    tmux rename-window "$*"
+    trap "tmux set automatic-rename on" EXIT
+fi
 "$@" 2>&1 | awk '$0="'"$prefix"'"$0'
