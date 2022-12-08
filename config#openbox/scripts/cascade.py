@@ -34,7 +34,7 @@ def get_xwininfo_value(xwininfo, key):
     line = [ i.strip() for i in xwininfo if i.strip().startswith(key) ][0]
     return line[line.find(":") + 1:].strip()
 
-encoded_win_state_pattern = re.compile(r'"?(\d+):(\d+):(\d+):(\d+) (\w*)"?')
+encoded_win_state_pattern = re.compile(r'"?(-?\d+):(-?\d+):(-?\d+):(-?\d+) (\w*)"?')
 
 class WinState:
     def __init__(self, win_id):
@@ -78,7 +78,7 @@ class WinState:
 
     def decode_from(self, encoded):
         m = encoded_win_state_pattern.match(encoded)
-        assert m != None
+        assert m != None, f"cannot parse encoded state: {encoded}"
         decoded = WinState(self.win_id)
         decoded.x = int(m.group(1))
         decoded.y = int(m.group(2))
