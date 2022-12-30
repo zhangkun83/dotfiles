@@ -831,17 +831,34 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
   (let* ((args-copy (copy-sequence args))
         (orig-file-name (nth 0 args))
         (new-file-name (zk-cygwin-fix-windows-path orig-file-name)))
-    (if (not (string-equal orig-file-name new-file-name))
-	(progn
-	  (setf (nth 0 args-copy) new-file-name)
-	  (message "zk-cygwin-fix-windows-path changed file name \"%s\" to \"%s\""
-		   orig-file-name new-file-name))
-      args-copy)))
+    (unless (string-equal orig-file-name new-file-name)
+      (setf (nth 0 args-copy) new-file-name)
+      (message "zk-cygwin-fix-windows-path changed file name \"%s\" to \"%s\""
+	       orig-file-name new-file-name))
+    args-copy))
+
+(defun set-exec-path-from-shell-PATH ()
+  "Set up Emacs' `exec-path' and PATH environment variable to match
+that used by the user's shell.
+
+This is particularly useful under Mac OS X and macOS, where GUI
+apps are not started from a shell."
+  (interactive)
+  (let ((path-from-shell (replace-regexp-in-string
+              "[ \t\n]*$" "" (shell-command-to-string
+                      "$SHELL --login -c 'echo $PATH'"
+                            ))))
+    (setenv "PATH" path-from-shell)
+    (setq exec-path (split-string path-from-shell path-separator))))
 
 (when (eq system-type 'cygwin)
   (message "cygwin detected, installing advices")
   (advice-add 'compilation-find-file :filter-args #'zk-cygwin-filter-compilation-find-file-args)
-  (advice-add 'find-file-noselect :filter-args #'zk-cygwin-advice-find-file-fix-windows-path))
+  (advice-add 'find-file-noselect :filter-args #'zk-cygwin-advice-find-file-fix-windows-path)
+  ;; When Windows starts Cygwin Emacs, it's not from a login shell thus paths won't be set.
+  ;; This will set exec-path and the PATH environment correctly.
+  (unless (member "/bin" exec-path)
+    (set-exec-path-from-shell-PATH)))
 
 (when (string-prefix-p "/google/src/cloud" command-line-default-directory)
   (defun zk-google3-find-g4-opened-file(f)
