@@ -851,14 +851,24 @@ apps are not started from a shell."
     (setenv "PATH" path-from-shell)
     (setq exec-path (split-string path-from-shell path-separator))))
 
+;; Cygwin-specific hacks
 (when (eq system-type 'cygwin)
-  (message "cygwin detected, installing advices")
+  (message "Cygwin detected, installing advices")
   (advice-add 'compilation-find-file :filter-args #'zk-cygwin-filter-compilation-find-file-args)
   (advice-add 'find-file-noselect :filter-args #'zk-cygwin-advice-find-file-fix-windows-path)
   ;; When Windows starts Cygwin Emacs, it's not from a login shell thus paths won't be set.
   ;; This will set exec-path and the PATH environment correctly.
   (unless (member "/bin" exec-path)
-    (set-exec-path-from-shell-PATH)))
+    (message "Explicitly setting exec-path and PATH for Cygwin")
+    (set-exec-path-from-shell-PATH))
+  ;; When Windows starts Cygwin Emacs, it's not from a shell thus the
+  ;; SHELL environment is not set, causing shell-file-name to be set
+  ;; to /bin/sh, overriding its default value /bin/bash, which caused
+  ;; explicit-bash-args to be unused. Here I restore the value of
+  ;; shell-file-name.
+  (unless (getenv "SHELL")
+    (message "SHELL environment is not set, forcing shell-file-name to bash")
+    (setq shell-file-name "/bin/bash")))
 
 (when (string-prefix-p "/google/src/cloud" command-line-default-directory)
   (defun zk-google3-find-g4-opened-file(f)
