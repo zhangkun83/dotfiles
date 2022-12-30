@@ -797,7 +797,7 @@ text suitable for copying to line-wraping text editors."
 ;;; separator. compilation-find-file is the function compilation-mode
 ;;; uses to open a file from the error message. We filter its file
 ;;; name argument and fix its separators.
-(defun zk-filter-compilation-find-file-args (args)
+(defun zk-cygwin-filter-compilation-find-file-args (args)
   ;; Second argument is the file name
   (let* ((args-copy (copy-sequence args))
         (orig-file-name (nth 1 args))
@@ -806,9 +806,41 @@ text suitable for copying to line-wraping text editors."
     (message "zk-filter-compilation-find-file-args: changed file name \"%s\" to \"%s\""
              orig-file-name new-file-name)
     args-copy))
+
+(defun zk-cygwin-fix-windows-path (orig-file-name)
+  "Convert
+  '/cygdrive/c/Windows/system32/\"D:\\Users\\zhangkun\\a.txt\\\"' (with
+  windows path quoted) or
+  '/cygdrive/c/Windows/system32/D:\\Users\\zhangkun\\a.txt\\' (with
+  windows path not quoted) to
+  '/cygdrive/d/Users/zhangkun/a.txt'. This is used to fix the
+  file path when Windows uses Cygwin Emacs to open a file"
+  (if (or (string-match "\"\\([A-Z]\\):\\\\\\([^\"]*\\)\"$" orig-file-name)
+          (string-match "[^\"]\\([A-Z]\\):\\\\\\(.*\\)$" orig-file-name))
+      (concat
+         "/cygdrive/"
+         (downcase (match-string 1 orig-file-name))  ; The drive letter
+         "/"
+         (replace-regexp-in-string "\\\\" "/" (decode-coding-string (match-string 2 orig-file-name) 'utf-8)))
+      orig-file-name))
+
+(defun zk-cygwin-advice-find-file-fix-windows-path (args)
+  "An advice to fix the file path passed to find-file-noselect when
+Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
+  ;; First argument is the file name
+  (let* ((args-copy (copy-sequence args))
+        (orig-file-name (nth 0 args))
+        (new-file-name (zk-cygwin-fix-windows-path orig-file-name)))
+    (when (not (string-equal orig-file-name new-file-name))
+      (setf (nth 0 args-copy) new-file-name)
+      (message "zk-cygwin-fix-windows-path changed file name \"%s\" to \"%s\""
+               orig-file-name new-file-name)
+      args-copy)))
+
 (when (eq system-type 'cygwin)
   (message "cygwin detected, installing zk-filter-compilation-find-file-args advice")
-  (advice-add 'compilation-find-file :filter-args #'zk-filter-compilation-find-file-args))
+  (advice-add 'compilation-find-file :filter-args #'zk-cygwin-filter-compilation-find-file-args)
+  (advice-add 'find-file-noselect :filter-args #'zk-cygwin-advice-find-file-fix-windows-path))
 
 (when (string-prefix-p "/google/src/cloud" command-line-default-directory)
   (defun zk-google3-find-g4-opened-file(f)
