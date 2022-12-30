@@ -831,14 +831,15 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
   (let* ((args-copy (copy-sequence args))
         (orig-file-name (nth 0 args))
         (new-file-name (zk-cygwin-fix-windows-path orig-file-name)))
-    (when (not (string-equal orig-file-name new-file-name))
-      (setf (nth 0 args-copy) new-file-name)
-      (message "zk-cygwin-fix-windows-path changed file name \"%s\" to \"%s\""
-               orig-file-name new-file-name)
+    (if (not (string-equal orig-file-name new-file-name))
+	(progn
+	  (setf (nth 0 args-copy) new-file-name)
+	  (message "zk-cygwin-fix-windows-path changed file name \"%s\" to \"%s\""
+		   orig-file-name new-file-name))
       args-copy)))
 
 (when (eq system-type 'cygwin)
-  (message "cygwin detected, installing zk-filter-compilation-find-file-args advice")
+  (message "cygwin detected, installing advices")
   (advice-add 'compilation-find-file :filter-args #'zk-cygwin-filter-compilation-find-file-args)
   (advice-add 'find-file-noselect :filter-args #'zk-cygwin-advice-find-file-fix-windows-path))
 
