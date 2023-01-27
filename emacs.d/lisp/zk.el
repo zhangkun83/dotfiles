@@ -837,6 +837,14 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
 	       orig-file-name new-file-name))
     args-copy))
 
+(defun zk-cygwin-dired-cygstart ()
+  "Run cygstart on selected files in dired."
+  (interactive)
+  (let ((file (dired-get-file-for-visit)))
+    (if (eq 0 (call-process "cygstart" nil nil nil file))
+        (message "Successfully called cygstart for '%s'" file)
+      (message "cygstart for '%s' failed" file))))
+
 (defun set-exec-path-from-shell-PATH ()
   "Set up Emacs' `exec-path' and PATH environment variable to match
 that used by the user's shell.
@@ -868,7 +876,10 @@ apps are not started from a shell."
   ;; shell-file-name.
   (unless (getenv "SHELL")
     (message "SHELL environment is not set, forcing shell-file-name to bash")
-    (setq shell-file-name "/bin/bash")))
+    (setq shell-file-name "/bin/bash"))
+  (add-hook 'dired-mode-hook
+            (lambda ()
+              (local-set-key (kbd "r") 'zk-cygwin-dired-cygstart))))
 
 (when (string-prefix-p "/google/src/cloud" command-line-default-directory)
   (defun zk-google3-find-g4-opened-file(f)
