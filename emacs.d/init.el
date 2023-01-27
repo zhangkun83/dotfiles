@@ -245,6 +245,9 @@
                                              ((eq system-type 'gnu/linux) "Droid Sans Fallback")))
                     nil t))
 
+(add-hook 'dired-mode-hook
+          (lambda() (dired-hide-details-mode 1)))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -254,6 +257,7 @@
  '(compilation-scroll-output t)
  '(custom-enabled-themes '(leuven))
  '(dabbrev-case-replace nil)
+ '(dired-listing-switches "-alo")
  '(explicit-bash-args
    '("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i"))
  '(fci-rule-character 9474)
