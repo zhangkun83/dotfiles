@@ -879,7 +879,7 @@ apps are not started from a shell."
     (setq shell-file-name "/bin/bash"))
   (add-hook 'dired-mode-hook
             (lambda ()
-              (local-set-key (kbd "r") 'zk-cygwin-dired-cygstart))))
+              (local-set-key (kbd "E") 'zk-cygwin-dired-cygstart))))
 
 (when (string-prefix-p "/google/src/cloud" command-line-default-directory)
   (defun zk-google3-find-g4-opened-file(f)
