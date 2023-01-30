@@ -238,8 +238,7 @@
 
 ;; Set font
 (set-face-attribute 'default nil
-		    :family (cond ((eq system-type 'cygwin) "Consolas")
-                                   (t "Liberation Mono")))
+		    :family "Liberation Mono")
 (when (fboundp 'set-fontset-font)
   (set-fontset-font t 'chinese-gbk
                     (font-spec :family (cond ((eq system-type 'cygwin) "Microsoft YaHei")
