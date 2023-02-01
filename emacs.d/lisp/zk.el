@@ -378,7 +378,7 @@ try-catch-finally constructs as a single thing."
 or 'backward"
   ;; Check if is in a pair of parentheses.
   (save-excursion
-    (backward-up-list)
+    (backward-up-list nil t t)
     (unless (eq (char-after) ?\()
       (user-error "Not in an argument list")))
   (let ((continue-loop-p t) (last-point (point)))
