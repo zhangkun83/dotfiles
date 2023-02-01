@@ -363,6 +363,48 @@ try-catch-finally constructs as a single thing."
                 (goto-char original-point))
             (setq last-point (point))))))))
 
+(defun zk-java-next-argument()
+  "Move to the beginning of the next argument in an argument list"
+  (interactive)
+  (zk-java-move-to-argument 'forward))
+
+(defun zk-java-prev-argument()
+  "Move to the beginning of the previous argument in an argument list"
+  (interactive)
+  (zk-java-move-to-argument 'backward))
+
+(defun zk-java-move-to-argument (dir)
+  "Move to the beginning of an argument. dir can be either 'forward
+or 'backward"
+  ;; Check if is in a pair of parentheses.
+  (save-excursion
+    (backward-up-list)
+    (unless (eq (char-after) ?\()
+      (user-error "Not in an argument list")))
+  (let ((continue-loop-p t) (last-point (point)))
+    (while continue-loop-p
+      (cond ((eq dir 'forward)
+             ;; forward-sexp throw an error at the end of the list
+             (ignore-errors
+               (forward-sexp)))
+            ((eq dir 'backward)
+             ;; backward-sexp throw an error at the beginning of the list
+             (ignore-errors
+               ;; Two backwards then one forward so that the point
+               ;; can arrive at the comma.
+               (backward-sexp)
+               (backward-sexp)
+               (forward-sexp))))
+      (if (or (eq (char-after) ?,)
+              (= (point) last-point))
+          (setq continue-loop-p nil))
+      (setq last-point (point))))
+  ;; The point may have arrived at a comma, skip it and all blank
+  ;; characters so that the point arrive at the beginning of the next
+  ;; argument
+  (while (memq (char-after) '(?, ?\t ?\n ?\s ?\r))
+    (forward-char)))
+
 (defun zk-copy-buffer-file-path ()
   "Copy the full path of a buffer's file to kill ring"
   (interactive)

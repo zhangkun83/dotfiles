@@ -162,6 +162,8 @@
             (local-set-key (kbd "M-o") 'zk-java-exit-bracesblock)
             (local-set-key (kbd "M-n") 'zk-java-next-thing)
             (local-set-key (kbd "M-p") 'zk-java-prev-thing)
+            (local-set-key (kbd "C-c C-n") 'zk-java-next-argument)
+            (local-set-key (kbd "C-c C-p") 'zk-java-prev-argument)
             (local-set-key [backtab] (lambda() (interactive) (c-indent-line-or-region -1)))))
 
 ; Java stacktrace detection in compilation-mode
