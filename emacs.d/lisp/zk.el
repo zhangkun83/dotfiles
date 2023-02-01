@@ -363,6 +363,24 @@ try-catch-finally constructs as a single thing."
                 (goto-char original-point))
             (setq last-point (point))))))))
 
+(defun zk-java-enter-argument-list()
+  "Move into an argument list and place the point at the
+beginning of the first argument."
+  (interactive)
+  (zk-escape-string)
+  (let ((continue-loop-p t))
+    (while continue-loop-p
+      (down-list)
+      ;; We may have entered a bracelet pair, a bracket pair or a
+      ;; string. In that case, jump out and skip over that pair.
+      (if (eq (char-before) ?\()
+          (setq continue-loop-p nil)
+        (backward-up-list nil t t)
+        (forward-sexp))))
+  ;; Skip over all blank characters
+  (while (memq (char-after) '(?\t ?\n ?\s ?\r))
+    (forward-char)))
+
 (defun zk-java-next-argument()
   "Move to the beginning of the next argument in an argument list"
   (interactive)
