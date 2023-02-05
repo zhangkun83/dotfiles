@@ -244,7 +244,7 @@
 		    :family "DejaVu Sans Mono"
                     :height (if (<= 1440 (nth 3 (alist-get 'geometry (car (display-monitor-attributes-list)))))
                                 ;; likely high-DPI
-                                100
+                                105
                               ;; likely low-DPI
                               110))
 
