@@ -990,13 +990,21 @@ apps are not started from a shell."
   (global-set-key (kbd "C-z g p") 'zk-google3-open-build-sponge-link)
 
   (defun zk-google3-open-critique()
-    "Open the critique page of the current file."
+    "Open the critique page of the current file. If the current
+buffer doesn't visit a file, let the user select a CL to open."
     (interactive)
     (let ((file-name (buffer-file-name)))
-      (unless file-name
-        (user-error "Current buffer doesn't visit a file"))
-      (shell-command (concat "open-critique-for-file "
-                             (prin1-to-string (zk-project-get-relative-path file-name))))))
+      (if file-name
+          (shell-command (concat "open-critique-for-file "
+                                 (prin1-to-string (zk-project-get-relative-path file-name))))
+        ;; If not visiting a file, let the user select a CL
+        (let* ((selected-line
+                (completing-read "Open Critique for: "
+                                 (process-lines "bash" "-c" "g4 p | grep '^Change [0-9]\\+' | sed 's/^Change //'")))
+               (selected-cl (if (string-match "\\(^[0-9]+\\) .*" selected-line)
+                                (match-string 1 selected-line)
+                              (user-error "No CL selected"))))
+          (zk-browse-url (concat "http://cl/" selected-cl))))))
   (global-set-key (kbd "C-z g c") 'zk-google3-open-critique)
 
   (defun zk-google3-open-file-from-codesearch-or-critique-link (link)
