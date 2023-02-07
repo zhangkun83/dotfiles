@@ -849,6 +849,19 @@ text suitable for copying to line-wraping text editors."
   (interactive)
   (switch-to-buffer (other-buffer (current-buffer))))
 
+(defun zk-yank-to-register (r)
+  "Yank to a register"
+  (interactive (list (register-read-with-preview
+                      (format "Yank \"%s\" to register: "
+                              (let ((content (current-kill 0 t))
+                                    (limit 80))
+                                (replace-regexp-in-string
+                                 "\n+" " "
+                                 (if (> (length content) limit)
+                                     (concat (substring content 0 limit) "...")
+                                   content)))))))
+  (set-register r (current-kill 0 t)))
+
 ;;; Advice compilation-find-file to replace "\" with "/" in file names
 ;;; if the system is cygwin.  javac under windows produces error
 ;;; messages where file names use "\" as separators. While emacs can
