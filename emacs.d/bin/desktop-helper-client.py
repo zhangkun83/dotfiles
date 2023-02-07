@@ -22,9 +22,9 @@ else:
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket:
     socket.connect((HOST, PORT))
     if command == 'store-to-clipboard':
-        sys.stderr.write(f"desktop-helper-client: {command} (content redacted)\n")
+        sys.stderr.write(f"desktop-helper-client: {command} (content redacted); ")
     else:
-        sys.stderr.write(f"desktop-helper-client: {command} {data}\n")
+        sys.stderr.write(f"desktop-helper-client: {command} {data}; ")
     net_messaging.write_msg(socket, command)
     net_messaging.write_msg(socket, data)
     status = net_messaging.read_msg(socket)
