@@ -1,11 +1,11 @@
 #!/bin/bash
 DIR="$HOME/orgwork"
-FILE="$DIR/work.org"
 
 cd $DIR
 # Disable create-lockfiles because it doesn't work well with Google Drive
-emacs-nolock "$FILE" \
-      --eval="(progn \
+emacs-nolock --eval="(progn \
                 (setq org-agenda-files '(\"$DIR\")\
                       frame-title-format \"orgwork\" )\
-                (add-to-list 'zk-remote-file-prefix-list \"$DIR\"))"
+                (add-to-list 'zk-remote-file-prefix-list \"$DIR\")
+                (zk-orgwork-goto-latest-note-file)
+                (end-of-buffer))"
