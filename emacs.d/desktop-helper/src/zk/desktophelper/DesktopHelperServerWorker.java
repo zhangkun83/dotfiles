@@ -53,6 +53,8 @@ final class DesktopHelperServerWorker implements BlockingServer.Worker {
             writeMessage(out, new Message("ERROR", e.toString()));
           }
         }
+      } else if (msg.header.equals("ping")) {
+        writeMessage(out, new Message("OK", "Pong!"));
       } else {
         writeMessage(out, new Message("ERROR", "Unsupported command: " + msg.header));
       }

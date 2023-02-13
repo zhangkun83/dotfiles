@@ -28,6 +28,7 @@ final class DesktopHelperProxyWorker implements BlockingServer.Worker {
 
   void start() {
     connect();
+    timerService.scheduleWithFixedDelay(this::ping, 60, 60, TimeUnit.SECONDS);
   }
 
   private void connect() {
@@ -44,15 +45,41 @@ final class DesktopHelperProxyWorker implements BlockingServer.Worker {
 
   private void scheduleReconnect() {
     logger.info("Waiting to reconnect to server");
-    timerService.schedule(
-        () -> {
-          try {
-            Thread.sleep(5000);
-          } catch (Exception ignored) {}
-          connect();
-        },
-        5,
-        TimeUnit.SECONDS);
+    timerService.schedule(this::connect, 5, TimeUnit.SECONDS);
+  }
+
+  private void ping() {
+    logger.info("Pinging server");
+    requestServer(new Message("ping", ""));
+  }
+
+  private Message requestServer(Message request) {
+    Socket socket = null;
+    try {
+      socket = socketToServer.poll(10, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      logger.warning("Failed to get a connection to server: " + e);
+    }
+    if (socket == null) {
+      logger.warning("Proxy cannot get a connection to send " + request.header);
+      return new Message("ERROR", "Proxy cannot get a connection to server");
+    } else {
+      Message response;
+      try {
+        OutputStream outToServer = socket.getOutputStream();
+        InputStream inFromServer = socket.getInputStream();
+        writeMessage(outToServer, request);
+        logger.info("Sent " + request.header + " to server");
+        response = readMessage(inFromServer);
+        logger.info("Response from server: " + response.header);
+        socketToServer.add(socket);
+        return response;
+      } catch (IOException e) {
+        logger.info("Proxy-server connection is broken: " + e);
+        scheduleReconnect();
+        return new Message("ERROR", "Proxy-server connection is broken");
+      }
+    }
   }
 
   @Override
@@ -60,34 +87,7 @@ final class DesktopHelperProxyWorker implements BlockingServer.Worker {
     while (true) {
       Message msg = readMessage(in);
       logger.info("Received: " + msg);
-      Socket socket = null;
-      try {
-        socket = socketToServer.poll(10, TimeUnit.SECONDS);
-      } catch (InterruptedException e) {
-        logger.warning("Failed to get connect to server: " + e);
-      }
-      if (socket == null) {
-        logger.warning("Proxy cannot get a connection to server");
-        writeMessage(out, new Message("ERROR", "Proxy cannot get a connection to server"));
-      } else {
-        Message response;
-        try {
-          OutputStream outToServer = socket.getOutputStream();
-          InputStream inFromServer = socket.getInputStream();
-          writeMessage(outToServer, msg);
-          logger.info("Forwarded request to server");
-          response = readMessage(inFromServer);
-          logger.info("Response from server: " + response);
-          socketToServer.add(socket);
-        } catch (IOException e) {
-          logger.info("Proxy-server connection is broken: " + e);
-          writeMessage(out, new Message("ERROR", "Proxy-server connection is broken"));
-          scheduleReconnect();
-          continue;
-        }
-        writeMessage(out, response);
-        logger.info("Forwarded response to client");
-      }
+      writeMessage(out, requestServer(msg));
     }
   }
 }
