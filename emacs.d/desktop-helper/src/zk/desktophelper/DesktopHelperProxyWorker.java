@@ -55,11 +55,12 @@ final class DesktopHelperProxyWorker implements BlockingServer.Worker {
       logger.info("Received: " + msg);
       Socket socket = null;
       try {
-        socketToServer.poll(10, TimeUnit.SECONDS);
+        socket = socketToServer.poll(10, TimeUnit.SECONDS);
       } catch (InterruptedException e) {
         logger.warning("Failed to get connect to server: " + e);
       }
       if (socket == null) {
+        logger.warning("Proxy cannot get a connection to server");
         writeMessage(out, new Message("ERROR", "Proxy cannot get a connection to server"));
       } else {
         Message response;
@@ -72,8 +73,8 @@ final class DesktopHelperProxyWorker implements BlockingServer.Worker {
           logger.info("Response from server: " + response);
           socketToServer.add(socket);
         } catch (IOException e) {
-          writeMessage(out, new Message("ERROR", "Proxy-server connection is broken"));
           logger.info("Proxy-server connection is broken: " + e);
+          writeMessage(out, new Message("ERROR", "Proxy-server connection is broken"));
           scheduleReconnect();
           continue;
         }
