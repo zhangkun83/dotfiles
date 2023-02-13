@@ -3,6 +3,7 @@ package zk.desktophelper;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -24,13 +25,12 @@ final class BlockingServer {
 
   private void acceptConnections() {
     try {
-      ServerSocket ss = new ServerSocket(port);
+      ServerSocket ss = new ServerSocket(port, 50, InetAddress.getByName("localhost"));
       logger.info("BlockingServer listening on port " + port);
       while (true) {
         Socket s = ss.accept();
         new Thread(() -> {
-              logger.info(
-                  "New connection from " + s.getRemoteSocketAddress() + " dispatched to " + worker);
+              logger.info("New connection from " + s.getRemoteSocketAddress());
               try {
                 InputStream in = s.getInputStream();
                 OutputStream out = s.getOutputStream();
@@ -38,7 +38,7 @@ final class BlockingServer {
               } catch (IOException ioe) {
                 logger.info(ioe.toString());
               } catch (RuntimeException e) {
-                logger.log(Level.WARNING, "Exception thrown from Worker " + worker, e);
+                logger.log(Level.WARNING, "Exception thrown from Worker", e);
               }
               try {
                 s.close();

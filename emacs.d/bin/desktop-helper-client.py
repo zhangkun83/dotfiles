@@ -34,3 +34,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket:
         sys.stdout.write(data)
     else:
         sys.stderr.write(f"{status}: {data}\n")
+    socket.close()
