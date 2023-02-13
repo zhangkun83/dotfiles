@@ -28,7 +28,7 @@ final class DesktopHelperProxyWorker implements BlockingServer.Worker {
 
   void start() {
     connect();
-    timerService.scheduleWithFixedDelay(this::ping, 60, 60, TimeUnit.SECONDS);
+    timerService.scheduleWithFixedDelay(this::ping, 0, 60, TimeUnit.SECONDS);
   }
 
   private void connect() {
@@ -50,7 +50,8 @@ final class DesktopHelperProxyWorker implements BlockingServer.Worker {
 
   private void ping() {
     logger.info("Pinging server");
-    requestServer(new Message("ping", ""));
+    Message response = requestServer(new Message("ping", ""));
+    logger.info("Ping result: " + response);
   }
 
   private Message requestServer(Message request) {
