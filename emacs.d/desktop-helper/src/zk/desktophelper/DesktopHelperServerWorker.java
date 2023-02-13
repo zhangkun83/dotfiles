@@ -35,6 +35,22 @@ final class DesktopHelperServerWorker implements BlockingServer.Worker {
         } catch (UnsupportedFlavorException e) {
           writeMessage(out, new Message("ERROR", e.toString()));
         }
+      } else if (msg.header.equals("open-url")) {
+        String os = System.getProperty("os.name");
+        String program = null;
+        if (os.toLowerCase().contains("win")) {
+          program = "c:/Program Files/Google/Chrome/Application/chrome.exe";
+        }
+        if (program == null) {
+          writeMessage(out, new Message("ERROR", "Unsupported OS for open-url: " + os));
+        } else {
+          try {
+            Runtime.getRuntime().exec(new String[]{program, msg.data});
+            writeMessage(out, new Message("OK", "URL sent to " + program));
+          } catch (IOException e) {
+            writeMessage(out, new Message("ERROR", e.toString()));
+          }
+        }
       } else {
         writeMessage(out, new Message("ERROR", "Unsupported command: " + msg.header));
       }
