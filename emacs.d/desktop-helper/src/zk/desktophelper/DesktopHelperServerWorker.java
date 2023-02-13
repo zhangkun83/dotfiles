@@ -40,6 +40,8 @@ final class DesktopHelperServerWorker implements BlockingServer.Worker {
         String program = null;
         if (os.toLowerCase().contains("win")) {
           program = "c:/Program Files/Google/Chrome/Application/chrome.exe";
+        } else if (os.toLowerCase().contains("linux")) {
+          program = "/usr/bin/google-chrome";
         }
         if (program == null) {
           writeMessage(out, new Message("ERROR", "Unsupported OS for open-url: " + os));
