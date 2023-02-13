@@ -3,6 +3,6 @@ desktophelper.jar: $(shell find src -name '*.java')
 run-server: desktophelper.jar
 	java -Xmx60M -cp desktophelper.jar zk.desktophelper.DesktopHelperServer --port=5032
 run-proxy: desktophelper.jar
-	java -Xmx60M -cp desktophelper.jar zk.desktophelper.DesktopHelperProxy --port=5032
+	java -Xmx60M -cp desktophelper.jar zk.desktophelper.DesktopHelperProxy --server_port=5035 --proxy_port=5032
 clean:
 	rm -r desktophelper.jar compile
