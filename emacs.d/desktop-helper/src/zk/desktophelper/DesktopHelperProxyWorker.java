@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import zk.desktophelper.Protocol.Message;
@@ -16,6 +18,8 @@ final class DesktopHelperProxyWorker implements BlockingServer.Worker {
   private static final Logger logger = Logger.getLogger(DesktopHelperProxyWorker.class.getName());
 
   private final int serverPort;
+  private final ScheduledExecutorService timerService =
+      Executors.newSingleThreadScheduledExecutor();
   private ArrayBlockingQueue<Socket> socketToServer = new ArrayBlockingQueue<>(1);
 
   DesktopHelperProxyWorker(int serverPort) {
@@ -39,13 +43,16 @@ final class DesktopHelperProxyWorker implements BlockingServer.Worker {
   }
 
   private void scheduleReconnect() {
-    new Thread(() -> {
-          logger.info("Waiting to reconnect to server");
+    logger.info("Waiting to reconnect to server");
+    timerService.schedule(
+        () -> {
           try {
             Thread.sleep(5000);
           } catch (Exception ignored) {}
           connect();
-    }).start();
+        },
+        5,
+        TimeUnit.SECONDS);
   }
 
   @Override

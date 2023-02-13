@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +16,8 @@ final class BlockingServer {
 
   private final int port;
   private final Worker worker;
+  private final Executor executor = Executors.newCachedThreadPool();
+
   BlockingServer(int port, Worker worker) {
     this.port = port;
     this.worker = worker;
@@ -29,8 +33,8 @@ final class BlockingServer {
       logger.info("BlockingServer listening on port " + port);
       while (true) {
         Socket s = ss.accept();
-        new Thread(() -> {
-              logger.info("New connection from " + s.getRemoteSocketAddress());
+        executor.execute(() -> {
+              logger.info("New client: " + s.getRemoteSocketAddress());
               try {
                 InputStream in = s.getInputStream();
                 OutputStream out = s.getOutputStream();
@@ -45,8 +49,8 @@ final class BlockingServer {
               } catch (Exception e) {
                 // ignored
               }
-              logger.info("Connection from " + s.getRemoteSocketAddress() + " closed");
-        }).start();
+              logger.info("Client " + s.getRemoteSocketAddress() + " disconnected");
+        });
       }
     } catch (Exception e) {
       logger.log(Level.SEVERE, "ServerSocket broken", e);
