@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 public class DesktopHelperServer {
   private static final Logger logger = Logger.getLogger(DesktopHelperServer.class.getName());
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     Flags flags = new Flags(args);
     logger.info("DesktopHelperServer started with flags: " + flags);
     System.err.println(
@@ -19,6 +19,6 @@ public class DesktopHelperServer {
         + "proxy will connect to.\n"
         + "##################################################################################");
     int port = flags.getInt("port");
-    new BlockingServer(port, new DesktopHelperServerWorker()).start();
+    new BlockingServer(port, new DesktopHelperServerWorker()).runServer();
   }
 }

@@ -23,13 +23,9 @@ final class BlockingServer {
     this.worker = worker;
   }
 
-  void start() {
-    new Thread(this::acceptConnections).start();
-  }
-
-  private void acceptConnections() {
+  void runServer() throws IOException {
+    ServerSocket ss = new ServerSocket(port, 50, InetAddress.getByName("localhost"));
     try {
-      ServerSocket ss = new ServerSocket(port, 50, InetAddress.getByName("localhost"));
       logger.info("BlockingServer listening on port " + port);
       while (true) {
         Socket s = ss.accept();
@@ -46,14 +42,18 @@ final class BlockingServer {
               }
               try {
                 s.close();
-              } catch (Exception e) {
+              } catch (IOException e) {
                 // ignored
               }
               logger.info("Client " + s.getRemoteSocketAddress() + " disconnected");
-        });
+            });
       }
-    } catch (Exception e) {
-      logger.log(Level.SEVERE, "ServerSocket broken", e);
+    } finally {
+      try {
+        ss.close();
+      } catch (IOException e) {
+        // ignored
+      }
     }
   }
 
