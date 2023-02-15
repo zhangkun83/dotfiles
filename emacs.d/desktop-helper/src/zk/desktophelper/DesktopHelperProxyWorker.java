@@ -1,8 +1,5 @@
 package zk.desktophelper;
 
-import static zk.desktophelper.Protocol.readMessage;
-import static zk.desktophelper.Protocol.writeMessage;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import zk.desktophelper.Protocol.Message;
 
-final class DesktopHelperProxyWorker implements BlockingServer.Worker {
+final class DesktopHelperProxyWorker extends MessageWorker {
   private static final Logger logger = Logger.getLogger(DesktopHelperProxyWorker.class.getName());
 
   private final int serverPort;
@@ -69,9 +66,9 @@ final class DesktopHelperProxyWorker implements BlockingServer.Worker {
       try {
         OutputStream outToServer = socket.getOutputStream();
         InputStream inFromServer = socket.getInputStream();
-        writeMessage(outToServer, request);
+        Protocol.writeMessage(outToServer, request);
         logger.info("Sent " + request.header + " to server");
-        response = readMessage(inFromServer);
+        response = Protocol.readMessage(inFromServer);
         logger.info("Response from server: " + response.header);
         socketToServer.add(socket);
         return response;
@@ -84,11 +81,11 @@ final class DesktopHelperProxyWorker implements BlockingServer.Worker {
   }
 
   @Override
-  public void workOnConnection(InputStream in, OutputStream out) throws IOException {
+  public void workOnConnection(MessageStream stream) throws IOException {
     while (true) {
-      Message msg = readMessage(in);
+      Message msg = stream.readMessage();
       logger.info("Received: " + msg);
-      writeMessage(out, requestServer(msg));
+      stream.writeMessage(requestServer(msg));
     }
   }
 }
