@@ -1000,7 +1000,7 @@ buffer doesn't visit a file, let the user select a CL to open."
         ;; If not visiting a file, let the user select a CL
         (let* ((selected-line
                 (completing-read "Open Critique for: "
-                                 (process-lines "bash" "-c" "g4 p | grep '^Change [0-9]\\+' | sed 's/^Change //'")))
+                                 (process-lines "bash" "-c" "g4 p | grep '^[* ]*Change [0-9]\\+' | sed 's/^[* ]*Change //'")))
                (selected-cl (if (string-match "\\(^[0-9]+\\) .*" selected-line)
                                 (match-string 1 selected-line)
                               (user-error "No CL selected"))))
