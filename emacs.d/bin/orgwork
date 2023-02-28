@@ -1,5 +1,5 @@
 #!/bin/bash
-DIR="$HOME/orgwork"
+DIR="/google/data/rw/users/zh/zhangkun/orgwork"
 
 cd $DIR
 # Disable create-lockfiles because it doesn't work well with Google Drive
