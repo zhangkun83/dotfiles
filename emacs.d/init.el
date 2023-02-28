@@ -244,10 +244,10 @@
 (set-face-attribute 'default nil
 		    :family "DejaVu Sans Mono"
                     :height (if (<= 1440 (nth 3 (alist-get 'geometry (car (display-monitor-attributes-list)))))
-                                ;; likely high-DPI
+                                ;; High-res displays
                                 105
-                              ;; likely low-DPI
-                              110))
+                              ;; Low-res displays
+                              125))
 
 (when (fboundp 'set-fontset-font)
   (set-fontset-font t 'chinese-gbk
