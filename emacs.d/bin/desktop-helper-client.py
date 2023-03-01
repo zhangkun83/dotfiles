@@ -3,9 +3,11 @@
 # The command string is read from the first argument, while the data string is
 # either the rest of the arguments if given, or read from stdin.
 
+import os
 import socket
 import sys
 import net_messaging
+import threading
 
 HOST = "127.0.0.1"
 PORT = 5032
@@ -18,6 +20,13 @@ else:
     data = ''
     for line in sys.stdin:
         data += line
+
+def timeout_handler():
+    sys.stderr.write("desktop-helper-client timed out\n")
+    os._exit(1)
+
+timeout_timer = threading.Timer(10.0, timeout_handler)
+timeout_timer.start()
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket:
     socket.connect((HOST, PORT))
@@ -34,4 +43,5 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket:
         sys.stdout.write(data)
     else:
         sys.stderr.write(f"{status}: {data}\n")
+    timeout_timer.cancel()
     socket.close()
