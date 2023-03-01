@@ -1,0 +1,14 @@
+#!/bin/bash
+action=$1
+
+LOCAL_DIR="$HOME/syncbox"
+REMOTE_DIR="rsync://localhost:1873/syncbox"
+
+if [[ "$action" == "upload" ]]; then
+   echo "Uploading ..."
+   rsync -rtuv "$LOCAL_DIR/" "$REMOTE_DIR"
+elif [[ "$action" == "download" ]]; then
+   echo "Downloading ..."
+   rsync -rtuv "$REMOTE_DIR/" "$LOCAL_DIR"
+fi
+
