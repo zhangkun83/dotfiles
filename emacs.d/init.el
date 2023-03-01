@@ -275,6 +275,7 @@
  '(inhibit-startup-screen t)
  '(ns-command-modifier nil)
  '(org-agenda-sticky t)
+ '(org-agenda-window-setup 'current-window)
  '(org-fontify-quote-and-verse-blocks t)
  '(org-log-into-drawer t)
  '(org-startup-indented t)

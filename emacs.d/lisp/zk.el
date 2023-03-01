@@ -514,9 +514,7 @@ without asking."
   (let* ((view-buffer-name (if arg "*Org Agenda(M)*" "*Org Agenda(m)*"))
          (view-buffer (get-buffer view-buffer-name)))
     (if view-buffer
-        (progn
-          (display-buffer view-buffer)
-          (select-window (get-buffer-window view-buffer)))
+        (switch-to-buffer view-buffer)
       (org-tags-view arg))))
 
 (defun zk-org-set-tags-command ()
