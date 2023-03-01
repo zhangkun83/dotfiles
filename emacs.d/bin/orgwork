@@ -1,6 +1,6 @@
 #!/bin/bash
 DIR="$HOME/orgwork"
-BACKUP_DIR="/google/data/rw/users/zh/zhangkun/orgwork"
+BACKUP_DIR="rsync://localhost:1873/root/google/data/rw/users/zh/zhangkun/orgwork"
 
 if [[ "$1" != "upload" ]]; then
     echo "Updating local files ..."
@@ -11,7 +11,7 @@ if [[ "$1" != "upload" ]]; then
 
     cd $DIR
     # Disable create-lockfiles because it doesn't work well with Google Drive
-    emacs-nolock --eval="(progn \
+    emacs --eval="(progn \
                 (setq org-agenda-files '(\"$DIR\")\
                       frame-title-format \"orgwork\" )\
                 (add-to-list 'zk-remote-file-prefix-list \"$DIR\")
