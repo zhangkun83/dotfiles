@@ -4,9 +4,13 @@ BACKUP_DIR="rsync://localhost:1873/x20/users/zh/zhangkun/orgwork"
 
 if [[ "$1" != "upload" ]]; then
     echo "Updating local files ..."
-    rsync -rtuv "$BACKUP_DIR/" "$DIR" || exit 1
-
-    echo "Press Enter to open orgwork"
+    rsync -rtuv "$BACKUP_DIR/" "$DIR"
+    if [[ "$?" -ne 0 ]]; then
+        echo "Update failed. Press Enter to open orgwork in READ-ONLY mode ..."
+        readonly_hook="(add-hook 'org-mode-hook (lambda() (read-only-mode 1)))"
+    else
+        echo "Update successful. Press Enter to open orgwork ..."
+    fi
     read
 
     cd $DIR
@@ -15,9 +19,14 @@ if [[ "$1" != "upload" ]]; then
                 (setq org-agenda-files '(\"$DIR\")\
                       frame-title-format \"orgwork\" )\
                 (add-to-list 'zk-remote-file-prefix-list \"$DIR\")
+                $readonly_hook
                 (zk-orgwork-goto-latest-note-file)
                 (end-of-buffer))"
 fi
 
-echo "Uploading changed files ..."
-rsync -rtuv "$DIR/" "$BACKUP_DIR" || exit 1
+if [[ -z "$readonly_hook" ]]; then
+    echo "Uploading local changes ..."
+    rsync -rtuv "$DIR/" "$BACKUP_DIR" || exit 1
+else
+    echo "orgwork was in READ-ONLY mode. Uploading skipped."
+fi
