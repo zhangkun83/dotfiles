@@ -25,8 +25,12 @@ if [[ "$1" != "upload" ]]; then
 fi
 
 if [[ -z "$readonly_hook" ]]; then
-    echo "Uploading local changes ..."
-    rsync -rtuv "$DIR/" "$BACKUP_DIR" || exit 1
+    while true; do
+        echo "Uploading local changes ..."
+        rsync -rtuv "$DIR/" "$BACKUP_DIR" && break
+        echo "Upload failed. Press Enter to retry ..."
+        read
+    done
 else
     echo "orgwork was in READ-ONLY mode. Uploading skipped."
 fi
