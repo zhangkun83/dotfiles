@@ -1,11 +1,23 @@
 #!/bin/bash
-DIR="/google/data/rw/users/zh/zhangkun/orgwork"
+DIR="$HOME/orgwork"
+BACKUP_DIR="/google/data/rw/users/zh/zhangkun/orgwork"
 
-cd $DIR
-# Disable create-lockfiles because it doesn't work well with Google Drive
-emacs-nolock --eval="(progn \
+if [[ "$1" != "upload" ]]; then
+    echo "Updating local files ..."
+    rsync -rtuv "$BACKUP_DIR/" "$DIR" || exit 1
+
+    echo "Press Enter to open orgwork"
+    read
+
+    cd $DIR
+    # Disable create-lockfiles because it doesn't work well with Google Drive
+    emacs-nolock --eval="(progn \
                 (setq org-agenda-files '(\"$DIR\")\
                       frame-title-format \"orgwork\" )\
                 (add-to-list 'zk-remote-file-prefix-list \"$DIR\")
                 (zk-orgwork-goto-latest-note-file)
                 (end-of-buffer))"
+fi
+
+echo "Uploading changed files ..."
+rsync -rtuv "$DIR/" "$BACKUP_DIR" || exit 1
