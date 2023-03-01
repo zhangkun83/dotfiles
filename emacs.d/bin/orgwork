@@ -9,7 +9,7 @@ if [[ "$1" != "upload" ]]; then
         echo "Update failed. Press Enter to open orgwork in READ-ONLY mode ..."
         readonly_hook="(add-hook 'org-mode-hook (lambda() (read-only-mode 1)))"
     else
-        echo "Update successful. Press Enter to open orgwork ..."
+        echo -n "Update successful. Press Enter to open orgwork ..."
     fi
     read
 
@@ -27,7 +27,7 @@ if [[ -z "$readonly_hook" ]]; then
     while true; do
         echo "Uploading local changes ..."
         rsync -rtuv "$DIR/" "$BACKUP_DIR" && break
-        echo "Upload failed. Press Enter to retry ..."
+        echo -n "Upload failed. Press Enter to retry ..."
         read
     done
 else
