@@ -18,7 +18,6 @@ if [[ "$1" != "upload" ]]; then
     emacs --eval="(progn \
                 (setq org-agenda-files '(\"$DIR\")\
                       frame-title-format \"orgwork\" )\
-                (add-to-list 'zk-remote-file-prefix-list \"$DIR\")
                 $readonly_hook
                 (zk-orgwork-goto-latest-note-file)
                 (end-of-buffer))"
