@@ -14,6 +14,7 @@ if [[ "$1" != "upload" ]]; then
     read
 
     cd $DIR
+    echo "Launching orgwork in emacs ..."
     # Disable create-lockfiles because it doesn't work well with Google Drive
     emacs --eval="(progn \
                 (setq org-agenda-files '(\"$DIR\")\
