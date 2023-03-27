@@ -6,7 +6,7 @@ if [[ "$1" != "upload" ]]; then
     echo "Downloading remote files ..."
     rsync -rtuv "$BACKUP_DIR/" "$DIR"
     if [[ "$?" -ne 0 ]]; then
-        echo "Download FAILED. Press Enter to open orgwork in READ-ONLY mode ..."
+        echo "Download FAILED. !!! Press Enter to open orgwork in READ-ONLY mode ... !!!"
         readonly_hook="(add-hook 'org-mode-hook (lambda() (read-only-mode 1)))"
     else
         echo "Download SUCCESSFUL. Press Enter to open orgwork ..."
@@ -14,7 +14,7 @@ if [[ "$1" != "upload" ]]; then
     read
 
     cd $DIR
-    echo "Launching Emacs... Have a safe and productive day."
+    echo "Launching Emacs... Have a very safe and productive day."
     # Disable create-lockfiles because it doesn't work well with Google Drive
     emacs --eval="(progn \
                 (setq org-agenda-files '(\"$DIR\")\
@@ -22,9 +22,9 @@ if [[ "$1" != "upload" ]]; then
                 $readonly_hook
                 (zk-orgwork-goto-latest-note-file)
                 (end-of-buffer))"
+    echo "Emacs session ended. Wrapping up ..."
 fi
 
-echo "Emacs session ended. Wrapping up ..."
 if [[ -z "$readonly_hook" ]]; then
     while true; do
         echo "Uploading local changes ..."
