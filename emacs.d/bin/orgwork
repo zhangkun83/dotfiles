@@ -6,12 +6,18 @@ if [[ "$1" != "upload" ]]; then
     echo "Downloading remote files ..."
     rsync -rtuv "$BACKUP_DIR/" "$DIR"
     if [[ "$?" -ne 0 ]]; then
-        echo "Download FAILED. !!! Press Enter to open orgwork in READ-ONLY mode ... !!!"
-        readonly_hook="(add-hook 'org-mode-hook (lambda() (read-only-mode 1)))"
+        echo "!!! Download FAILED !!!"
+        echo "- Press Enter to open orgwork in READ-ONLY mode ..."
+        echo "- If you are sure local files are up-to-date,"
+        echo "  press S followed by Enter to open orgwork normally ..."
+        read response
+        if [[ "$response" != "S" ]]; then
+            readonly_hook="(add-hook 'org-mode-hook (lambda() (read-only-mode 1)))"
+        fi
     else
         echo "Download SUCCESSFUL. Press Enter to open orgwork ..."
+        read
     fi
-    read
 
     cd $DIR
     echo "Launching Emacs... Have a very safe and productive day."
