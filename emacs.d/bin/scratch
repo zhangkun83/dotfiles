@@ -4,12 +4,13 @@ if [[ -n "$TMUX" ]]; then
     tmux rename-window -t $current_window_id "scratch"
     trap "tmux set -wt:$current_window_id automatic-rename on" EXIT
 fi
+mkdir -p ~/.zk
 emacs -nw --eval='(progn
       (auto-save-visited-mode)
-      (find-file "~/.scratch.txt")
+      (find-file "~/.zk/scratch.txt")
       (split-window-below)
       (other-window 1)
-      (find-file "~/.scratch")
+      (find-file "~/.zk/scratch")
       (lisp-interaction-mode)
       (other-window 1)
       (kill-buffer "*scratch*"))'
