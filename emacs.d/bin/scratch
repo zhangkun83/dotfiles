@@ -4,4 +4,7 @@ if [[ -n "$TMUX" ]]; then
     tmux rename-window -t $current_window_id "scratch"
     trap "tmux set -wt:$current_window_id automatic-rename on" EXIT
 fi
-emacs -nw
+emacs -nw --eval='(progn
+      (auto-save-visited-mode)
+      (find-file "~/.scratch")
+      (lisp-interaction-mode))'
