@@ -7,10 +7,10 @@ fi
 mkdir -p ~/.zk
 emacs -nw --eval='(progn
       (auto-save-visited-mode)
-      (find-file "~/.zk/scratch.txt")
+      (find-file "~/.zk/scratch.org")
       (split-window-below)
       (other-window 1)
-      (find-file "~/.zk/scratch")
+      (find-file "~/.zk/scratch.el")
       (lisp-interaction-mode)
       (other-window 1)
       (kill-buffer "*scratch*"))'
