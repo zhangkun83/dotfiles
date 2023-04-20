@@ -23,6 +23,7 @@ if [[ "$1" != "upload" ]]; then
     echo "Launching Emacs... Have a very safe and productive day."
     # Disable create-lockfiles because it doesn't work well with Google Drive
     emacs --eval="(progn \
+                (require 'zk-org)
                 (setq org-agenda-files '(\"$DIR\")\
                       frame-title-format \"orgwork\" )\
                 $readonly_hook
