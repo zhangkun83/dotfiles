@@ -153,4 +153,5 @@ the current file for completion."
 (add-hook 'org-mode-hook 'zk-org-setup-bindings)
 (add-hook 'org-agenda-mode-hook 'zk-org-setup-bindings)
 
+(setq confirm-kill-emacs 'yes-or-no-p)
 (provide 'zk-org)
