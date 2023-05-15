@@ -35,7 +35,7 @@ fi
 if [[ -z "$readonly_hook" ]]; then
     while true; do
         echo "Uploading local changes ..."
-        rsync -rtuv --include='*.org*' --exclude='*' "$DIR/" "$BACKUP_DIR" && break
+        rsync -rtuv --include='*.org' --include='*.org_archive' --exclude='*' "$DIR/" "$BACKUP_DIR" && break
         echo "Upload FAILED. Press Enter to retry ..."
         read
     done
