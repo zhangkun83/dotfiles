@@ -6,6 +6,6 @@ if [[ -n "$2" ]]; then
   echo "CPU Power State of $1 changed to $2%"
 fi
 echo "Current CPU Power settings:"
-powercfg /Q SCHEME_CURRENT SUB_PROCESSOR
-echo "Appying new settings..."
+powercfg /Q SCHEME_CURRENT SUB_PROCESSOR | w10-powercfg-cpu-filter.py
+echo "Appying settings..."
 powercfg /S SCHEME_CURRENT
