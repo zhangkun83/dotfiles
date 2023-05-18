@@ -1,9 +1,9 @@
 #!/bin/bash
 # Display or change the CPU power on Windows 10
-if [[ -n "$1" ]]; then
-  powercfg /SETACVALUEINDEX SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX $1
-  powercfg /SETACVALUEINDEX SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMIN $1
-  echo "CPU Power State changed to $1%"
+if [[ -n "$2" ]]; then
+  powercfg /SET${1}VALUEINDEX SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX $2
+  powercfg /SET${1}VALUEINDEX SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMIN $2
+  echo "CPU Power State of $1 changed to $2%"
 fi
 echo "Current CPU Power settings:"
 powercfg /Q SCHEME_CURRENT SUB_PROCESSOR
