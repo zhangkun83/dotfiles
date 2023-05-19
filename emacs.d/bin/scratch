@@ -1,16 +1,9 @@
 #!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && realpath $(pwd) )"
 if [[ -n "$TMUX" ]]; then
     current_window_id=$(tmux display-message -p '#I')
     tmux rename-window -t $current_window_id "scratch"
     trap "tmux set -wt:$current_window_id automatic-rename on" EXIT
 fi
 mkdir -p ~/.zk
-emacs -nw --eval='(progn
-      (auto-save-visited-mode)
-      (find-file "~/.zk/scratch.org")
-      (split-window-below)
-      (other-window 1)
-      (find-file "~/.zk/scratch.el")
-      (lisp-interaction-mode)
-      (other-window 1)
-      (kill-buffer "*scratch*"))'
+emacs -nw --load="$DIR/scratch.el"
