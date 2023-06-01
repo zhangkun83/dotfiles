@@ -3,11 +3,11 @@
 (defun zk-orgwork-goto-latest-note-file ()
   "Go to the latest note org file under the same directory."
   (interactive)
-  (let* ((file-list (directory-files default-directory nil "notes.*\\.org"))
+  (let* ((file-list (directory-files zk-orgwork-directory nil "notes.*\\.org"))
          ;; directory-files sort the files alphabeticaly
          (latest-file (car (last file-list))))
     (unless latest-file (user-error "No notes file found"))
-    (switch-to-buffer (find-file-noselect latest-file))))
+    (switch-to-buffer (find-file-noselect (concat zk-orgwork-directory "/" latest-file)))))
 
 (defun zk-orgwork-goto-orgwork-file ()
   "Go to the work.org file under the same directory if it exists."

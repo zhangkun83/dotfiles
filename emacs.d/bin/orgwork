@@ -1,5 +1,11 @@
 #!/bin/bash
-DIR="$HOME/orgwork"
+cd $HOME
+# Use relative directory for local paths, because I may be running
+# this script under MINGW64 (provided by Git bash) whose home is like
+# "/c/Users/zhangkun" while the rsync on the system is a Cygwin
+# version whose home is like "/cygdrive/c/home/zhangkun". Passing the
+# absolute path from this script to rsync won't work.
+DIR="orgwork"
 BACKUP_DIR="rsync://localhost:1873/x20/users/zh/zhangkun/orgwork"
 
 if [[ "$1" != "upload" ]]; then
@@ -19,12 +25,18 @@ if [[ "$1" != "upload" ]]; then
         read
     fi
 
-    cd $DIR
     echo "Launching Emacs... Have a very safe and productive day."
-    # Disable create-lockfiles because it doesn't work well with Google Drive
-    emacs --eval="(progn \
+    if [[ $(uname) =~ ^MINGW.* ]]; then
+        # The location of Windows version Emacs configs
+        export HOME="c:/Users/zhangkun/AppData/Roaming"
+        EMACS_BIN="/c/Program Files/Emacs/emacs-28.1/bin/emacs"
+    else
+        EMACS_BIN="emacs"
+    fi
+    "$EMACS_BIN" --eval="(progn \
                 (require 'zk-org)
-                (setq org-agenda-files '(\"$DIR\")\
+                (setq zk-orgwork-directory (concat default-directory \"$DIR\"))
+                (setq org-agenda-files (list zk-orgwork-directory)\
                       frame-title-format \"orgwork\" )\
                 $readonly_hook
                 (zk-orgwork-goto-latest-note-file)
