@@ -1,7 +1,13 @@
 #!/bin/bash
 action=$1
 
-LOCAL_DIR="$HOME/syncbox"
+cd $HOME
+# Use relative directory for local paths, because I may be running
+# this script under MINGW64 (provided by Git bash) whose home is like
+# "/c/Users/zhangkun" while the rsync on the system is a Cygwin
+# version whose home is like "/cygdrive/c/home/zhangkun". Passing the
+# absolute path from this script to rsync won't work.
+LOCAL_DIR="syncbox"
 REMOTE_DIR="rsync://localhost:1873/syncbox"
 
 if [[ "$action" == "upload" ]]; then
