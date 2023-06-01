@@ -27,6 +27,7 @@
   (lambda ()
     (local-set-key (kbd "C-c C-o") 'zk-scratch-open-link-at-point)))
 
+(setq create-lockfiles nil)
 (auto-save-visited-mode)
 (find-file "~/.zk/scratch.org")
 (split-window-below)
