@@ -150,7 +150,13 @@ the current file for completion."
   (local-set-key (kbd "C-c g n") 'zk-orgwork-goto-latest-note-file)
   (local-set-key (kbd "C-c g w") 'zk-orgwork-goto-orgwork-file)
   (local-set-key (kbd "C-c l") 'zk-org-set-generated-custom-id-and-copy-external-link))
+
+(defun zk-org-set-file-encoding ()
+  ;; Force unix newline format, even on Windows
+  (setq buffer-file-coding-system 'utf-8-unix))
+
 (add-hook 'org-mode-hook 'zk-org-setup-bindings)
+(add-hook 'org-mode-hook 'zk-org-set-file-encoding)
 (add-hook 'org-agenda-mode-hook 'zk-org-setup-bindings)
 
 (setq confirm-kill-emacs 'yes-or-no-p)
