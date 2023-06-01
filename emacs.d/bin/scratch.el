@@ -1,6 +1,7 @@
 ;; Set up the scratch environment
 
 (setq frame-title-format "scratch")
+(setq confirm-kill-emacs 'yes-or-no-p)
 
 (defun zk-scratch-get-link-at-point()
   (let ((link-prop (get-text-property (point) 'htmlize-link)))
