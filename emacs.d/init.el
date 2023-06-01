@@ -1,6 +1,9 @@
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp"))
 
+(global-unset-key (kbd "C-z"))
+
 (require 'kotlin-mode)
+(require 'zk)
 
 ;; Disable tool-bar
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
@@ -18,32 +21,16 @@
 (setq browse-url-browser-function 'zk-browse-url)
 
 (setq echo-keystrokes 0.01)
-(global-unset-key (kbd "C-z"))
 
 ;; Treat camelCase as multiple words instead of one
 (global-subword-mode)
 
-;;;; etags-select (better ctags search)
-
-(load "etags-select.el")
-(defun zk-load-tags-if-not-loaded ()
-  (interactive)
-  (unless (get-buffer "TAGS")
-    (visit-tags-table zk-project-index-path)))
-
-(global-set-key "\M-?" 'etags-select-find-tag-at-point)
-(global-set-key "\M-." 'etags-select-find-tag)
-
-;; From some point etags-select stopped loading TAGS.
-;; Work around it.
-(advice-add 'etags-select-find-tag :before #'zk-load-tags-if-not-loaded)
-
-;;; Always do case-sensitive search for tags
-(setq-default tags-case-fold-search nil)
-
 ;;;; Don't enable semantic (semantic doesn't work if Java file contains generics)
 ;;(semantic-mode 1)
 
+(unless (eq system-type 'windows-nt)
+  (require 'zk-project)
+  (require 'zk-clipboard))
 
 (require 'vertico)
 (vertico-mode t)
@@ -123,69 +110,10 @@
     (message "Current buffer does not have a file"))
 )
 
-;; For jumping quickly back to project-root in shells.
-;; Also used by gradlez script
-(require 'zk)
-(setenv "ZK_PROJECT_ROOT" zk-project-root)
 (setq frame-title-format '("" command-line-default-directory " - emacs"))
-
-(require 'savehist)
-(require 'bookmark)
-;; Save session data in per-zk-project directories
-(let ((session-data-dir (expand-file-name (concat "~/.zk/emacs/" zk-project-root))))
-  (make-directory session-data-dir t)
-  (setq savehist-file (concat session-data-dir "history"))
-  (savehist-mode t)
-  (setq bookmark-default-file (concat session-data-dir "bookmarks"))
-  ;; Do not display the file column in the benchmark menu, because zk-bookmark-set
-  ;; already includes (nicer) file names in the bookmark names.
-  (bookmark-bmenu-toggle-filenames nil)
-  (global-set-key (kbd "C-x r m") 'zk-bookmark-set))
 
 ;; Don't create backup files at all
 (setq make-backup-files nil)
-
-(setenv "EDITOR" "~/.emacs.d/bin/editor-stub")
-(setenv "PAGER" "cat")
-(setenv "P4EDITOR" "~/.emacs.d/bin/editor-stub")
-(setenv "P4DIFF" "diff -u")  ; works with zk-diff-navigate
-(setenv "G4PENDINGSTYLE" "relativepath")
-
-(add-hook 'java-mode-hook
-	  (lambda()
-	    "Register my own shortcuts for Java mode"
-	    (local-set-key (kbd "C-c i") 'zk-insert-java-import)
-	    (local-set-key (kbd "C-c d") 'zk-c-toggle-syntactic-indentation)
-            (local-set-key (kbd "M-;") 'recenter-top-bottom)
-            (local-set-key (kbd "M-h") 'zk-java-mark-thing)
-            (local-set-key (kbd "M-i") 'zk-java-enter-braces-block)
-            (local-set-key (kbd "M-o") 'zk-java-exit-bracesblock)
-            (local-set-key (kbd "M-n") 'zk-java-next-thing)
-            (local-set-key (kbd "M-p") 'zk-java-prev-thing)
-            (local-set-key (kbd "C-c TAB") 'zk-java-enter-argument-list)
-            (local-set-key (kbd "C-c C-n") 'zk-java-next-argument)
-            (local-set-key (kbd "C-c C-p") 'zk-java-prev-argument)
-            (local-set-key [backtab] (lambda() (interactive) (c-indent-line-or-region -1)))))
-
-; Java stacktrace detection in compilation-mode
-(require 'zk-java-stacktrace)
-(zk-java-stacktrace-detection-enable)
-(global-set-key (kbd "C-x \\") 'compile)
-
-(setq compile-command "runp ")
-
-;; go-mode for Golang
-(autoload 'go-mode "go-mode" nil t)
-(autoload 'gofmt-before-save "go-mode" nil t)
-(add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
-(add-hook 'before-save-hook 'gofmt-before-save)
-(add-hook 'go-mode-hook
-          (lambda()
-            (setq tab-width 2)))
-
-(add-to-list 'compilation-search-path zk-project-root)
-(require 'grep)
-(add-to-list 'grep-search-path zk-project-root)
 
 (defun zk-prev-window()
   "Switch to previous window"
@@ -201,19 +129,13 @@
 (require 'goto-last-change)
 (global-set-key (kbd "C-x C-\\") 'goto-last-change-with-auto-marks)
 (global-set-key (kbd "C-z r") 'revert-buffer)
-(global-set-key (kbd "C-z f") 'zk-find-src-file-in-project)
 (global-set-key (kbd "C-z p") 'zk-copy-buffer-file-path)
 (global-set-key (kbd "C-z b") 'browse-url)
 (define-key minibuffer-local-map (kbd "C-z p") 'zk-minibuffer-insert-current-file-path)
 (define-key minibuffer-local-map (kbd "C-z n") 'zk-minibuffer-insert-current-file-name)
 (global-set-key (kbd "C-z s") 'shell)
-(global-set-key (kbd "C-z C-c") 'zk-clipboard-copy)
-(global-set-key (kbd "C-z C-x") 'zk-clipboard-cut)
-(global-set-key (kbd "C-z C-v") 'zk-clipboard-paste)
-(define-key minibuffer-local-map (kbd "C-z C-v") 'zk-clipboard-paste)
 (global-set-key (kbd "C-z d") 'zk-diff-navigate)
 (global-set-key (kbd "C-z y") 'zk-youdao-dict)
-(global-set-key (kbd "C-z C-y") 'zk-clipboard-youdao-dict)
 (global-set-key (kbd "C-z h") 'global-hl-line-mode)
 (global-set-key (kbd "C-M-y") 'zk-yank-to-register)
 
