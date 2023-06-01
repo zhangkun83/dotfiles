@@ -2,6 +2,8 @@
 
 (setq frame-title-format "scratch")
 (setq confirm-kill-emacs 'yes-or-no-p)
+(disable-theme 'leuven)
+(load-theme 'adwaita t nil)
 
 (defun zk-scratch-get-link-at-point()
   (let ((link-prop (get-text-property (point) 'htmlize-link)))
