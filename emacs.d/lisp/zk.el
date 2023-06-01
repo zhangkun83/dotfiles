@@ -177,7 +177,7 @@ remote directory suddenly becomes inaccessible."
 (defun zk-browse-url (url &optional _new-window)
   ;; new-window ignored
   (let ((program (if (eq system-type 'windows-nt)
-                     "C:/Program Files/Google/Chrome/Application/chrome.exe"
+                     "\"C:/Program Files/Google/Chrome/Application/chrome.exe\" "
                    "desktop-helper-client.py open-url ")))
     (shell-command (concat program
                          (prin1-to-string url)))))
