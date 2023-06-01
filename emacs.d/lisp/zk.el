@@ -668,8 +668,11 @@ text suitable for copying to line-wraping text editors."
 
 (defun zk-browse-url (url &optional _new-window)
   ;; new-window ignored
-  (shell-command (concat "desktop-helper-client.py open-url "
-                         (prin1-to-string url))))
+  (let ((program (if (eq system-type 'windows-nt)
+                     "C:/Program Files/Google/Chrome/Application/chrome.exe"
+                   "desktop-helper-client.py open-url ")))
+    (shell-command (concat program
+                         (prin1-to-string url)))))
 
 (defvar zk-shell-command-on-file-at-point--history nil)
 (defun zk-shell-command-on-file-at-point ()
