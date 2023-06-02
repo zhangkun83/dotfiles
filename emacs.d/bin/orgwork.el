@@ -90,7 +90,7 @@
             (if (eq zk-orgwork-status 'clean)
                 (setq zk-orgwork-status 'modified))))
 
-(setq zk-orgwork-directory (concat (getenv "HOME") "/" zk-orgwork-dirname))
+(setq zk-orgwork-directory (concat zk-orgwork-rsync-invoke-dir "/" zk-orgwork-dirname))
 (setq org-agenda-files (list zk-orgwork-directory)
       frame-title-format "orgwork" )
 
