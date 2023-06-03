@@ -156,7 +156,7 @@
 ;; Set font
 (set-face-attribute 'default nil
 		    :family "DejaVu Sans Mono"
-                    :height (if (<= 1440 (nth 3 (alist-get 'geometry (car (display-monitor-attributes-list)))))
+                    :height (if (<= 1080 (nth 3 (alist-get 'geometry (car (display-monitor-attributes-list)))))
                                 ;; High-res displays
                                 105
                               ;; Low-res displays
