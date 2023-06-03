@@ -174,7 +174,8 @@ the current file for completion."
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
   (local-set-key (kbd "C-c g n") 'zk-orgwork-goto-latest-note-file)
   (local-set-key (kbd "C-c g w") 'zk-orgwork-goto-orgwork-file)
-  (local-set-key (kbd "C-c l") 'zk-org-set-generated-custom-id-and-copy-external-link))
+  (local-set-key (kbd "C-c l") 'zk-org-set-generated-custom-id-and-copy-external-link)
+  (local-set-key (kbd "C-c u") 'zk-orgwork-rsync-upload))
 
 (defun zk-org-set-file-encoding ()
   ;; Force unix newline format, even on Windows
