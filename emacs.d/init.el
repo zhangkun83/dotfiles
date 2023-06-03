@@ -171,6 +171,9 @@
 (add-hook 'dired-mode-hook
           (lambda() (dired-hide-details-mode 1)))
 
+(if (display-graphic-p)
+    (load-theme 'leuven t))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -178,7 +181,6 @@
  ;; If there is more than one, they won't work right.
  '(c-echo-syntactic-information-p t)
  '(compilation-scroll-output t)
- '(custom-enabled-themes '(leuven))
  '(dabbrev-case-replace nil)
  '(dired-listing-switches "-alo")
  '(explicit-bash-args
