@@ -22,6 +22,9 @@
     (user-error "Unexpected orgwork status: %s" zk-orgwork-status))
   (setq zk-orgwork-status 'downloading)
   (let ((default-directory zk-orgwork-rsync-invoke-dir))
+    (switch-to-buffer zk-orgwork-rsync-buffer-name)
+    (erase-buffer)
+    (insert "Downloading remote files ...\n")
     (make-process :name "orgwork-rsync-download"
                   :buffer zk-orgwork-rsync-buffer-name
                   :command (list
@@ -39,8 +42,7 @@
                                 (if (y-or-n-p "Download failed. Press y to retry, n to open in read-only mode")
                                     (zk-orgwork-rsync-download)
                                   (kill-buffer)
-                                  (zk-orgwork-startup-open t)))))
-    (switch-to-buffer zk-orgwork-rsync-buffer-name)))
+                                  (zk-orgwork-startup-open t)))))))
 
 
 (defun zk-orgwork-rsync-upload ()
@@ -51,6 +53,9 @@
     (user-error "Unexpected orgwork status: %s" zk-orgwork-status))
   (setq zk-orgwork-status 'uploading)
   (let ((default-directory zk-orgwork-rsync-invoke-dir))
+    (switch-to-buffer zk-orgwork-rsync-buffer-name)
+    (erase-buffer)
+    (insert "Uploading local changes ...\n")
     (make-process :name "orgwork-rsync-upload"
                   :buffer zk-orgwork-rsync-buffer-name
                   :command (list
@@ -65,8 +70,7 @@
                                     (kill-buffer))
                                 (setq zk-orgwork-status 'modified)
                                 (if (y-or-n-p "Upload failed. Retry?")
-                                    (zk-orgwork-rsync-upload)))))
-    (switch-to-buffer zk-orgwork-rsync-buffer-name)))
+                                    (zk-orgwork-rsync-upload)))))))
 
 (defun zk-orgwork-startup-open (readonly)
   (when readonly
