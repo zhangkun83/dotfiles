@@ -30,7 +30,8 @@
 
 (unless (eq system-type 'windows-nt)
   (require 'zk-project)
-  (require 'zk-clipboard))
+  (require 'zk-clipboard)
+  (require 'zk-google3))
 
 (require 'vertico)
 (vertico-mode t)
