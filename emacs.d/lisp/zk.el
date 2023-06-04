@@ -1,3 +1,12 @@
+(defconst zk-user-home-dir
+  (if (eq system-type 'windows-nt)
+      (getenv "USERPROFILE")
+    (getenv "HOME"))
+  "The home directory on an OS where a users files are located.
+On linux it's the same as $HOME. On Windows it's $USERPFOFILE,
+whose value is \"C:\\Users\\foo\" and more preferrable
+than $HOME which is \"c:\\Users\\foo\\AppData\\Roaming\".")
+
 (defun zk-trim-string (string)
   "Remove white spaces in beginning and ending of STRING.
 White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."

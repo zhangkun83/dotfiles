@@ -12,15 +12,7 @@
 
 (defconst zk-orgwork-rsync-buffer-name "*orgwork rsync*")
 
-(defconst zk-orgwork-rsync-invoke-dir
-  (if (eq system-type 'windows-nt)
-      ;; On Windows $USERPFOFILE is
-      ;; C:\Users\{username}, while $HOME is
-      ;; c:\Users\{username}\AppData\Roaming
-      (getenv "USERPROFILE")
-    (getenv "HOME")))
-
-(defconst zk-orgwork-directory (concat zk-orgwork-rsync-invoke-dir "/" zk-orgwork-dirname))
+(defconst zk-orgwork-directory (concat zk-user-home-dir "/" zk-orgwork-dirname))
 
 ;; Possible values: outdated, downloading, uploading, clean, modified
 (setq zk-orgwork-status 'outdated)
@@ -185,7 +177,7 @@ the current file for completion."
   (unless (eq zk-orgwork-status 'outdated)
     (user-error "Unexpected orgwork status: %s" zk-orgwork-status))
   (setq zk-orgwork-status 'downloading)
-  (let ((default-directory zk-orgwork-rsync-invoke-dir))
+  (let ((default-directory zk-user-home-dir))
     (switch-to-buffer zk-orgwork-rsync-buffer-name)
     (erase-buffer)
     (insert "Downloading remote files ...\n")
@@ -216,7 +208,7 @@ the current file for completion."
            (eq zk-orgwork-status 'modified))
     (user-error "Unexpected orgwork status: %s" zk-orgwork-status))
   (setq zk-orgwork-status 'uploading)
-  (let ((default-directory zk-orgwork-rsync-invoke-dir))
+  (let ((default-directory zk-user-home-dir))
     (switch-to-buffer zk-orgwork-rsync-buffer-name)
     (erase-buffer)
     (insert "Uploading local changes ...\n")
