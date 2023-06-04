@@ -5,6 +5,8 @@
 (disable-theme 'leuven)
 (load-theme 'adwaita t nil)
 
+(defconst zk-scratch-dir (concat zk-user-home-dir "/scratch"))
+
 (defun zk-scratch-get-link-at-point()
   (let ((link-prop (get-text-property (point) 'htmlize-link)))
     (when link-prop
@@ -31,10 +33,10 @@
 
 (setq create-lockfiles nil)
 (auto-save-visited-mode)
-(find-file "~/.zk/scratch.org")
+(find-file (concat zk-scratch-dir "/scratch-org.org"))
 (split-window-below)
 (other-window 1)
-(find-file "~/.zk/scratch.el")
+(find-file (concat zk-scratch-dir "/scratch-lisp"))
 (lisp-interaction-mode)
 (other-window 1)
 (kill-buffer "*scratch*")
