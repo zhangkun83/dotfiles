@@ -159,6 +159,10 @@ the current file for completion."
           (message "Removed \"%s\" in %d entries" from-tag counter)
         (message "Changed \"%s\" to \"%s\" in %d entries" from-tag to-tag counter)))))
 
+(defun zk-orgwork-show-status ()
+  (interactive)
+  (message "orgwork status: %s" zk-orgwork-status))
+
 (defun zk-org-setup-bindings ()
   "Register my own shortcuts for org mode"
   (local-set-key (kbd "C-c a") 'org-agenda-list)
@@ -167,7 +171,8 @@ the current file for completion."
   (local-set-key (kbd "C-c g n") 'zk-orgwork-goto-latest-note-file)
   (local-set-key (kbd "C-c g w") 'zk-orgwork-goto-orgwork-file)
   (local-set-key (kbd "C-c l") 'zk-org-set-generated-custom-id-and-copy-external-link)
-  (local-set-key (kbd "C-c u") 'zk-orgwork-rsync-upload))
+  (local-set-key (kbd "C-c s s") 'zk-orgwork-show-status)
+  (local-set-key (kbd "C-c s u") 'zk-orgwork-rsync-upload))
 
 (defun zk-org-set-file-encoding ()
   ;; Force unix newline format, even on Windows
