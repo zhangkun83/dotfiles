@@ -250,13 +250,13 @@ remote directory suddenly becomes inaccessible."
         (cond ((string-equal action "download")
                (eshell-print "Downloading from remote syncbox ...\n")
                (eshell-command (zk-syncbox-generate-command
-                                zk-syncbox-local-dirname
-                                zk-syncbox-remote-dir)))
+                                zk-syncbox-remote-dir
+                                zk-syncbox-local-dirname)))
               ((string-equal action "upload")
                (eshell-print "Uploading to remote syncbox ...\n")
                (eshell-command (zk-syncbox-generate-command
-                                zk-syncbox-remote-dir
-                                zk-syncbox-local-dirname)))
+                                zk-syncbox-local-dirname
+                                zk-syncbox-remote-dir)))
               (t eshell/echo "Unkown action: " action)))
     (eshell/echo "Usage: syncbox <download|upload>")))
 
