@@ -335,6 +335,19 @@ apps are not started from a shell."
     (setenv "PATH" path-from-shell)
     (setq exec-path (split-string path-from-shell path-separator))))
 
+(defun zk-shell (&optional arg)
+  (interactive)
+  (if (eq system-type 'windows-nt)
+      (progn
+        ;; On Windows, Emacs is run with HOME=c:\Users\foo\AppData\Roaming, which
+        ;; is not convenient for shell operations. Override it to c:\Users\foo for
+        ;; this shell session.
+        (let ((process-environment (append
+                                    (list (concat "HOME=" zk-user-home-dir))
+                                    process-environment)))
+          (eshell arg)))
+    (shell arg)))
+
 ;; Cygwin-specific hacks
 (when (eq system-type 'cygwin)
   (message "Cygwin detected, installing advices")
