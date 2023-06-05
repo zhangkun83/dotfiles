@@ -240,25 +240,30 @@ remote directory suddenly becomes inaccessible."
 (defconst zk-syncbox-remote-dir "rsync://localhost:1873/syncbox")
 (defconst zk-syncbox-buffer-name "*syncbox*")
 
-(defun zk-syncbox-generate-command (src dest)
-  (format "rsync -rtuv %s/ %s" src dest))
+(defun zk-syncbox (msg src dest)
+  (switch-to-buffer zk-syncbox-buffer-name)
+  (read-only-mode -1)
+  (erase-buffer)
+  (insert msg "\n")
+  (let ((default-directory zk-user-home-dir))
+    (call-process
+     "rsync" nil zk-syncbox-buffer-name t 
+     "-rtuv" (concat src "/") dest))
+  (read-only-mode 1)
+  (read-string "Press Enter to continue ...")
+  (kill-buffer))
 
-(defun eshell/syncbox (&rest args)
-  (if args
-      (let ((action (car args))
-            (default-directory zk-user-home-dir))
-        (cond ((string-equal action "download")
-               (eshell-print "Downloading from remote syncbox ...\n")
-               (eshell-command (zk-syncbox-generate-command
-                                zk-syncbox-remote-dir
-                                zk-syncbox-local-dirname)))
-              ((string-equal action "upload")
-               (eshell-print "Uploading to remote syncbox ...\n")
-               (eshell-command (zk-syncbox-generate-command
-                                zk-syncbox-local-dirname
-                                zk-syncbox-remote-dir)))
-              (t eshell/echo "Unkown action: " action)))
-    (eshell/echo "Usage: syncbox <download|upload>")))
+(defun zk-syncbox-download ()
+  "Download from remote syncbox to local syncbox."
+  (interactive)
+  (zk-syncbox "Downloading from remote syncbox ..."
+              zk-syncbox-remote-dir zk-syncbox-local-dirname))
+
+(defun zk-syncbox-upload ()
+  "Upload local syncbox to remote syncbox."
+  (interactive)
+  (zk-syncbox "Uploading to remote syncbox ..."
+              zk-syncbox-local-dirname zk-syncbox-remote-dir))
 
 ;;; Advice compilation-find-file to replace "\" with "/" in file names
 ;;; if the system is cygwin.  javac under windows produces error
