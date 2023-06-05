@@ -231,6 +231,35 @@ remote directory suddenly becomes inaccessible."
                                    content)))))))
   (set-register r (current-kill 0 t)))
 
+;; Use relative directory for local paths, because I may be running
+;; this script under MINGW64 (provided by Git bash) whose home is like
+;; "/c/Users/zhangkun" while the rsync on the system is a Cygwin
+;; version whose home is like "/cygdrive/c/home/zhangkun". Passing the
+;; absolute path from this script to rsync won't work.
+(defconst zk-syncbox-local-dirname "syncbox")
+(defconst zk-syncbox-remote-dir "rsync://localhost:1873/syncbox")
+(defconst zk-syncbox-buffer-name "*syncbox*")
+
+(defun zk-syncbox-generate-command (src dest)
+  (format "rsync -rtuv %s/ %s" src dest))
+
+(defun eshell/syncbox (&rest args)
+  (if args
+      (let ((action (car args))
+            (default-directory zk-user-home-dir))
+        (cond ((string-equal action "download")
+               (eshell-print "Downloading from remote syncbox ...\n")
+               (eshell-command (zk-syncbox-generate-command
+                                zk-syncbox-local-dirname
+                                zk-syncbox-remote-dir)))
+              ((string-equal action "upload")
+               (eshell-print "Uploading to remote syncbox ...\n")
+               (eshell-command (zk-syncbox-generate-command
+                                zk-syncbox-remote-dir
+                                zk-syncbox-local-dirname)))
+              (t eshell/echo "Unkown action: " action)))
+    (eshell/echo "Usage: syncbox <download|upload>")))
+
 ;;; Advice compilation-find-file to replace "\" with "/" in file names
 ;;; if the system is cygwin.  javac under windows produces error
 ;;; messages where file names use "\" as separators. While emacs can
