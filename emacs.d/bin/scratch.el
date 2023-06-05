@@ -33,10 +33,16 @@
 
 (setq create-lockfiles nil)
 (auto-save-visited-mode)
-(find-file (concat zk-scratch-dir "/scratch-org.org"))
-(split-window-below)
-(other-window 1)
-(find-file (concat zk-scratch-dir "/scratch-lisp"))
-(lisp-interaction-mode)
-(other-window 1)
 (kill-buffer "*scratch*")
+
+(defun zk-scratch-init ()
+  (interactive)
+  (delete-other-windows)
+  (find-file (concat zk-scratch-dir "/scratch-org.org"))
+  (split-window-below)
+  (other-window 1)
+  (find-file (concat zk-scratch-dir "/scratch-lisp"))
+  (lisp-interaction-mode)
+  (other-window 1))
+
+(zk-scratch-init)
