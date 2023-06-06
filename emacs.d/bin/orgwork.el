@@ -205,7 +205,7 @@ the current file for completion."
                               (if (string-match-p "finished.*" event)
                                   (progn
                                     (setq zk-orgwork-status 'clean)
-                                    (read-string "Download successful. Press Enter to open orgwork.")
+                                    (read-string "Download successful. Press Enter to continue ...")
                                     (kill-buffer)
                                     (zk-orgwork-startup-open nil))
                                 (setq zk-orgwork-status 'outdated)
