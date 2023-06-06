@@ -31,6 +31,8 @@
   (lambda ()
     (local-set-key (kbd "C-c C-o") 'zk-scratch-open-link-at-point)))
 
+(global-set-key (kbd "<f5>") 'zk-scratch-init)
+
 (setq create-lockfiles nil)
 (auto-save-visited-mode)
 (kill-buffer "*scratch*")

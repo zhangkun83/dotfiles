@@ -5,5 +5,4 @@ if [[ -n "$TMUX" ]]; then
     tmux rename-window -t $current_window_id "scratch"
     trap "tmux set -wt:$current_window_id automatic-rename on" EXIT
 fi
-mkdir -p ~/.zk
 emacs -nw --load="$DIR/scratch.el"
