@@ -17,6 +17,15 @@
 ;; Possible values: outdated, downloading, uploading, clean, modified
 (setq zk-orgwork-status 'outdated)
 
+;; Most values are copied from the default mode-line-format. I added
+;; zk-orgwork-status.
+(setq-default
+ mode-line-format
+ '("%e" mode-line-front-space mode-line-mule-info mode-line-client mode-line-modified mode-line-remote mode-line-frame-identification mode-line-buffer-identification "   " mode-line-position
+   "  " mode-line-modes
+   (:eval (format "[orgwork: %s]" zk-orgwork-status))
+   mode-line-misc-info mode-line-end-spaces))
+
 (defun zk-orgwork-goto-latest-note-file ()
   "Go to the latest note org file under the same directory."
   (interactive)
@@ -227,7 +236,7 @@ the current file for completion."
                               (if (string-match-p "finished.*" event)
                                   (progn
                                     (setq zk-orgwork-status 'clean)
-                                    (read-string "Upload successful. Press Enter to continue.")
+                                    (read-string "Upload successful. Press Enter to continue ...")
                                     (kill-buffer))
                                 (setq zk-orgwork-status 'modified)
                                 (if (y-or-n-p "Upload failed. Retry?")
