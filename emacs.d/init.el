@@ -33,6 +33,11 @@
   (require 'zk-clipboard)
   (require 'zk-google3))
 
+;; Windows doesn't come with ispell program. Our best bet is the one
+;; from cygwin.
+(when (eq system-type 'windows-nt)
+  (setq ispell-program-name (concat zk-user-home-dir "/cygwin/bin/aspell")))
+
 (require 'vertico)
 (vertico-mode t)
 (setq completion-styles '(basic substring)
