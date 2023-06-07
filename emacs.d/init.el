@@ -162,7 +162,7 @@
 		    :family "DejaVu Sans Mono"
                     :height (if (<= 1080 (nth 3 (alist-get 'geometry (car (display-monitor-attributes-list)))))
                                 ;; High-res displays
-                                105
+                                (if (eq system-type 'darwin) 175 105)
                               ;; Low-res displays
                               125))
 
