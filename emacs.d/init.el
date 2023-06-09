@@ -185,6 +185,8 @@
  ;; If there is more than one, they won't work right.
  '(c-echo-syntactic-information-p t)
  '(compilation-scroll-output t)
+ '(custom-safe-themes
+   '("c4cecd97a6b30d129971302fd8298c2ff56189db0a94570e7238bc95f9389cfb" default))
  '(dabbrev-case-replace nil)
  '(dired-listing-switches "-alo")
  '(explicit-bash-args

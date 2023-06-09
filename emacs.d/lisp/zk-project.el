@@ -391,13 +391,14 @@ or 'backward"
 
 (require 'compile)
 (defvar zk-diff-navigate--history nil)
-(defun zk-diff-navigate ()
+(defun zk-diff-navigate (&optional command)
   "Generic diff navigation with compilation mode."
   (interactive)
   (save-some-buffers)
-  (let ((diff-command (read-string "Diff command: "
-                                   (car zk-diff-navigate--history)
-                                   '(zk-diff-navigate--history . 1)))
+  (let ((diff-command (if command command
+                        (read-string "Diff command: "
+                                     (car zk-diff-navigate--history)
+                                     '(zk-diff-navigate--history . 1))))
         (output_buf (zk-recreate-buffer "*ZK Diff Navigation*")))
     (with-current-buffer output_buf
       ;; This is the only expected error line format in this
