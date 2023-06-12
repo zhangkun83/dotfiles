@@ -13,7 +13,7 @@
       (nth 1 link-prop))))
 
 (require 'server)
-(defun zk-scratch-open-link-at-point()
+(defun zk-scratch-advice-open-link-at-point(orig-open-link-at-point)
   "Opens the link at point. If it's a local org link, ask the
 orgwork server to open it."
   (interactive)
@@ -29,9 +29,9 @@ orgwork server to open it."
                      '(raise-frame)))
             (message "Asked orgwork to open \"%s\"" link))
         ;; Open other links normally
-        (org-open-at-point)))))
+        (funcall orig-open-link-at-point)))))
 
-(advice-add 'org-open-at-point :override #'zk-scratch-open-link-at-point)
+(advice-add 'org-open-at-point :around #'zk-scratch-advice-open-link-at-point)
 
 (global-set-key (kbd "<f5>") 'zk-scratch-init)
 
