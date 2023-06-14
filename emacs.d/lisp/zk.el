@@ -288,8 +288,14 @@ argument, apply the change to the entire buffer."
       (goto-char begin)
       ;; Replace every new-line and its adjacent blanks with one space
       (while (search-forward-regexp
-              "\\([[:graph:]]\\)[[:blank:]]*\n[[:blank:]]*\\([[:graph:]]\\)" end t)
-        (replace-match "\\1 \\2")))))
+              "\\([[:graph:]]\\)[[:blank:]]*\n[[:blank:]]*\\([[:graph:]]+\\)" end t)
+        (let ((second-line (match-string 2)))
+          ;; If the second line starts with a bullet prefix ("-", "*",
+          ;; "+", or "1." "2." etc), it is meant to be a new line, so
+          ;; don't join the two lines. This is common in markdown
+          ;; texts.
+          (unless (save-match-data (string-match "^\\([-*+]\\)\\|\\([0-9]*[.]\\)" second-line))
+            (replace-match "\\1 \\2")))))))
 
 ;;; Advice compilation-find-file to replace "\" with "/" in file names
 ;;; if the system is cygwin.  javac under windows produces error
