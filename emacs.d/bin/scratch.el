@@ -36,7 +36,6 @@ orgwork server to open it."
 (global-set-key (kbd "<f5>") 'zk-scratch-init)
 
 (setq create-lockfiles nil)
-(auto-save-visited-mode)
 (kill-buffer "*scratch*")
 
 (defun zk-scratch-init ()
