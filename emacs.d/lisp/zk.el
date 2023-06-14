@@ -265,6 +265,32 @@ remote directory suddenly becomes inaccessible."
   (zk-syncbox "Uploading to remote syncbox ..."
               zk-syncbox-local-dirname zk-syncbox-remote-dir))
 
+(defun zk-copy-region-to-temp-buffer ()
+  "Copy the content of the active region to a temporary buffer."
+  (interactive)
+    (unless mark-active
+      (user-error "Region not active"))
+    (let ((content (buffer-substring-no-properties (region-beginning) (region-end))))
+      (switch-to-buffer (make-temp-name "*clip*"))
+      (insert content)))
+
+(defun zk-remove-line-breaks-within-paragraphs (arg)
+  "Join all lines, except empty lines, in the active region.  This
+effectively removes all line breaks within paragraphs, making the
+text suitable for copying to line-wraping text editors. With the prefix
+argument, apply the change to the entire buffer."
+  (interactive "P")
+  (unless (or arg mark-active)
+    (user-error "Region is not active"))
+  (let ((begin (if mark-active (region-beginning) (point-min)))
+        (end (if mark-active (region-end) (point-max))))
+    (save-mark-and-excursion
+      (goto-char begin)
+      ;; Replace every new-line and its adjacent blanks with one space
+      (while (search-forward-regexp
+              "\\([[:graph:]]\\)[[:blank:]]*\n[[:blank:]]*\\([[:graph:]]\\)" end t)
+        (replace-match "\\1 \\2")))))
+
 ;;; Advice compilation-find-file to replace "\" with "/" in file names
 ;;; if the system is cygwin.  javac under windows produces error
 ;;; messages where file names use "\" as separators. While emacs can

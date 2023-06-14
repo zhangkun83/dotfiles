@@ -1,56 +1,28 @@
 (require 'zk)
 
-(defun zk-clipboard-cut (arg)
-  "Delete the current region (selection) and send it to clipboard
-using desktop-helper. With prefix argument (C-u), remove line
-breaks within paragraphs in the saved content."
-  (interactive "P")
-  (zk-clipboard-copy arg)
-  (delete-region (region-beginning) (region-end)))
-
 (defun zk-clipboard-copy (arg)
   "Save the current region (selection) to clipboard using
-desktop-helper. With prefix argument (C-u), remove line breaks
-within paragraphs in the saved content."
+desktop-helper. With prefix argument (C-u), copy the whole
+buffer."
   (interactive "P")
-  (unless mark-active
+  (unless (or arg mark-active)
     (user-error "Region not active"))
   (let ((buffer (current-buffer))
-        (begin (region-beginning))
-        (end (region-end)))
+        (begin (if arg (point-min) (region-beginning)))
+        (end (if arg (point-max) (region-end))))
     (if (= begin end)
-        (user-error "No region selected"))
-    (if arg (with-temp-buffer
-              (insert-buffer-substring buffer begin end)
-              (mark-whole-buffer)
-              (zk-remove-line-breaks-within-paragraphs-region)
-              (zk-clipboard-copy nil))
-      (with-temp-buffer
-        ;; Use a temp-buffer for client output
-        (let ((temp-buffer (current-buffer)))
-          (with-current-buffer buffer
-            (call-process-region
-             begin end
-             "desktop-helper-client.py"
-             nil temp-buffer nil
-             "store-to-clipboard")))
-        (message (zk-trim-string (buffer-string)))))
-    (deactivate-mark)))
-
-(defun zk-remove-line-breaks-within-paragraphs-region ()
-  "Join all lines, except empty lines, within the region.  This
-effectively removes all line breaks within paragraphs, making the
-text suitable for copying to line-wraping text editors."
-  (unless mark-active
-    (user-error "Region is not active"))
-  (let ((begin (region-beginning))
-        (end (region-end)))
-    (save-mark-and-excursion
-      (goto-char begin)
-      ;; Replace every new-line and its adjacent blanks with one space
-      (while (search-forward-regexp
-              "\\([[:graph:]]\\)[[:blank:]]*\n[[:blank:]]*\\([[:graph:]]\\)" end t)
-        (replace-match "\\1 \\2")))))
+        (user-error "Content is empty"))
+    (with-temp-buffer
+      ;; Use a temp-buffer for client output
+      (let ((temp-buffer (current-buffer)))
+        (with-current-buffer buffer
+          (call-process-region
+           begin end
+           "desktop-helper-client.py"
+           nil temp-buffer nil
+           "store-to-clipboard")))
+      (message (zk-trim-string (buffer-string)))))
+  (deactivate-mark))
 
 (defun zk-clipboard-paste ()
   "Retrieve the clipboard from desktop-helper and insert to the current point."
@@ -81,7 +53,6 @@ text suitable for copying to line-wraping text editors."
   (zk-youdao-dict word))
 
 (global-set-key (kbd "C-z C-c") 'zk-clipboard-copy)
-(global-set-key (kbd "C-z C-x") 'zk-clipboard-cut)
 (global-set-key (kbd "C-z C-v") 'zk-clipboard-paste)
 (define-key minibuffer-local-map (kbd "C-z C-v") 'zk-clipboard-paste)
 (global-set-key (kbd "C-z C-y") 'zk-clipboard-youdao-dict)
