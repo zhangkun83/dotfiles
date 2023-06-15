@@ -294,7 +294,7 @@ argument, apply the change to the entire buffer."
           ;; "+", or "1." "2." etc), it is meant to be a new line, so
           ;; don't join the two lines. This is common in markdown
           ;; texts.
-          (unless (save-match-data (string-match "^\\([-*+]\\)\\|\\([0-9]*[.]\\)" second-line))
+          (unless (save-match-data (string-match "^\\([-*+]\\)\\|\\([0-9]+[.]\\)" second-line))
             (replace-match "\\1 \\2")))))))
 
 ;;; Advice compilation-find-file to replace "\" with "/" in file names
