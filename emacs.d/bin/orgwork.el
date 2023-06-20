@@ -208,7 +208,7 @@ the current file for completion."
   (unless (eq zk-orgwork-status 'outdated)
     (user-error "Unexpected orgwork status: %s" zk-orgwork-status))
   (setq zk-orgwork-status 'downloading)
-  (let ((default-directory zk-user-home-dir))
+  (let ((default-directory zk-orgwork-directory))
     (switch-to-buffer zk-orgwork-rsync-buffer-name)
     (erase-buffer)
     (insert "Downloading remote files ...\n")
@@ -216,7 +216,7 @@ the current file for completion."
                   :buffer zk-orgwork-rsync-buffer-name
                   :command (list
                             "rsync" "-rtuv"
-                            (concat zk-orgwork-rsync-backup-dir "/") zk-orgwork-dirname)
+                            (concat zk-orgwork-rsync-backup-dir "/") ".")
                   :sentinel (lambda (process event)
                               (message "orgwork-rsync-download is now %s" event)
                               (if (string-match-p "finished.*" event)
