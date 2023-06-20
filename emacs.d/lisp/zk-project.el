@@ -1,16 +1,29 @@
 (require 'zk)
 
-(defvar zk-project-root (expand-file-name command-line-default-directory)
+(defconst zk-project-root
+  (expand-file-name command-line-default-directory)
   "The root directory of a project. TAGS and SRCFILES are located here.")
 
-(defun zk-set-project-root(f)
-  "Set project root where TAGS and SRCFILES are located."
-  (interactive "DProject root: ")
-  (setq zk-project-root f)
-  (message "Project root set as %s" f)
-  (setq zk-project-index-path (expand-file-name (concat zk-user-home-dir "/.zk/index/" zk-project-root))))
+(defconst zk-project-root-as-suffix
+  (replace-regexp-in-string ":" "" zk-project-root))
 
-(zk-set-project-root zk-project-root)
+(defconst zk-project-index-path
+  (expand-file-name (concat zk-user-home-dir "/.zk/index/" zk-project-root-as-suffix)))
+
+(defun zk-project-get-relative-path(absolute-path)
+  "If the absolute path starts with zk-project-root, remove it and make it a relative path"
+  (if (string-prefix-p zk-project-root absolute-path)
+      (let ((trimmed (substring absolute-path (length zk-project-root))))
+        (if (string-prefix-p "/" trimmed)
+            (substring trimmed 1)
+          trimmed))
+    absolute-path))
+
+(defun zk-project-restore-absolute-path(relative-path)
+  "If the path is a relative path, add zk-project-root as its prefix"
+  (if (string-prefix-p "/" relative-path)
+      relative-path
+    (concat zk-project-root "/" relative-path)))
 
 (defun zk-bookmark-set ()
   "Set a bookmark with pre-populated name in zk's custom format."
@@ -34,7 +47,8 @@
 (require 'savehist)
 (require 'bookmark)
 ;; Save session data in per-zk-project directories
-(let ((session-data-dir (expand-file-name (concat zk-user-home-dir "/.zk/emacs/" zk-project-root))))
+(let ((session-data-dir
+       (expand-file-name (concat zk-user-home-dir "/.zk/emacs/" zk-project-root-as-suffix))))
   (make-directory session-data-dir t)
   (setq savehist-file (concat session-data-dir "history"))
   (savehist-mode t)

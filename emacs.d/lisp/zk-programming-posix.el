@@ -50,21 +50,6 @@
                                 (process-lines "bash" "-c" (concat "cat '" zk-project-index-path "/SRCFILES'; echo -n"))))))
   (find-file (zk-project-restore-absolute-path f)))
 
-(defun zk-project-get-relative-path(absolute-path)
-  "If the absolute path starts with zk-project-root, remove it and make it a relative path"
-  (if (string-prefix-p zk-project-root absolute-path)
-      (let ((trimmed (substring absolute-path (length zk-project-root))))
-        (if (string-prefix-p "/" trimmed)
-            (substring trimmed 1)
-          trimmed))
-    absolute-path))
-
-(defun zk-project-restore-absolute-path(relative-path)
-  "If the path is a relative path, add zk-project-root as its prefix"
-  (if (string-prefix-p "/" relative-path)
-      relative-path
-    (concat zk-project-root "/" relative-path)))
-
 (defun zk-java-import-line< (line1 line2)
   "Decides whether one java import line should appear before the other.
 They must not be equal, and must start with 'import '."
