@@ -28,10 +28,20 @@
 ;;;; Don't enable semantic (semantic doesn't work if Java file contains generics)
 ;;(semantic-mode 1)
 
-(unless (eq system-type 'windows-nt)
-  (require 'zk-project)
-  (require 'zk-clipboard)
+(require 'zk-project)
+(require 'subr-x)
+(unless (or
+         ;; The following modules don't support native Windows
+         (eq system-type 'windows-nt)
+         ;; And they don't make sense in the HOME directory
+         (string-equal (string-remove-suffix "/" zk-user-home-dir)
+                       (string-remove-suffix "/" zk-project-root)))
+  (require 'zk-programming-posix)
   (require 'zk-google3))
+
+(unless (eq system-type 'windows-nt)
+  ;; Doesn't support native Windows
+  (require 'zk-clipboard))
 
 ;; Windows doesn't come with ispell program. Our best bet is the one
 ;; from cygwin.
