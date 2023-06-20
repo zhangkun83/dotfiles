@@ -14,6 +14,8 @@
 
 (defconst zk-orgwork-directory (concat zk-user-home-dir "/" zk-orgwork-dirname))
 
+(defconst zk-orgwork-upload-list-file-name ".upload-list")
+
 ;; Possible values: outdated, downloading, uploading, clean, modified
 (setq zk-orgwork-status 'outdated)
 
@@ -25,6 +27,21 @@
    "  " mode-line-modes
    (:eval (format "[orgwork: %s]" zk-orgwork-status))
    mode-line-misc-info mode-line-end-spaces))
+
+(defun zk-orgwork-generate-upload-list-file ()
+  "Generates a file that has the list of files eligible for
+uploading. It only include org and org_archive files, and exclude
+Emacs temporary files (starting with #) and hidden
+files (starting with .)"
+  (let ((list-file (concat zk-orgwork-directory "/" zk-orgwork-upload-list-file-name))
+        (file-list (directory-files zk-orgwork-directory)))
+    (with-current-buffer (find-file-noselect list-file)
+      (erase-buffer)
+      (dolist (file file-list)
+        (when (string-match-p "^[^.#].+\\.\\(org\\)\\|\\(org_archive\\)$" file)
+          (insert file "\n")))
+      (save-buffer)
+      (kill-buffer))))
 
 (defun zk-orgwork-goto-latest-note-file ()
   "Go to the latest note org file under the same directory."
@@ -222,15 +239,17 @@ the current file for completion."
            (eq zk-orgwork-status 'modified))
     (user-error "Unexpected orgwork status: %s" zk-orgwork-status))
   (setq zk-orgwork-status 'uploading)
-  (let ((default-directory zk-user-home-dir))
+  (zk-orgwork-generate-upload-list-file)
+  (let ((default-directory zk-orgwork-directory))
     (switch-to-buffer zk-orgwork-rsync-buffer-name)
     (erase-buffer)
     (insert "Uploading local changes ...\n")
     (make-process :name "orgwork-rsync-upload"
                   :buffer zk-orgwork-rsync-buffer-name
                   :command (list
-                            "rsync" "-rtuv" "--include='*.org'" "--include='*.org_archive'" "--exclude='*'"
-                            (concat zk-orgwork-dirname "/") zk-orgwork-rsync-backup-dir)
+                            "rsync" "-rtuv"
+                            (concat "--files-from=" zk-orgwork-upload-list-file-name)
+                            "./" zk-orgwork-rsync-backup-dir)
                   :sentinel (lambda (process event)
                               (message "orgwork-rsync-upload is now %s" event)
                               (if (string-match-p "finished.*" event)
