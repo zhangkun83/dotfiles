@@ -48,6 +48,11 @@
 (when (eq system-type 'windows-nt)
   (setq ispell-program-name (concat zk-user-home-dir "/cygwin/bin/aspell")))
 
+;; The temp buffer used by eshell to save command history is using
+;; latin-1 encoding on Windows and would complain if the history has
+;; non-latin characters. This will fix it.
+(set-default-coding-systems 'utf-8)
+
 (require 'vertico)
 (vertico-mode t)
 (setq completion-styles '(basic substring)
