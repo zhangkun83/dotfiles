@@ -66,6 +66,41 @@ White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."
     (kill-new file-name)
     (message "Copied \"%s\"" file-name)))
 
+(defun zk-sum-all-duration-marks-as-seconds ()
+  "Find duration marks in the format of H:MM:SS as its own line in
+the current buffer, sum them up and return the total seconds"
+  (save-excursion
+    (goto-char (point-min))
+    (let ((total-seconds 0))
+      (while (re-search-forward "^ *\\([0-9]+\\):\\([0-9]\\{2\\}\\):\\([0-9]\\{2\\}\\) *$" nil t)
+        (let ((hours (match-string 1))
+              (minutes (match-string 2))
+              (seconds (match-string 3)))
+          (setq total-seconds
+                (+ total-seconds
+                   (string-to-number seconds)
+                   (* 60 (string-to-number minutes))
+                   (* 3600 (string-to-number hours))))))
+      total-seconds)))
+
+(defun zk-convert-seconds-to-hms (seconds)
+  "Convert seconds to the format H:MM:SS"
+  (let* ((hours (/ seconds 3600))
+         (seconds (mod seconds 3600))
+         (minutes (/ seconds 60))
+         (seconds (mod seconds 60)))
+    (format "%d:%02d:%02d" hours minutes seconds)))
+
+(defun zk-sum-all-duration-marks ()
+  "Find duration marks in the format of H:MM:SS as its own line in
+the current buffer, sum them up and return the sum in the same
+format.  This is useful for preparing presentations where the
+duration of each slide is recorded with org-timer."
+  (interactive)
+  (let* ((total-seconds (zk-sum-all-duration-marks-as-seconds))
+         (hms (zk-convert-seconds-to-hms total-seconds)))
+    (message "Total duration: %s" hms)
+    hms))
 
 (defun zk-days-between-dates (&rest dates)
   "Given a list of dates and calculate the days between
