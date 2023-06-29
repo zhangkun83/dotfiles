@@ -264,7 +264,9 @@ the current file for completion."
 (defun zk-orgwork-startup-open (readonly)
   (when readonly
       (add-hook 'org-mode-hook (lambda() (read-only-mode 1))))
-  (org-tags-view nil "keep_in_mind|tbs")
+  (org-tags-view nil "keep_in_mind")
+  (split-window)
+  (org-tags-view nil "tbs")
   (setq server-name "orgwork")
   (server-start)
   (message "Ready%s. Have a very safe and productive day!"
