@@ -380,13 +380,20 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
 	       orig-file-name new-file-name))
     args-copy))
 
-(defun zk-cygwin-dired-cygstart ()
-  "Run cygstart on selected files in dired."
+(defun zk-dired-open-file-with-os ()
+  "Use OS-specific command to open a selected file in dired."
   (interactive)
-  (let ((file (dired-get-file-for-visit)))
-    (if (eq 0 (call-process "cygstart" nil nil nil file))
-        (message "Successfully called cygstart for '%s'" file)
-      (message "cygstart for '%s' failed" file))))
+  (let ((file (dired-get-file-for-visit))
+        (cmd (cond ((eq system-type 'cygwin) "cygstart")
+                   ((eq system-type 'darwin) "open")
+                   (t (user-error "Unsupported system: %s" system-type)))))
+    (if (eq 0 (call-process cmd nil nil nil file))
+        (message "Successfully called '%s' for '%s'" cmd file)
+      (message "'%s' for '%s' failed" cmd file))))
+
+(add-hook 'dired-mode-hook
+          (lambda ()
+            (local-set-key (kbd "E") 'zk-dired-open-file-with-os)))
 
 (defun set-exec-path-from-shell-PATH ()
   "Set up Emacs' `exec-path' and PATH environment variable to match
@@ -432,9 +439,6 @@ apps are not started from a shell."
   ;; shell-file-name.
   (unless (getenv "SHELL")
     (message "SHELL environment is not set, forcing shell-file-name to bash")
-    (setq shell-file-name "/bin/bash"))
-  (add-hook 'dired-mode-hook
-            (lambda ()
-              (local-set-key (kbd "E") 'zk-cygwin-dired-cygstart))))
+    (setq shell-file-name "/bin/bash")))
 
 (provide 'zk)
