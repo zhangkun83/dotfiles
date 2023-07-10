@@ -56,13 +56,6 @@ files (starting with .)"
     (unless latest-file (user-error "No notes file found"))
     (switch-to-buffer (find-file-noselect (concat (zk-zorg-directory) "/" latest-file)))))
 
-(defun zk-zorg-goto-orgwork-file ()
-  "Go to the work.org file under the same directory if it exists."
-  (interactive)
-  (let ((file-name "work.org"))
-    (unless (file-exists-p file-name) (user-error "%s does not exist" file-name))
-    (switch-to-buffer (find-file-noselect file-name))))
-
 (defun zk-org-generate-custom-id-from-text (text)
   "Generate a plain ID that only contains alphanumerics and
 underscores from a natural text. Throw an error if the generated
@@ -199,7 +192,6 @@ the current file for completion."
   (local-set-key (kbd "C-c m") 'zk-org-tags-view)
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
   (local-set-key (kbd "C-c g n") 'zk-zorg-goto-latest-note-file)
-  (local-set-key (kbd "C-c g w") 'zk-zorg-goto-orgwork-file)
   (local-set-key (kbd "C-c l") 'zk-org-set-generated-custom-id-and-copy-external-link)
   (local-set-key (kbd "C-c s s") 'zk-zorg-show-status)
   (local-set-key (kbd "C-c s u") 'zk-zorg-rsync-upload))
