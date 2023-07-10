@@ -220,10 +220,12 @@ remote directory suddenly becomes inaccessible."
 
 (defun zk-browse-url (url &optional _new-window)
   ;; new-window ignored
-  (let ((program (if (eq system-type 'windows-nt)
-                     "\"C:/Program Files/Google/Chrome/Application/chrome.exe\" "
-                   "desktop-helper-client.py open-url ")))
-    (shell-command (concat program
+  (let ((program (cond ((eq system-type 'windows-nt)
+                        "\"C:/Program Files/Google/Chrome/Application/chrome.exe\"")
+                       ((eq system-type 'darwin)
+                        "open")
+                       (t "desktop-helper-client.py open-url"))))
+    (shell-command (concat program " "
                          (prin1-to-string url)))))
 
 (defvar zk-shell-command-on-file-at-point--history nil)
