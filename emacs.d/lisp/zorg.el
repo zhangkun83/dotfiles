@@ -12,6 +12,9 @@
   relative to the home directory, to store org files.  Also used
   as the frame title and emacs server name.")
 
+(defvar zk-zorg-startup-view-func nil "Called to present the
+initial view once initialization has succeeded")
+
 (defconst zk-zorg-rsync-buffer-name "*zorg rsync*")
 
 (defun zk-zorg-directory ()
@@ -282,9 +285,8 @@ check failed."
       (if readonly
           (add-hook 'org-mode-hook (lambda() (read-only-mode 1)))
         (zk-zorg-rsync-check-remote-freshness))
-    (org-tags-view nil "keep_in_mind")
-    (split-window)
-    (org-tags-view nil "tbs")
+    (when zk-zorg-startup-view-func
+      (funcall zk-zorg-startup-view-func))
     (setq server-name zk-zorg-profile-name)
     (server-start)
     (message "Ready%s. Have a very safe and productive day!"
