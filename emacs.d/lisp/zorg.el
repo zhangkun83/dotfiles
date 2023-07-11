@@ -18,8 +18,6 @@
   "Returns the absolute directory for local org files"
   (concat zk-user-home-dir "/" zk-zorg-profile-name))
 
-(defconst zk-zorg-upload-list-file-name ".upload-list")
-
 ;; Possible values: outdated, downloading, uploading, clean, modified
 (setq zk-zorg-status 'outdated)
 
@@ -36,16 +34,18 @@
   "Generates a file that has the list of files eligible for
 uploading. It only include org and org_archive files, and exclude
 Emacs temporary files (starting with #) and hidden
-files (starting with .)"
-  (let ((list-file (concat (zk-zorg-directory) "/" zk-zorg-upload-list-file-name))
-        (file-list (directory-files (zk-zorg-directory))))
+files (starting with .). Returns the list file name."
+  (let* ((list-file-name ".upload-list")
+         (list-file (concat (zk-zorg-directory) "/" list-file-name))
+         (file-list (directory-files (zk-zorg-directory))))
     (with-current-buffer (find-file-noselect list-file)
       (erase-buffer)
       (dolist (file file-list)
         (when (string-match-p "^[^.#].+\\.\\(org\\)\\|\\(org_archive\\)$" file)
           (insert file "\n")))
       (save-buffer)
-      (kill-buffer))))
+      (kill-buffer))
+    list-file-name))
 
 (defun zk-zorg-goto-latest-note-file ()
   "Go to the latest note org file under the same directory."
@@ -217,25 +217,18 @@ the current file for completion."
     (switch-to-buffer zk-zorg-rsync-buffer-name)
     (erase-buffer)
     (insert "Downloading remote files ...\n")
-    (make-process :name "zorg-rsync-download"
-                  :buffer zk-zorg-rsync-buffer-name
-                  :command (list
-                            "rsync" "-rtuv"
-                            (concat zk-zorg-rsync-backup-dir "/") ".")
-                  :sentinel (lambda (process event)
-                              (message "zorg-rsync-download is now %s" event)
-                              (if (string-match-p "finished.*" event)
-                                  (progn
-                                    (setq zk-zorg-status 'clean)
-                                    (read-string "Download successful. Press Enter to continue ...")
-                                    (kill-buffer)
-                                    (zk-zorg-startup-open nil))
-                                (setq zk-zorg-status 'outdated)
-                                (if (y-or-n-p "Download failed. Press y to retry, n to open in read-only mode")
-                                    (zk-zorg-startup-init)
-                                  (kill-buffer)
-                                  (zk-zorg-startup-open t)))))))
-
+    (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                            "-rtuv" (concat zk-zorg-rsync-backup-dir "/") "."))
+        (progn
+          (setq zk-zorg-status 'clean)
+          (read-string "Download successful. Press Enter to continue ...")
+          (kill-buffer)
+          (zk-zorg-startup-open nil))
+      (setq zk-zorg-status 'outdated)
+      (if (y-or-n-p "Download failed. Press y to retry, n to open in read-only mode")
+          (zk-zorg-startup-init)
+        (kill-buffer)
+        (zk-zorg-startup-open t)))))
 
 (defun zk-zorg-rsync-upload ()
   (interactive)
@@ -244,38 +237,58 @@ the current file for completion."
            (eq zk-zorg-status 'modified))
     (user-error "Unexpected zorg status: %s" zk-zorg-status))
   (setq zk-zorg-status 'uploading)
-  (zk-zorg-generate-upload-list-file)
   (let ((default-directory (zk-zorg-directory)))
     (switch-to-buffer zk-zorg-rsync-buffer-name)
     (erase-buffer)
     (insert "Uploading local changes ...\n")
-    (make-process :name "zorg-rsync-upload"
-                  :buffer zk-zorg-rsync-buffer-name
-                  :command (list
-                            "rsync" "-rtuv"
-                            (concat "--files-from=" zk-zorg-upload-list-file-name)
-                            "./" zk-zorg-rsync-backup-dir)
-                  :sentinel (lambda (process event)
-                              (message "zorg-rsync-upload is now %s" event)
-                              (if (string-match-p "finished.*" event)
-                                  (progn
-                                    (setq zk-zorg-status 'clean)
-                                    (read-string "Upload successful. Press Enter to continue ...")
-                                    (kill-buffer))
-                                (setq zk-zorg-status 'modified)
-                                (if (y-or-n-p "Upload failed. Retry?")
-                                    (zk-zorg-rsync-upload)))))))
+    (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                            "-rtuv"
+                            (concat "--files-from=" (zk-zorg-generate-upload-list-file))
+                            "./" zk-zorg-rsync-backup-dir))
+        (progn
+          (setq zk-zorg-status 'clean)
+          (read-string "Upload successful. Press Enter to continue ...")
+          (kill-buffer))
+      (setq zk-zorg-status 'modified)
+      (if (y-or-n-p "Upload failed. Retry?")
+          (zk-zorg-rsync-upload)))))
+
+(defun zk-zorg-rsync-check-remote-freshness ()
+  "Called right after the initial download to make sure the remote
+is as fresh as the local copy.  Returns t if check passes, nil if
+check failed."
+  (let ((default-directory (zk-zorg-directory)))
+    (switch-to-buffer zk-zorg-rsync-buffer-name)
+    (erase-buffer)
+    (insert "Checking remote freshness ...\n")
+    (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                            "-ncrti"
+                            (concat "--files-from=" (zk-zorg-generate-upload-list-file))
+                            "./" zk-zorg-rsync-backup-dir))
+        (with-current-buffer zk-zorg-rsync-buffer-name
+          (if (> (count-lines (point-min) (point-max)) 1)
+              (progn
+                (read-string "WARNING: local files differ from remote.  Please check ...")
+                nil)
+            (read-string "Local files are consistent with remote.  Press Enter to continue ...")
+            (kill-buffer)
+            t))
+      (if (y-or-n-p "Failed to check remote freshness. Retry?")
+          (zk-zorg-rsync-check-remote-freshness)
+        nil))))
 
 (defun zk-zorg-startup-open (readonly)
-  (when readonly
-      (add-hook 'org-mode-hook (lambda() (read-only-mode 1))))
-  (org-tags-view nil "keep_in_mind")
-  (split-window)
-  (org-tags-view nil "tbs")
-  (setq server-name zk-zorg-profile-name)
-  (server-start)
-  (message "Ready%s. Have a very safe and productive day!"
-           (if readonly " (read-only)" "")))
+  (when
+      (if readonly
+          (add-hook 'org-mode-hook (lambda() (read-only-mode 1)))
+        (zk-zorg-rsync-check-remote-freshness))
+    (org-tags-view nil "keep_in_mind")
+    (split-window)
+    (org-tags-view nil "tbs")
+    (setq server-name zk-zorg-profile-name)
+    (server-start)
+    (message "Ready%s. Have a very safe and productive day!"
+             (if readonly " (read-only)" ""))))
 
 (defun zk-zorg-shutdown-confirm (prompt)
   (if (eq zk-zorg-status 'modified)
@@ -286,7 +299,11 @@ the current file for completion."
 
 (add-hook 'before-save-hook
           (lambda ()
-            (if (eq zk-zorg-status 'clean)
+            (if (and (eq zk-zorg-status 'clean)
+                     ;; Only monitor changes in zorg files
+                     (string-prefix-p (zk-zorg-directory) buffer-file-name)
+                     ;; Exclude ".upload-list" and other dot files
+                     (not (string-prefix-p "." (file-name-nondirectory buffer-file-name))))
                 (setq zk-zorg-status 'modified))))
 
 (add-hook 'org-mode-hook 'zk-org-setup-bindings)
