@@ -83,12 +83,13 @@ CUSTOM_ID already exists in the file."
                            (setq found-p t))))
     found-p))
   
-(defun zk-org-set-generated-custom-id-and-copy-external-link ()
+(defun zk-org-set-generated-custom-id-and-copy-external-link (arg)
   "If CUSTOM_ID of the current org headline doesn't exist,
 generate one based on the text of the headline and set it. This
 will also move to that headline. Return the external link based
-on the CUSTOM_ID."
-  (interactive)
+on the CUSTOM_ID.  When called with the prefix argument, copy the
+link to be used for scratch.el instead."
+  (interactive "P")
   (require 'org)
   (require 'org-element)
   (zk-org-move-to-current-heading)
@@ -101,6 +102,7 @@ on the CUSTOM_ID."
                        (org-set-property "CUSTOM_ID" new-id)
                        new-id)))
          (link (concat "file:"
+                       (if arg (concat "@" zk-zorg-profile-name ":"))
                        (file-name-nondirectory (buffer-file-name (current-buffer)))
                        "::#"
                        custom-id)))

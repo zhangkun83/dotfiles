@@ -14,20 +14,25 @@
 
 (require 'server)
 (defun zk-scratch-advice-open-link-at-point(orig-open-link-at-point)
-  "Opens the link at point. If it's a local org link, ask the
-orgwork server to open it."
+  "Opens the link at point. If it's a local org link, ask the zorg
+server to open it.  The link format must be like
+'file:@orglife:notes2023.org::#node_id'"
   (interactive)
   (let ((link (zk-scratch-get-link-at-point)))
     (when link
       (if (string-match-p "^file:.*" link)
-          ;; Open org file links in orgwork
           (progn
-            (server-eval-at
-             "orgwork"
-             (list 'progn
-                     (list 'org-link-open-from-string link)
+            (unless (string-match "^file:@\\([a-z]+\\):\\(.*\\)$" link)
+              (user-error "Link format must be in the form 'file:@zorgprofile:filename.org::#nodeid'"))
+            (let ((zorg-profile (match-string-no-properties 1 link))
+                  (actual-link (concat "file:" (match-string-no-properties 2 link))))
+              ;; Open org file links in zorg
+              (server-eval-at
+               zorg-profile
+               (list 'progn
+                     (list 'org-link-open-from-string actual-link)
                      '(raise-frame)))
-            (message "Asked orgwork to open \"%s\"" link))
+              (message "Asked %s to open \"%s\"" zorg-profile actual-link)))
         ;; Open other links normally
         (funcall orig-open-link-at-point)))))
 
