@@ -299,13 +299,18 @@ check failed."
        "I want to quit!")
     (yes-or-no-p prompt)))
 
-(add-hook 'before-save-hook
+(defun zk-zorg-current-buffer-is-zorg-file-p ()
+  (let ((file-name (file-name-nondirectory buffer-file-name)))
+    (and
+     ;; Only monitor changes in zorg files
+     (member file-name (directory-files (zk-zorg-directory)))
+     ;; Exclude ".upload-list" and other dot files
+     (not (string-prefix-p "." file-name)))))
+
+(add-hook 'after-save-hook
           (lambda ()
             (if (and (eq zk-zorg-status 'clean)
-                     ;; Only monitor changes in zorg files
-                     (string-prefix-p (zk-zorg-directory) buffer-file-name)
-                     ;; Exclude ".upload-list" and other dot files
-                     (not (string-prefix-p "." (file-name-nondirectory buffer-file-name))))
+                     (zk-zorg-current-buffer-is-zorg-file-p))
                 (setq zk-zorg-status 'modified))))
 
 (add-hook 'org-mode-hook 'zk-org-setup-bindings)
