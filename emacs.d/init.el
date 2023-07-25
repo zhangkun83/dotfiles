@@ -228,10 +228,6 @@
 (put 'narrow-to-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
 
-(require 'zk-go-to-char)
-(global-set-key (kbd "C-f") 'zk-go-to-char-forward)
-(global-set-key (kbd "C-b") 'zk-go-to-char-backward)
-
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
