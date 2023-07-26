@@ -203,11 +203,12 @@ the current file for completion."
   "Register my own shortcuts for org mode"
   (local-set-key (kbd "C-c a") 'org-agenda-list)
   (local-set-key (kbd "C-c m") 'zk-org-tags-view)
+  (local-set-key (kbd "C-c s") 'org-search-view)
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
   (local-set-key (kbd "C-c g n") 'zk-zorg-goto-latest-note-file)
   (local-set-key (kbd "C-c l") 'zk-org-set-generated-custom-id-and-copy-external-link)
-  (local-set-key (kbd "C-c s s") 'zk-zorg-show-status)
-  (local-set-key (kbd "C-c s u") 'zk-zorg-rsync-upload))
+  (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
+  (local-set-key (kbd "C-c r u") 'zk-zorg-rsync-upload))
 
 (defun zk-org-set-file-encoding ()
   ;; Force unix newline format, even on Windows
