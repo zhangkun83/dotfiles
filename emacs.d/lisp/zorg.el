@@ -95,22 +95,30 @@ link to be used for scratch.el instead."
   (interactive "P")
   (require 'org)
   (require 'org-element)
-  (zk-org-move-to-current-heading)
-  (let* ((headline (org-element-at-point))
-         (custom-id (or
-                     (org-element-property :CUSTOM_ID headline)
-                     (let ((new-id
-                            (zk-org-generate-custom-id-from-text
-                             (substring-no-properties (org-get-heading t t t t)))))
-                       (org-set-property "CUSTOM_ID" new-id)
-                       new-id)))
-         (link (concat "file:"
-                       (if arg (concat "@" zk-zorg-profile-name ":"))
-                       (file-name-nondirectory (buffer-file-name (current-buffer)))
-                       "::#"
-                       custom-id)))
-    (kill-new link)
-    (message "Copied \"%s\"" link)))
+  (save-excursion
+    ;; Allows invoking this command directly from the agenda buffer
+    (if (eq major-mode 'org-agenda-mode)
+        (org-agenda-switch-to))
+    (zk-org-move-to-current-heading)
+    (let* ((headline (org-element-at-point))
+           (custom-id (or
+                       (org-element-property :CUSTOM_ID headline)
+                       (let ((new-id
+                              (zk-org-generate-custom-id-from-text
+                               (substring-no-properties (org-get-heading t t t t)))))
+                         (org-set-property "CUSTOM_ID" new-id)
+                         new-id)))
+           (link (concat "file:"
+                         (if arg (concat "@" zk-zorg-profile-name ":"))
+                         (file-name-nondirectory (buffer-file-name (current-buffer)))
+                         "::#"
+                         custom-id)))
+      (kill-new link)
+      (message "Copied \"%s\"" link)))
+  ;; save-excursion will restore the previous buffer as current, but
+  ;; it doesn't switch the current window to that buffer.  We need to
+  ;; manually do it.
+  (switch-to-buffer (current-buffer)))
 
 (defun zk-org-move-to-current-heading ()
   "Move to the current heading if not already at a heading."
