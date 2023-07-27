@@ -86,39 +86,68 @@ CUSTOM_ID already exists in the file."
                            (setq found-p t))))
     found-p))
   
-(defun zk-org-set-generated-custom-id-and-copy-external-link (arg)
+(defun zk-org-set-generated-custom-id-and-copy-external-link (&optional arg)
   "If CUSTOM_ID of the current org headline doesn't exist,
-generate one based on the text of the headline and set it. This
-will also move to that headline. Return the external link based
-on the CUSTOM_ID.  When called with the prefix argument, copy the
-link to be used for scratch.el instead."
+generate one based on the text of the headline and set it.  Copy
+the external link based on the CUSTOM_ID to the kill ring.  When
+called with the prefix argument, the link will include
+zk-zorg-profile-name so that it can be used for scratch.el"
   (interactive "P")
+  (let* ((link-pair (zk-org-get-headline-link-at-point arg))
+         (link (nth 0 link-pair))
+         (headline-text (nth 1 link-pair)))
+    (kill-new link)
+    (message "Copied \"%s\"" link)))
+
+(defun zk-org-set-generated-custom-id-and-copy-external-reference (&optional arg)
+  "If CUSTOM_ID of the current org headline doesn't exist,
+generate one based on the text of the headline and set it.  Copy
+a reference, with the headline string followed by a link based on
+the CUSTOM_ID, to the kill ring.  When called with the prefix
+argument, the link will include zk-zorg-profile-name so that it
+can be used for scratch.el"
+  (interactive "P")
+  (let* ((link-pair (zk-org-get-headline-link-at-point arg))
+         (link (nth 0 link-pair))
+         (headline-text (nth 1 link-pair))
+         (reference (format "%s ([[%s][link]])" headline-text link)))
+    (kill-new reference)
+    (message "Copied \"%s\"" reference)))
+
+(defun zk-org-get-headline-link-at-point (with-profile-name)
+  "If CUSTOM_ID of the current org headline doesn't exist,
+generate one based on the text of the headline and set it.
+Returns a list of (link headline), where link is the external
+link based on the CUSTOM_ID, and headline is the headline text.
+When with-profile-name is non-nil, the link will include
+zk-zorg-profile-name so that it can be used for scratch.el"
   (require 'org)
   (require 'org-element)
-  (save-excursion
-    ;; Allows invoking this command directly from the agenda buffer
-    (if (eq major-mode 'org-agenda-mode)
-        (org-agenda-switch-to))
-    (zk-org-move-to-current-heading)
-    (let* ((headline (org-element-at-point))
-           (custom-id (or
-                       (org-element-property :CUSTOM_ID headline)
-                       (let ((new-id
-                              (zk-org-generate-custom-id-from-text
-                               (substring-no-properties (org-get-heading t t t t)))))
-                         (org-set-property "CUSTOM_ID" new-id)
-                         new-id)))
-           (link (concat "file:"
-                         (if arg (concat "@" zk-zorg-profile-name ":"))
-                         (file-name-nondirectory (buffer-file-name (current-buffer)))
-                         "::#"
-                         custom-id)))
-      (kill-new link)
-      (message "Copied \"%s\"" link)))
-  ;; save-excursion will restore the previous buffer as current, but
-  ;; it doesn't switch the current window to that buffer.  We need to
-  ;; manually do it.
-  (switch-to-buffer (current-buffer)))
+  (let ((return-value nil))
+    (save-excursion
+      ;; Allows invoking this command directly from the agenda buffer
+      (if (eq major-mode 'org-agenda-mode)
+          (org-agenda-switch-to))
+      (zk-org-move-to-current-heading)
+      (let* ((headline (org-element-at-point))
+             (headline-text (substring-no-properties (org-get-heading t t t t)))
+             (custom-id (or
+                         (org-element-property :CUSTOM_ID headline)
+                         (let ((new-id
+                                (zk-org-generate-custom-id-from-text headline-text)))
+                           (org-set-property "CUSTOM_ID" new-id)
+                           new-id)))
+             (link (concat "file:"
+                           (if with-profile-name (concat "@" zk-zorg-profile-name ":"))
+                           (file-name-nondirectory (buffer-file-name (current-buffer)))
+                           "::#"
+                           custom-id)))
+        (setq return-value (list link headline-text))))
+    ;; save-excursion will restore the previous buffer as current, but
+    ;; it doesn't switch the current window to that buffer.  We need
+    ;; to manually do it.
+    (switch-to-buffer (current-buffer))
+    return-value))
 
 (defun zk-org-move-to-current-heading ()
   "Move to the current heading if not already at a heading."
@@ -206,7 +235,8 @@ the current file for completion."
   (local-set-key (kbd "C-c s") 'org-search-view)
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
   (local-set-key (kbd "C-c g n") 'zk-zorg-goto-latest-note-file)
-  (local-set-key (kbd "C-c l") 'zk-org-set-generated-custom-id-and-copy-external-link)
+  (local-set-key (kbd "C-c l l") 'zk-org-set-generated-custom-id-and-copy-external-link)
+  (local-set-key (kbd "C-c l r") 'zk-org-set-generated-custom-id-and-copy-external-reference)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
   (local-set-key (kbd "C-c r u") 'zk-zorg-rsync-upload))
 
