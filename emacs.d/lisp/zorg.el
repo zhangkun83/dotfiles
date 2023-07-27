@@ -185,7 +185,7 @@ back to the current entry."
     (unless (and link (string-match-p "^\\(file:[^:]+::\\)?#[^#]+$" link))
       (user-error "Not a link to an org entry: %s" link))
     (let ((back-ref (zk-org-get-external-reference)))
-      (org-link-open-from-string link)
+      (org-open-at-point)
       (zk-org-add-note-to-logbook
        (concat "Referenced in: " back-ref) t))))
 
