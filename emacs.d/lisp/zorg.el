@@ -1,4 +1,7 @@
 (require 'zk)
+(require 'org)
+(require 'org-element)
+(require 'dash)
 
 (defvar zk-zorg-rsync-backup-dir
   nil "The remote path used by rsync for backing up org files")
@@ -78,7 +81,6 @@ CUSTOM_ID already exists in the file."
 
 (defun zk-org-custom-id-exists-p (custom-id)
   "Check if the given CUSTOM_ID already exists in the current org file."
-  (require 'org)
   (let ((found-p nil))
     (org-map-entries (lambda ()
                        (if (string= custom-id
@@ -107,12 +109,22 @@ the CUSTOM_ID, to the kill ring.  When called with the prefix
 argument, the link will include zk-zorg-profile-name so that it
 can be used for scratch.el"
   (interactive "P")
+  (let (reference (zk-org-get-external-reference (arg)))
+    (kill-new reference)
+    (message "Copied \"%s\"" reference)))
+
+(defun zk-org-get-external-reference (&optional arg)
+  "If CUSTOM_ID of the current org headline doesn't exist,
+generate one based on the text of the headline and set it.
+Returns a reference, with the headline string followed by a link
+based on the CUSTOM_ID.  When called with the prefix argument,
+the link will include zk-zorg-profile-name so that it can be used
+for scratch.el"
   (let* ((link-pair (zk-org-get-headline-link-at-point arg))
          (link (nth 0 link-pair))
          (headline-text (nth 1 link-pair))
          (reference (format "%s ([[%s][link]])" headline-text link)))
-    (kill-new reference)
-    (message "Copied \"%s\"" reference)))
+    reference))
 
 (defun zk-org-get-headline-link-at-point (with-profile-name)
   "If CUSTOM_ID of the current org headline doesn't exist,
@@ -121,8 +133,6 @@ Returns a list of (link headline), where link is the external
 link based on the CUSTOM_ID, and headline is the headline text.
 When with-profile-name is non-nil, the link will include
 zk-zorg-profile-name so that it can be used for scratch.el"
-  (require 'org)
-  (require 'org-element)
   (let ((return-value nil))
     (save-excursion
       ;; Allows invoking this command directly from the agenda buffer
@@ -149,10 +159,39 @@ zk-zorg-profile-name so that it can be used for scratch.el"
     (switch-to-buffer (current-buffer))
     return-value))
 
+(defun zk-org-add-note-to-logbook (content &optional show)
+  "Add a note to the log book of the current entry.
+
+If show is non-nil, will make the new note visible"
+  (goto-char (org-log-beginning t))
+  (save-excursion
+    (org-insert-time-stamp nil t t "- Note taken on " " \\\\\n")
+    (insert "  " content "\n"))
+  (when show
+    (org-show-context)))
+
+(defun zk-org-get-link-at-point()
+  (let ((link-prop (get-text-property (point) 'htmlize-link)))
+    (when link-prop
+      (nth 1 link-prop))))
+
+(defun zk-org-log-backlink-at-point ()
+  "If the point is on a link, record a log in the linked entry
+back to the current entry."
+  (interactive)
+  (let ((link (zk-org-get-link-at-point)))
+    ;; Only works on a org entry link, in the format of
+    ;; "(file:filename.org::)?#nodeid"
+    (unless (and link (string-match-p "^\\(file:[^:]+::\\)?#[^#]+$" link))
+      (user-error "Not a link to an org entry: %s" link))
+    (let ((back-ref (zk-org-get-external-reference)))
+      (org-link-open-from-string link)
+      (zk-org-add-note-to-logbook
+       (concat "Referenced in: " back-ref) t))))
+
 (defun zk-org-move-to-current-heading ()
   "Move to the current heading if not already at a heading."
   (interactive)
-  (require 'org-element)
   (unless (eq 'headline (org-element-type (org-element-at-point)))
     (org-previous-visible-heading 1)))
 
@@ -184,7 +223,6 @@ the current file for completion."
                    t)))
     (org-toggle-tag new-tag 'on)))
 
-(require 'dash)
 (defun zk-org-rename-tag-command ()
   "Rename a tag throughout the agenda files."
   (interactive)
@@ -237,6 +275,7 @@ the current file for completion."
   (local-set-key (kbd "C-c g n") 'zk-zorg-goto-latest-note-file)
   (local-set-key (kbd "C-c l l") 'zk-org-set-generated-custom-id-and-copy-external-link)
   (local-set-key (kbd "C-c l r") 'zk-org-set-generated-custom-id-and-copy-external-reference)
+  (local-set-key (kbd "C-c l b") 'zk-org-log-backlink-at-point)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
   (local-set-key (kbd "C-c r u") 'zk-zorg-rsync-upload))
 
