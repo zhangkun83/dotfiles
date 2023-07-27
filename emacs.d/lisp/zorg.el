@@ -152,12 +152,27 @@ zk-zorg-profile-name so that it can be used for scratch.el"
                            (file-name-nondirectory (buffer-file-name (current-buffer)))
                            "::#"
                            custom-id)))
-        (setq return-value (list link headline-text))))
+        (setq return-value (list link (zk-org-neutralize-timestamp headline-text)))))
     ;; save-excursion will restore the previous buffer as current, but
     ;; it doesn't switch the current window to that buffer.  We need
     ;; to manually do it.
     (switch-to-buffer (current-buffer))
     return-value))
+
+(defun zk-org-neutralize-timestamp (text)
+  "Convert org timestemps like \"[2023-07-27 Thu 14:58]\" or
+\"<2023-07-27 Thu 14:58>\" to a format that is not parsed by
+org-mode, by changing the brackets and angel brackets to
+parentheses."
+  (let ((result (copy-sequence text))
+        (date-pattern "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]"))
+    (while (string-match (concat "\\[" date-pattern "[^]]*\\]") result)
+      (aset result (match-beginning 0) ?\()
+      (aset result (- (match-end 0) 1) ?\)))
+    (while (string-match (concat "<" date-pattern "[^>]*>") result)
+      (aset result (match-beginning 0) ?\()
+      (aset result (- (match-end 0) 1) ?\)))
+    result))
 
 (defun zk-org-add-note-to-logbook (content &optional show)
   "Add a note to the log book of the current entry.
