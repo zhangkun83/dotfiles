@@ -177,13 +177,26 @@
             (local-set-key (kbd "C-c t") 'comint-truncate-buffer)))
 
 ;; Set font
+(defconst zk-font-family "DejaVu Sans Mono")
+
 (set-face-attribute 'default nil
-		    :family "DejaVu Sans Mono"
+		    :family zk-font-family
                     :height (if (<= 1080 (nth 3 (alist-get 'geometry (car (display-monitor-attributes-list)))))
                                 ;; High-res displays
                                 (if (eq system-type 'darwin) 175 105)
                               ;; Low-res displays
                               125))
+
+;; The "fixed-pitch" face is originally defined in faces.el, with
+;; family "Monospace".  However, on Windows it means "Courier" which
+;; is pretty ugly, and is used on code snippets in org-mode with
+;; themes other than leuven.  Override it to my font of choice.  (Use
+;; "C-u C-x =" to find out the face used to display the character at
+;; point).
+(defface fixed-pitch
+  '((t :family zk-font-family))
+  "The basic fixed-pitch face."
+  :group 'basic-faces)
 
 (when (fboundp 'set-fontset-font)
   (set-fontset-font t 'chinese-gbk
