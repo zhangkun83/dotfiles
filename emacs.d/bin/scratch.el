@@ -3,7 +3,7 @@
 (setq frame-title-format "scratch")
 (setq confirm-kill-emacs 'yes-or-no-p)
 (disable-theme 'leuven)
-(load-theme 'adwaita t nil)
+(load-theme 'tsdh-light t nil)
 
 (defconst zk-scratch-dir (concat zk-user-home-dir "/scratch"))
 
