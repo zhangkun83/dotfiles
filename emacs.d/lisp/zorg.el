@@ -332,46 +332,51 @@ the current file for completion."
            (eq zk-zorg-status 'clean)
            (eq zk-zorg-status 'modified))
     (user-error "Unexpected zorg status: %s" zk-zorg-status))
-  (setq zk-zorg-status 'uploading)
-  (let ((default-directory (zk-zorg-directory)))
-    (switch-to-buffer zk-zorg-rsync-buffer-name)
-    (erase-buffer)
-    (insert "Uploading local changes ...\n")
-    (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
-                            "-rtuv"
-                            (concat "--files-from=" (zk-zorg-generate-upload-list-file))
-                            "./" zk-zorg-rsync-backup-dir))
-        (progn
-          (setq zk-zorg-status 'clean)
-          (read-string "Upload successful. Press Enter to continue ...")
-          (kill-buffer))
-      (setq zk-zorg-status 'modified)
-      (if (y-or-n-p "Upload failed. Retry?")
-          (zk-zorg-rsync-upload)))))
+  (let ((default-directory (zk-zorg-directory))
+        (do-it-p t))
+    (while do-it-p
+      (setq zk-zorg-status 'uploading)
+      (switch-to-buffer zk-zorg-rsync-buffer-name)
+      (erase-buffer)
+      (insert "Uploading local changes ...\n")
+      (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                              "-rtuv"
+                              (concat "--files-from=" (zk-zorg-generate-upload-list-file))
+                              "./" zk-zorg-rsync-backup-dir))
+          (progn
+            (setq zk-zorg-status 'clean)
+            (read-string "Upload successful. Press Enter to continue ...")
+            (kill-buffer)
+            (setq do-it-p nil))
+        (setq zk-zorg-status 'modified)
+        (unless (y-or-n-p "Upload failed. Retry?")
+            (setq do-it-p nil))))))
 
 (defun zk-zorg-rsync-check-remote-freshness ()
   "Called right after the initial download to make sure the remote
 is as fresh as the local copy.  Returns t if check passes, nil if
 check failed."
-  (let ((default-directory (zk-zorg-directory)))
-    (switch-to-buffer zk-zorg-rsync-buffer-name)
-    (erase-buffer)
-    (insert "Checking remote freshness ...\n")
-    (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
-                            "-ncrti"
-                            (concat "--files-from=" (zk-zorg-generate-upload-list-file))
-                            "./" zk-zorg-rsync-backup-dir))
-        (with-current-buffer zk-zorg-rsync-buffer-name
-          (if (> (count-lines (point-min) (point-max)) 1)
-              (progn
+  (let ((default-directory (zk-zorg-directory))
+        (do-it-p t)
+        (consistent-p nil))
+    (while do-it-p
+      (switch-to-buffer zk-zorg-rsync-buffer-name)
+      (erase-buffer)
+      (insert "Checking remote freshness ...\n")
+      (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                              "-ncrti"
+                              (concat "--files-from=" (zk-zorg-generate-upload-list-file))
+                              "./" zk-zorg-rsync-backup-dir))
+          (with-current-buffer zk-zorg-rsync-buffer-name
+            (setq do-it-p nil)
+            (if (> (count-lines (point-min) (point-max)) 1)
                 (read-string "WARNING: local files differ from remote.  Please check ...")
-                nil)
-            (read-string "Local files are consistent with remote.  Press Enter to continue ...")
-            (kill-buffer)
-            t))
-      (if (y-or-n-p "Failed to check remote freshness. Retry?")
-          (zk-zorg-rsync-check-remote-freshness)
-        nil))))
+              (read-string "Local files are consistent with remote.  Press Enter to continue ...")
+              (kill-buffer)
+              (setq consistent-p t)))
+        (unless (y-or-n-p "Failed to check remote freshness. Retry?")
+          (setq do-it-p nil))))
+    consistent-p))
 
 (defun zk-zorg-startup-open (readonly)
   (when
