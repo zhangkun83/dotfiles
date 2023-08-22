@@ -11,7 +11,7 @@ public class DesktopHelperServer {
     System.err.println(
         "##################################################################################\n"
         + "Local clients will work. To make remote clients work, use:\n"
-        + "$ ssh <host> -R localhost:5035:localhost:5032 "
+        + "$ ssh <host> -R localhost:5035:localhost:5032 -o ExitOnForwardFailure=yes"
         + "-t ~/.emacs.d/bin/desktop-helper-proxy\n"
         + "to create an SSH tunnel and start a proxy.\n"
         + "The proxy will listen on the same port (5032) as the server, while SSH will tunnel\n"
