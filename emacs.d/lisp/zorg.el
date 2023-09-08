@@ -298,6 +298,15 @@ the current file for completion."
   ;; Force unix newline format, even on Windows
   (setq buffer-file-coding-system 'utf-8-unix))
 
+(defun zk-zorg-generate-frame-title ()
+  (let ((retval zk-zorg-profile-name))
+    ;; If this session has more than one frames, add the current
+    ;; buffer name to the frame title
+    (when (> (length (frame-list)) 1)
+      (setq retval (concat (buffer-name (window-buffer)) " @" retval)))
+    (setf (frame-parameter nil 'name) retval)
+    retval))
+
 (defun zk-zorg-startup-init ()
   "Initializes zorg session."
   (unless zk-zorg-rsync-backup-dir
@@ -307,7 +316,7 @@ the current file for completion."
   (unless (eq zk-zorg-status 'outdated)
     (user-error "Unexpected zorg status: %s" zk-zorg-status))
   (setq org-agenda-files (list (zk-zorg-directory))
-        frame-title-format zk-zorg-profile-name)
+        frame-title-format '(:eval (zk-zorg-generate-frame-title)))
   (setq zk-zorg-status 'downloading)
   (let ((default-directory (zk-zorg-directory)))
     (switch-to-buffer zk-zorg-rsync-buffer-name)
