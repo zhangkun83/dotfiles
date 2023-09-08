@@ -222,6 +222,7 @@
  '(org-fontify-quote-and-verse-blocks t)
  '(org-log-into-drawer t)
  '(org-startup-indented t)
+ '(switch-to-buffer-obey-display-actions t)
  '(tags-revert-without-query t)
  '(use-dialog-box nil)
  '(whitespace-line-column nil)
