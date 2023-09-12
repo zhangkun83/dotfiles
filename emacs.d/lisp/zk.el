@@ -387,12 +387,15 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
   (interactive)
   (let ((file (dired-get-file-for-visit))
         (cmd (cond ((eq system-type 'cygwin) "cygstart")
-                   ((eq system-type 'windows-nt) "explorer.exe")
+                   ((eq system-type 'windows-nt) "cmd")
                    ((eq system-type 'darwin) "open")
                    (t (user-error "Unsupported system: %s" system-type)))))
-    (if (eq 0 (call-process cmd nil nil nil file))
-        (message "Successfully called '%s' for '%s'" cmd file)
-      (message "'%s' for '%s' failed" cmd file))))
+    ;; Use 'cmd /C "" <file-name>' to open on native Windows.
+    ;; TODO: it doesn't work with unicode file names
+    (if (eq 0 (cond ((eq system-type 'windows-nt) (call-process cmd nil nil nil "/C" "start" "" file))
+                    (t (call-process cmd nil nil nil file))))
+        (message "Successfully opened '%s' in '%s'" file system-type)
+      (message "'%s' failed to open '%s'" system-type file))))
 
 (add-hook 'dired-mode-hook
           (lambda ()
