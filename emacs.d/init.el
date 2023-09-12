@@ -154,7 +154,7 @@
 (global-set-key (kbd "C-z b") 'browse-url)
 (define-key minibuffer-local-map (kbd "C-z p") 'zk-minibuffer-insert-current-file-path)
 (define-key minibuffer-local-map (kbd "C-z n") 'zk-minibuffer-insert-current-file-name)
-(global-set-key (kbd "C-z s") 'zk-shell)
+(global-set-key (kbd "C-z s") 'shell)
 (global-set-key (kbd "C-z d") 'zk-diff-navigate)
 (global-set-key (kbd "C-z y") 'zk-youdao-dict)
 (global-set-key (kbd "C-z h") 'global-hl-line-mode)
