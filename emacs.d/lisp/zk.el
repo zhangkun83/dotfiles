@@ -387,6 +387,7 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
   (interactive)
   (let ((file (dired-get-file-for-visit))
         (cmd (cond ((eq system-type 'cygwin) "cygstart")
+                   ((eq system-type 'windows-nt) "explorer.exe")
                    ((eq system-type 'darwin) "open")
                    (t (user-error "Unsupported system: %s" system-type)))))
     (if (eq 0 (call-process cmd nil nil nil file))
