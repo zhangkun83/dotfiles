@@ -126,6 +126,18 @@ for scratch.el"
          (reference (format "%s ([[%s][link]])" headline-text link)))
     reference))
 
+(defun zk-org-clone-narrowed-buffer ()
+  "Clone the current org buffer and narrow to the current
+subtree"
+  (interactive)
+  (unless (eq major-mode 'org-mode)
+    (user-error "Not in org-mode"))
+  (let ((headline-text (org-get-heading t t t t)))
+    (clone-indirect-buffer
+     (concat "* " headline-text " * " (buffer-name))
+     t)
+    (org-narrow-to-subtree)))
+
 (defun zk-org-get-headline-link-at-point (with-profile-name)
   "If CUSTOM_ID of the current org headline doesn't exist,
 generate one based on the text of the headline and set it.
@@ -292,7 +304,8 @@ the current file for completion."
   (local-set-key (kbd "C-c l r") 'zk-org-set-generated-custom-id-and-copy-external-reference)
   (local-set-key (kbd "C-c l b") 'zk-org-log-backlink-at-point)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
-  (local-set-key (kbd "C-c r u") 'zk-zorg-rsync-upload))
+  (local-set-key (kbd "C-c r u") 'zk-zorg-rsync-upload)
+  (local-set-key (kbd "C-c c") 'zk-org-clone-narrowed-buffer))
 
 (defun zk-org-set-file-encoding ()
   ;; Force unix newline format, even on Windows
