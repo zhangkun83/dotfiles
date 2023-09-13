@@ -334,6 +334,18 @@ argument, apply the change to the entire buffer."
           (unless (save-match-data (string-match "^\\([-*+]\\)\\|\\([0-9]+[.]\\)" second-line))
             (replace-match "\\1 \\2")))))))
 
+(defun zk-popup-window-to-new-frame ()
+  (interactive)
+  "If there is more than one windows, display the buffer of the
+current window in a new frame and close that window"
+  (if (> (length (window-list nil 'no-minibuf)) 1)
+      (let ((buffer (current-buffer)))
+        (when (minibufferp buffer)
+          (user-error "Current window is minibuffer"))
+        (delete-window)
+        (display-buffer-other-frame buffer))
+    (user-error "Should have at least 2 windows")))
+
 ;;; Advice compilation-find-file to replace "\" with "/" in file names
 ;;; if the system is cygwin.  javac under windows produces error
 ;;; messages where file names use "\" as separators. While emacs can
