@@ -337,9 +337,9 @@ argument, apply the change to the entire buffer."
             (replace-match "\\1 \\2")))))))
 
 (defun zk-popup-window-to-new-frame ()
-  (interactive)
   "If there is more than one windows, display the buffer of the
 current window in a new frame and close that window"
+  (interactive)
   (if (> (length (window-list nil 'no-minibuf)) 1)
       (let ((buffer (current-buffer)))
         (when (minibufferp buffer)
