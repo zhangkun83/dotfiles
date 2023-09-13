@@ -178,6 +178,8 @@ file name at point."
 zk-save-local-copy-if-remote-file to decide whether a file is a
 remote file.")
 
+(defvar zk-frame-title-base-name "Emacs")
+
 (defun zk-file-remote-p (path)
   (require 'dash)
   (or (file-remote-p path)
@@ -345,6 +347,17 @@ current window in a new frame and close that window"
         (delete-window)
         (display-buffer-other-frame buffer))
     (user-error "Should have at least 2 windows")))
+
+(defun zk-generate-frame-title ()
+  (let ((retval zk-frame-title-base-name))
+    ;; If this session has more than one frames, add the current
+    ;; buffer name to the frame title
+    (when (> (length (frame-list)) 1)
+      (setq retval (concat (buffer-name (window-buffer)) " @" retval)))
+    (setf (frame-parameter nil 'name) retval)
+    retval))
+
+(setq frame-title-format '(:eval (zk-generate-frame-title)))
 
 ;;; Advice compilation-find-file to replace "\" with "/" in file names
 ;;; if the system is cygwin.  javac under windows produces error

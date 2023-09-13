@@ -316,7 +316,7 @@ the current file for completion."
   (unless (eq zk-zorg-status 'outdated)
     (user-error "Unexpected zorg status: %s" zk-zorg-status))
   (setq org-agenda-files (list (zk-zorg-directory))
-        frame-title-format '(:eval (zk-zorg-generate-frame-title)))
+        zk-frame-title-base-name zk-zorg-profile-name)
   (setq zk-zorg-status 'downloading)
   (let ((default-directory (zk-zorg-directory)))
     (switch-to-buffer zk-zorg-rsync-buffer-name)

@@ -1,6 +1,7 @@
 ;; Set up the scratch environment
 
-(setq frame-title-format "scratch")
+(require 'zk)
+(setq zk-frame-title-base-name "scratch")
 (setq confirm-kill-emacs 'yes-or-no-p)
 (disable-theme 'leuven)
 (load-theme 'tsdh-light t nil)

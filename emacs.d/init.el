@@ -53,6 +53,8 @@
 ;; non-latin characters. This will fix it.
 (set-default-coding-systems 'utf-8)
 
+(setq zk-frame-title-base-name (concat "[" zk-project-root "]"))
+
 (require 'vertico)
 (vertico-mode t)
 (setq completion-styles '(basic substring)
@@ -130,8 +132,6 @@
         (message default-directory))
     (message "Current buffer does not have a file"))
 )
-
-(setq frame-title-format '("" command-line-default-directory " - emacs"))
 
 ;; Don't create backup files at all
 (setq make-backup-files nil)
