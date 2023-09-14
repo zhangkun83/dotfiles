@@ -348,6 +348,21 @@ current window in a new frame and close that window"
         (display-buffer-other-frame buffer))
     (user-error "Should have at least 2 windows")))
 
+(defun zk-kill-buffer-and-window-or-frame  ()
+  "Kill the current buffer.  If there are more than one windows in
+the current frame, close the window.  If there's only one window
+in the current frame, and there are more than one frames, close
+the frame."
+  (interactive)
+  (when (minibufferp)
+    (user-error "Can't kill minibuffer"))
+  (when (kill-buffer)
+    (if (> (length (window-list nil 'no-minibuf)) 1)
+        (delete-window)
+      (if (> (length (frame-list)) 1)
+          (delete-frame)
+        (message "This is the last window.")))))
+
 (defun zk-get-base-buffer (buffer)
   "Get the base buffer of the given buffer, if it's an indirect
 buffer.  Otherwise, return the buffer itself."
