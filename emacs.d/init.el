@@ -153,6 +153,7 @@
 (global-set-key (kbd "C-z r") 'revert-buffer)
 (global-set-key (kbd "C-z p") 'zk-copy-buffer-file-path)
 (global-set-key (kbd "C-z b") 'browse-url)
+(global-set-key (kbd "C-z C-b") 'zk-goto-base-buffer)
 (define-key minibuffer-local-map (kbd "C-z p") 'zk-minibuffer-insert-current-file-path)
 (define-key minibuffer-local-map (kbd "C-z n") 'zk-minibuffer-insert-current-file-name)
 (global-set-key (kbd "C-z s") 'shell)

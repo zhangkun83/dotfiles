@@ -351,7 +351,19 @@ current window in a new frame and close that window"
 (defun zk-get-base-buffer (buffer)
   "Get the base buffer of the given buffer, if it's an indirect
 buffer.  Otherwise, return the buffer itself."
-  (or (buffer-base-buffer) buffer))
+  (or (buffer-base-buffer buffer) buffer))
+
+(defun zk-goto-base-buffer ()
+  "Go to the base buffer if the current buffer is an indirect
+buffer.  Move the point to the current point of the indirect
+ buffer." 
+  (interactive)
+  (let ((base-buffer (buffer-base-buffer))
+        (pos (point)))
+    (unless base-buffer
+      (user-error "Not an indirect buffer"))
+    (switch-to-buffer base-buffer)
+    (goto-char pos)))
 
 (defun zk-generate-frame-title ()
   (let ((retval zk-frame-title-base-name))
