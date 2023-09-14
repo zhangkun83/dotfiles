@@ -348,6 +348,11 @@ current window in a new frame and close that window"
         (display-buffer-other-frame buffer))
     (user-error "Should have at least 2 windows")))
 
+(defun zk-get-base-buffer (buffer)
+  "Get the base buffer of the given buffer, if it's an indirect
+buffer.  Otherwise, return the buffer itself."
+  (or (buffer-base-buffer) buffer))
+
 (defun zk-generate-frame-title ()
   (let ((retval zk-frame-title-base-name))
     ;; If this session has more than one frames, add the current

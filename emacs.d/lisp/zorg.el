@@ -161,7 +161,7 @@ zk-zorg-profile-name so that it can be used for scratch.el"
                            new-id)))
              (link (concat "file:"
                            (if with-profile-name (concat "@" zk-zorg-profile-name ":"))
-                           (file-name-nondirectory (buffer-file-name (current-buffer)))
+                           (file-name-nondirectory (buffer-file-name (zk-get-base-buffer (current-buffer))))
                            "::#"
                            custom-id)))
         (setq return-value (list link (zk-org-neutralize-timestamp headline-text)))))
