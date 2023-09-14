@@ -132,10 +132,13 @@ subtree"
   (interactive)
   (unless (eq major-mode 'org-mode)
     (user-error "Not in org-mode"))
-  (let ((headline-text (org-get-heading t t t t)))
+  (let ((headline-text (org-get-heading t t t t))
+        (pos (point)))
     (clone-indirect-buffer
-     (concat "* " headline-text " * " (buffer-name))
+     (concat "* " headline-text " * "
+             (buffer-name (zk-get-base-buffer (current-buffer))))
      t)
+    (goto-char pos)
     (org-narrow-to-subtree)))
 
 (defun zk-org-get-headline-link-at-point (with-profile-name)
