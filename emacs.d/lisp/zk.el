@@ -340,20 +340,20 @@ argument, apply the change to the entire buffer."
   "If there is more than one windows, display the buffer of the
 current window in a new frame and close that window"
   (interactive)
-  (if (> (length (window-list nil 'no-minibuf)) 1)
-      (when (minibufferp)
-        (user-error "Current window is minibuffer"))
-      (let ((window (selected-window)))
-        (make-frame)
-        ;; If there are more than one windows displaying the same
-        ;; buffer in the current frame on different points, deleting
-        ;; the current window will change the buffer point to where
-        ;; the other window is at, thus the new frame will use the
-        ;; other window's point, not the original one's.  To avoid
-        ;; that, we must delete the original window *after* the new
-        ;; frame has been created.
-        (delete-window window))
-    (user-error "Should have at least 2 windows")))
+  (unless (> (length (window-list nil 'no-minibuf)) 1)
+    (user-error "Should have at least 2 windows"))
+  (when (minibufferp)
+    (user-error "Current window is minibuffer"))
+  (let ((window (selected-window)))
+    (make-frame)
+    ;; If there are more than one windows displaying the same
+    ;; buffer in the current frame on different points, deleting
+    ;; the current window will change the buffer point to where
+    ;; the other window is at, thus the new frame will use the
+    ;; other window's point, not the original one's.  To avoid
+    ;; that, we must delete the original window *after* the new
+    ;; frame has been created.
+    (delete-window window)))
 
 (defun zk-kill-buffer-and-window-or-frame  ()
   "Kill the current buffer.  If there are more than one windows in
