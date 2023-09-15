@@ -341,11 +341,18 @@ argument, apply the change to the entire buffer."
 current window in a new frame and close that window"
   (interactive)
   (if (> (length (window-list nil 'no-minibuf)) 1)
-      (let ((buffer (current-buffer)))
-        (when (minibufferp buffer)
-          (user-error "Current window is minibuffer"))
-        (delete-window)
-        (display-buffer-other-frame buffer))
+      (when (minibufferp)
+        (user-error "Current window is minibuffer"))
+      (let ((window (selected-window)))
+        (make-frame)
+        ;; If there are more than one windows displaying the same
+        ;; buffer in the current frame on different points, deleting
+        ;; the current window will change the buffer point to where
+        ;; the other window is at, thus the new frame will use the
+        ;; other window's point, not the original one's.  To avoid
+        ;; that, we must delete the original window *after* the new
+        ;; frame has been created.
+        (delete-window window))
     (user-error "Should have at least 2 windows")))
 
 (defun zk-kill-buffer-and-window-or-frame  ()
