@@ -198,9 +198,6 @@
 (add-hook 'dired-mode-hook
           (lambda() (dired-hide-details-mode 1)))
 
-(if (display-graphic-p)
-    (load-theme 'leuven t))
-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

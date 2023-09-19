@@ -3,8 +3,8 @@
 (require 'zk)
 (setq zk-frame-title-base-name "scratch")
 (setq confirm-kill-emacs 'yes-or-no-p)
-(disable-theme 'leuven)
-(load-theme 'tsdh-light t nil)
+(if (display-graphic-p)
+    (load-theme 'light-blue t))
 
 (defconst zk-scratch-dir (concat zk-user-home-dir "/scratch"))
 
