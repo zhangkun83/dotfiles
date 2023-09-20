@@ -445,7 +445,9 @@ check failed."
 
 (setq confirm-kill-emacs 'zk-zorg-shutdown-confirm)
 
-(if (display-graphic-p)
-    (load-theme 'leuven t))
+(when (display-graphic-p)
+  (setq leuven-scale-outline-headlines nil
+        leuven-scale-org-agenda-structure nil)
+  (load-theme 'leuven t))
 
 (provide 'zorg)
