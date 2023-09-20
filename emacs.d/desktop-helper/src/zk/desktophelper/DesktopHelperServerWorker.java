@@ -23,7 +23,7 @@ final class DesktopHelperServerWorker extends MessageWorker {
     try {
       SystemTray tray = SystemTray.getSystemTray();
       Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource("trayicon.png"));
-      trayIcon = new TrayIcon(image, "DesktopHelperServer");
+      trayIcon = new TrayIcon(image, "Desktop Helper Server");
       trayIcon.setImageAutoSize(true);
       trayIcon.setToolTip("DesktopHelper Notifications");
       tray.add(trayIcon);
@@ -39,14 +39,14 @@ final class DesktopHelperServerWorker extends MessageWorker {
             try {
               Thread.sleep(2000);
             } catch (Exception e) {}
-            displayNotification("DesktopHelper notifications will display here.");
+            displayNotification("Desktop Helper notifications will display here.");
       }).start();
     }
   }
 
   private boolean displayNotification(String msg) {
     if (trayIcon != null) {
-      trayIcon.displayMessage(msg, "DesktopHelperServer", TrayIcon.MessageType.INFO);
+      trayIcon.displayMessage(msg, "Desktop Helper", TrayIcon.MessageType.INFO);
       return true;
     }
     return false;
