@@ -175,7 +175,11 @@
             (dirtrack-mode t)
             (local-set-key (kbd "C-c o") 'zk-open-file-path-from-region-or-at-point)
             (local-set-key (kbd "C-c c") 'zk-shell-command-on-file-at-point)
-            (local-set-key (kbd "C-c t") 'comint-truncate-buffer)))
+            (local-set-key (kbd "C-c t") 'comint-truncate-buffer)
+            ;; shell-mode insists on using slashes to tab-complete paths, while
+            ;; Windows doesn't always recognize slashes.  Disable tab-complete.
+            (if (eq system-type 'windows-nt)
+                (define-key shell-mode-map "\t" 'self-insert-command))))
 
 ;; Set font
 (defconst zk-font-family "DejaVu Sans Mono")
