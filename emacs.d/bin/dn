@@ -1,0 +1,3 @@
+#!/bin/bash
+# Short-cut for "desktop-helper-client.py notify"
+desktop-helper-client.py notify "$*"

@@ -1,5 +1,5 @@
 desktophelper.jar: $(shell find src -name '*.java')
-	javac -d compile $^ && jar cf $@ -C compile .
+	javac -d compile $^ && cp trayicon.png compile/zk/desktophelper/ && jar cf $@ -C compile .
 run-server: desktophelper.jar
 	java -Xmx60M -cp desktophelper.jar zk.desktophelper.DesktopHelperServer --port=5032
 run-proxy: desktophelper.jar
