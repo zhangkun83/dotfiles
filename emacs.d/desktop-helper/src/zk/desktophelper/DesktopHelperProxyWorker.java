@@ -34,6 +34,7 @@ final class DesktopHelperProxyWorker extends MessageWorker {
       Socket socket = new Socket("localhost", serverPort);
       logger.info("Connected to server at " + socket.getRemoteSocketAddress());
       socketToServer.add(socket);
+      requestServer(new Message("notify", "A proxy is connected to this Desktop Helper"));
     } catch (IOException e) {
       logger.warning("Failed to connect to server at port " + serverPort + ": " + e);
       scheduleReconnect();
