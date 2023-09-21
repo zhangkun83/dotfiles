@@ -18,38 +18,42 @@ final class DesktopHelperServerWorker extends MessageWorker {
   private final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
   private final TrayIcon trayIcon;
 
-  DesktopHelperServerWorker() {
+  DesktopHelperServerWorker(boolean useSystemNotifications) {
     TrayIcon trayIcon = null;
-    try {
-      SystemTray tray = SystemTray.getSystemTray();
-      Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource("trayicon.png"));
-      trayIcon = new TrayIcon(image, "Desktop Helper Server");
-      trayIcon.setImageAutoSize(true);
-      trayIcon.setToolTip("DesktopHelper Notifications");
-      tray.add(trayIcon);
-    } catch (Exception e) {
-      logger.warning(
-          "Failed to get SystemTray. Notifications will not be displayed. Reason=" + e);
+    if (useSystemNotifications) {
+      try {
+        SystemTray tray = SystemTray.getSystemTray();
+        Image image =
+            Toolkit.getDefaultToolkit().createImage(getClass().getResource("trayicon.png"));
+        trayIcon = new TrayIcon(image, "Desktop Helper Server");
+        trayIcon.setImageAutoSize(true);
+        trayIcon.setToolTip("Desktop Helper Notifications");
+        tray.add(trayIcon);
+      } catch (Exception e) {
+        logger.warning("Failed to get SystemTray. Reason=" + e);
+      }
     }
     this.trayIcon = trayIcon;
-    if (trayIcon != null) {
-      new Thread(() -> {
-            // Allow the icon to be added to OS'es tray.  Otherwise the message may be lost or the
-            // icon may not display properly in the message.
-            try {
-              Thread.sleep(2000);
-            } catch (Exception e) {}
-            displayNotification("Desktop Helper notifications will display here.");
-      }).start();
-    }
+    new Thread(() -> {
+          // Allow the icon to be added to OS'es tray.  Otherwise the message may be lost or the
+          // icon may not display properly in the message.
+          try {
+            Thread.sleep(2000);
+          } catch (Exception e) {}
+          displayNotification("Notifications sent to the Desktop Helper will show like this.");
+    }).start();
   }
 
   private boolean displayNotification(String msg) {
     if (trayIcon != null) {
       trayIcon.displayMessage(msg, "Desktop Helper", TrayIcon.MessageType.INFO);
       return true;
+    } else {
+      NotificationWindow win = new NotificationWindow("Desktop Helper", msg);
+      win.setVisible(true);
+      win.pack();
+      return true;
     }
-    return false;
   }
 
   @Override

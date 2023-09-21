@@ -19,6 +19,14 @@ final class Flags {
     return value;
   }
 
+  String getString(String name, String defaultValue) {
+    String value = data.get(name);
+    if (value == null) {
+      return defaultValue;
+    }
+    return value;
+  }
+
   int getInt(String name) {
     return Integer.parseInt(getString(name));
   }

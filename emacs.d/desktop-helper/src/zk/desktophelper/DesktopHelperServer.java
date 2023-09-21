@@ -19,6 +19,8 @@ public class DesktopHelperServer {
         + "proxy will connect to.\n"
         + "##################################################################################");
     int port = flags.getInt("port");
-    new BlockingServer(port, new DesktopHelperServerWorker()).runServer();
+    boolean useSystemNotifications =
+        "true".equals(flags.getString("use_system_notifications", "false"));
+    new BlockingServer(port, new DesktopHelperServerWorker(useSystemNotifications)).runServer();
   }
 }
