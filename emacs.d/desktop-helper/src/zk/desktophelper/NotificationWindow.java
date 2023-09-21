@@ -22,7 +22,7 @@ class NotificationWindow extends JFrame {
   private final CountDownTimerHandler countDownTimerHandler;
   private final Timer countDownTimer;
   private static final DateTimeFormatter dateTimeFormatter =
-      DateTimeFormatter.ofPattern("HH:mm (yyyy-MM-dd)");
+      DateTimeFormatter.ofPattern("HH:mm");
 
   NotificationWindow(String title, String message) {
     setTitle(title);
@@ -59,7 +59,7 @@ class NotificationWindow extends JFrame {
   }
 
   private class CountDownTimerHandler implements ActionListener {
-    int secondsLeft = 3;
+    int secondsLeft = 1;
     final LocalDateTime time = LocalDateTime.now();
 
     @Override
@@ -70,7 +70,7 @@ class NotificationWindow extends JFrame {
 
     void update() {
       if (secondsLeft > 0) {
-        countDown.setText("Closeable after " + secondsLeft + "s");
+        countDown.setText("You may close it in " + secondsLeft + "s");
       } else {
         countDown.setText(dateTimeFormatter.format(time));
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
