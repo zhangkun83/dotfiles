@@ -49,9 +49,7 @@ final class DesktopHelperServerWorker extends MessageWorker {
       trayIcon.displayMessage(msg, "Desktop Helper", TrayIcon.MessageType.INFO);
       return true;
     } else {
-      NotificationWindow win = new NotificationWindow("Desktop Helper", msg);
-      win.setVisible(true);
-      win.pack();
+      new NotificationWindow("Desktop Helper", msg);
       return true;
     }
   }
