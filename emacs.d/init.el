@@ -181,6 +181,10 @@
             (if (eq system-type 'windows-nt)
                 (define-key shell-mode-map "\t" 'self-insert-command))))
 
+(add-hook 'compilation-mode-hook
+          (lambda()
+            (local-set-key (kbd "C-c C-p") 'zk-copy-pid)))
+
 ;; Set font
 (defconst zk-font-family "DejaVu Sans Mono")
 

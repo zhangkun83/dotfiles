@@ -387,6 +387,16 @@ buffer.  Move the point to the current point of the indirect
     (switch-to-buffer base-buffer)
     (goto-char pos)))
 
+(defun zk-copy-pid ()
+  "Copy the pid of the process of the current buffer."
+  (interactive)
+  (let ((process (get-buffer-process (current-buffer))))
+    (unless process
+      (user-error "No process found for this buffer"))
+    (let ((pid (number-to-string (process-id process))))
+      (kill-new pid)
+      (message "Copied: %s" pid))))
+
 (defun zk-generate-frame-title ()
   (let ((retval zk-frame-title-base-name))
     ;; If this session has more than one frames, add the current

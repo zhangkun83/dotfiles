@@ -1,0 +1,5 @@
+#!/bin/bash
+# Wait for a process to terminate
+echo Waiting for the following process:
+ps -p $1 -o pid,args | tail -n -1
+tail --pid=$1 -f /dev/null
