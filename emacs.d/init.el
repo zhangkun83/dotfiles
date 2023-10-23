@@ -186,15 +186,19 @@
             (local-set-key (kbd "C-c C-p") 'zk-copy-pid)))
 
 ;; Set font
-(defconst zk-font-family "DejaVu Sans Mono")
+(if (<= 1080 (nth 3 (alist-get 'geometry (car (display-monitor-attributes-list)))))
+    ;; High-res displays
+    (progn
+      (defconst zk-font-family "Liberation Mono")
+      (defconst zk-font-height
+        (if (eq system-type 'darwin) 175 105)))
+  ;; Low-res displays
+  (defconst zk-font-family "DejaVu Sans Mono")
+  (defconst zk-font-height 125))
 
 (set-face-attribute 'default nil
 		    :family zk-font-family
-                    :height (if (<= 1080 (nth 3 (alist-get 'geometry (car (display-monitor-attributes-list)))))
-                                ;; High-res displays
-                                (if (eq system-type 'darwin) 175 105)
-                              ;; Low-res displays
-                              125))
+                    :height zk-font-height)
 
 (when (fboundp 'set-fontset-font)
   (set-fontset-font t 'chinese-gbk
@@ -249,5 +253,5 @@
  ;; themes other than leuven.  Override it to my font of choice.  (Use
  ;; "C-u C-x =" to find out the face used to display the character at
  ;; point).
- '(fixed-pitch ((t (:family "DejaVu Sans Mono"))))
+ '(fixed-pitch ((t (:family zk-font-family))))
  '(region ((t (:background "blue" :foreground "white")))))
