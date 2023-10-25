@@ -526,6 +526,12 @@ apps are not started from a shell."
   ;; Set font
   (defconst zk-font-height
     (if (eq system-type 'darwin) 175 105))
-  (zk-set-default-font zk-font-family zk-font-height))
+  (zk-set-default-font zk-font-family zk-font-height)
+
+  (defun zk-scale-default-font (factor)
+    "Scale the default font by a percentage factor, where 100 is the
+original size"
+    (interactive (list (read-number "Scale default font (as percentage): " 100)))
+    (zk-set-default-font zk-font-family (round (* zk-font-height (/ factor 100.0))))))
 
 (provide 'zk)
