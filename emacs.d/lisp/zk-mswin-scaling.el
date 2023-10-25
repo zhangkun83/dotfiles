@@ -58,12 +58,12 @@ scale factor.
   (let* ((scale-factor (or (zk-mswin-scaling-get-current-monitor-scale-factor)
                            (list (read-number "Current monitor not recognized.  Enter scale factor: " 100)
                                  "User entered scale factor")))
-         (height (round (* zk-font-height
-                    (/ (float (car scale-factor))
-                       (car zk-mswin-scaling-initial-scale-factor))))))
+         (font-size-factor
+          (/ (float (car scale-factor))
+             (car zk-mswin-scaling-initial-scale-factor))))
     (message "zk-mswin-scaling: initial monitor: %s, current monitor: %s"
              (zk-mswin-scaling-format-scale-factor zk-mswin-scaling-initial-scale-factor)
              (zk-mswin-scaling-format-scale-factor scale-factor))
-    (zk-set-default-font zk-font-family height)))
+    (zk-set-default-font zk-font-family font-size-factor)))
 
 (provide 'zk-mswin-scaling)

@@ -483,10 +483,17 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
              (display-pixel-width)
              (* (display-mm-width) 0.0393701)))))
 
-(defun zk-set-default-font (family height)
+(defun zk-get-default-font-height ()
+  (if (> (zk-get-monitor-dpi) 100)
+      ;; HiDPI
+      105
+    ;; Low DPI
+    125))
+
+(defun zk-set-default-font (family factor)
   (set-face-attribute 'default nil
 		      :family family
-                      :height height))
+                      :height (round (* (zk-get-default-font-height) factor))))
 
 (defun set-exec-path-from-shell-PATH ()
   "Set up Emacs' `exec-path' and PATH environment variable to match
@@ -524,9 +531,7 @@ apps are not started from a shell."
 (defconst zk-font-family "Liberation Mono")
 (when (display-graphic-p)
   ;; Set font
-  (defconst zk-font-height
-    (if (eq system-type 'darwin) 175 105))
-  (zk-set-default-font zk-font-family zk-font-height)
+  (zk-set-default-font zk-font-family 1)
 
   (defun zk-scale-default-font (factor)
     "Scale the default font by a percentage factor, where 100 is the
@@ -534,6 +539,6 @@ original size"
     (interactive (list (read-number "Scale default font (as percentage, between 50 and 500): " 100)))
     (when (or (> factor 500) (< factor 50))
         (user-error "Factor out of range"))
-    (zk-set-default-font zk-font-family (round (* zk-font-height (/ factor 100.0))))))
+    (zk-set-default-font zk-font-family (/ factor 100.0))))
 
 (provide 'zk)
