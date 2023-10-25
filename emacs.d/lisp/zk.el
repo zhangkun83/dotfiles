@@ -531,7 +531,9 @@ apps are not started from a shell."
   (defun zk-scale-default-font (factor)
     "Scale the default font by a percentage factor, where 100 is the
 original size"
-    (interactive (list (read-number "Scale default font (as percentage): " 100)))
+    (interactive (list (read-number "Scale default font (as percentage, between 50 and 500): " 100)))
+    (when (or (> factor 500) (< factor 50))
+        (user-error "Factor out of range"))
     (zk-set-default-font zk-font-family (round (* zk-font-height (/ factor 100.0))))))
 
 (provide 'zk)
