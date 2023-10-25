@@ -40,8 +40,9 @@ found."
 (defun zk-mswin-scaling-format-scale-factor (value)
   "Format the return value of
 zk-mswin-scaling-get-current-monitor-scale-factor."
-  (format "`%s' at scale factor %d"
-          (nth 1 value) (car value)))
+  (if value (format "`%s' at scale factor %d"
+                    (nth 1 value) (car value))
+    "Unrecognized monitor"))
 
 (defconst zk-mswin-scaling-initial-scale-factor
   (let ((value (zk-mswin-scaling-get-current-monitor-scale-factor)))
@@ -55,9 +56,10 @@ so that the font appears the same size as was in the initial
 scale factor.
 "
   (interactive)
+  (unless zk-mswin-scaling-initial-scale-factor
+    (user-error "Initial monitor was not recognized"))
   (let* ((scale-factor (or (zk-mswin-scaling-get-current-monitor-scale-factor)
-                           (list (read-number "Current monitor not recognized.  Enter scale factor: " 100)
-                                 "User entered scale factor")))
+                           (user-error "Current monitor is not recognized")))
          (font-size-factor
           (/ (float (car scale-factor))
              (car zk-mswin-scaling-initial-scale-factor))))

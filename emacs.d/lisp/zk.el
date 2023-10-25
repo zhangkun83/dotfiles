@@ -487,10 +487,12 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
   (if (> (zk-get-monitor-dpi) 100)
       ;; HiDPI
       105
-    ;; Low DPI
+    ;; Low DPI.  Use larger font for better readability.
     125))
 
 (defun zk-set-default-font (family factor)
+  "Set the default font for Emacs.  `factor' is used to multiply
+`(zk-get-default-font-height)' to calculate the actual font height"
   (set-face-attribute 'default nil
 		      :family family
                       :height (round (* (zk-get-default-font-height) factor))))
