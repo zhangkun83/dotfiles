@@ -521,17 +521,11 @@ apps are not started from a shell."
     (message "SHELL environment is not set, forcing shell-file-name to bash")
     (setq shell-file-name "/bin/bash")))
 
+(defconst zk-font-family "Liberation Mono")
 (when (display-graphic-p)
   ;; Set font
-  (if (> (zk-get-monitor-dpi) 100)
-      ;; High-res displays
-      (progn
-        (defconst zk-font-family "Liberation Mono")
-        (defconst zk-font-height
-          (if (eq system-type 'darwin) 175 105)))
-    ;; Low-res displays
-    (defconst zk-font-family "DejaVu Sans Mono")
-    (defconst zk-font-height 125))
+  (defconst zk-font-height
+    (if (eq system-type 'darwin) 175 105))
   (zk-set-default-font zk-font-family zk-font-height))
 
 (provide 'zk)

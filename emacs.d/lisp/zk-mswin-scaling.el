@@ -26,6 +26,7 @@
     ;; "Display Settings".
     ("3840:697" . (225 "ThinkVision 32\""))
     ("3840:344" . (300 "Thinkpad P1G4 16\""))
+    ("1920:532" . (125 "Acer 1080p 24\""))
     ))
 
 (defun zk-mswin-scaling-get-current-monitor-scale-factor ()
