@@ -475,6 +475,19 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
           (lambda ()
             (local-set-key (kbd "E") 'zk-dired-open-file-with-os)))
 
+(defun zk-get-monitor-dpi ()
+  "Return the DPI of the current monitor"
+  (let ((mm-width (car (frame-monitor-attribute 'mm-size)))
+        (pixel-width (nth 2 (frame-monitor-attribute 'geometry))))
+    (fround (/
+             (display-pixel-width)
+             (* (display-mm-width) 0.0393701)))))
+
+(defun zk-set-default-font (family height)
+  (set-face-attribute 'default nil
+		      :family family
+                      :height height))
+
 (defun set-exec-path-from-shell-PATH ()
   "Set up Emacs' `exec-path' and PATH environment variable to match
 that used by the user's shell.
@@ -507,5 +520,18 @@ apps are not started from a shell."
   (unless (getenv "SHELL")
     (message "SHELL environment is not set, forcing shell-file-name to bash")
     (setq shell-file-name "/bin/bash")))
+
+(when (display-graphic-p)
+  ;; Set font
+  (if (> (zk-get-monitor-dpi) 100)
+      ;; High-res displays
+      (progn
+        (defconst zk-font-family "Liberation Mono")
+        (defconst zk-font-height
+          (if (eq system-type 'darwin) 175 105)))
+    ;; Low-res displays
+    (defconst zk-font-family "DejaVu Sans Mono")
+    (defconst zk-font-height 125))
+  (zk-set-default-font zk-font-family zk-font-height))
 
 (provide 'zk)

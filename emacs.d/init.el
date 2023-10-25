@@ -48,6 +48,9 @@
 (when (eq system-type 'windows-nt)
   (setq ispell-program-name (concat zk-user-home-dir "/cygwin/bin/aspell")))
 
+(when (eq window-system 'w32)
+  (require 'zk-mswin-scaling))
+
 ;; The temp buffer used by eshell to save command history is using
 ;; latin-1 encoding on Windows and would complain if the history has
 ;; non-latin characters. This will fix it.
@@ -184,21 +187,6 @@
 (add-hook 'compilation-mode-hook
           (lambda()
             (local-set-key (kbd "C-c C-p") 'zk-copy-pid)))
-
-;; Set font
-(if (<= 1080 (nth 3 (alist-get 'geometry (car (display-monitor-attributes-list)))))
-    ;; High-res displays
-    (progn
-      (defconst zk-font-family "Liberation Mono")
-      (defconst zk-font-height
-        (if (eq system-type 'darwin) 175 105)))
-  ;; Low-res displays
-  (defconst zk-font-family "DejaVu Sans Mono")
-  (defconst zk-font-height 125))
-
-(set-face-attribute 'default nil
-		    :family zk-font-family
-                    :height zk-font-height)
 
 (when (fboundp 'set-fontset-font)
   (set-fontset-font t 'chinese-gbk
