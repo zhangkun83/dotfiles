@@ -60,7 +60,10 @@ files (starting with .). Returns the list file name."
          ;; directory-files sort the files alphabeticaly
          (latest-file (car (last file-list))))
     (unless latest-file (user-error "No notes file found"))
-    (switch-to-buffer (find-file-noselect (concat (zk-zorg-directory) "/" latest-file)))))
+    (let ((path (concat (zk-zorg-directory) "/" latest-file)))
+    (pop-to-buffer
+     (or (find-buffer-visiting path)
+         (find-file-noselect path))))))
 
 (defun zk-org-generate-custom-id-from-text (text)
   "Generate a plain ID that only contains alphanumerics and
