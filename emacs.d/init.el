@@ -145,8 +145,15 @@
   (interactive)
   (other-window -1))
 
-(global-set-key (kbd "C-x C-p") 'zk-prev-window)
-(global-set-key (kbd "C-x C-n") 'other-window)
+(defun zk-prev-frame()
+  "Switch to previous frame"
+  (interactive)
+  (other-frame -1))
+
+(global-set-key (kbd "<f7>") 'other-window)
+(global-set-key (kbd "M-<f7>") 'zk-prev-window)
+(global-set-key (kbd "<f8>") 'other-frame)
+(global-set-key (kbd "M-<f8>") 'zk-prev-frame)
 (global-set-key (kbd "C-x C-b") 'zk-switch-to-other-buffer)
 (global-set-key (kbd "C-x C-l") 'zk-recenter-top-bottom-other-window)
 (require 'transpose-frame)
