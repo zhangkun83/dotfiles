@@ -24,7 +24,7 @@ final class BlockingServer {
   }
 
   void runServer() throws IOException {
-    ServerSocket ss = new ServerSocket(port, 50, InetAddress.getByName("localhost"));
+    ServerSocket ss = new ServerSocket(port, 50, InetAddress.getByAddress(new byte[]{127, 0, 0, 1}));
     try {
       logger.info("BlockingServer listening on port " + port);
       while (true) {
