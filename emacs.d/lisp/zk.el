@@ -255,7 +255,7 @@ remote directory suddenly becomes inaccessible."
 (defun zk-switch-to-other-buffer ()
   "Switch to the other buffer without asking."
   (interactive)
-  (switch-to-buffer (other-buffer (current-buffer))))
+  (switch-to-buffer (other-buffer (current-buffer) t)))
 
 (defun zk-yank-to-register (r)
   "Yank to a register"
