@@ -1,3 +1,6 @@
 #!/bin/bash
-# Short-cut for "desktop-helper-client.py notify"
-desktop-helper-client.py notify "$*"
+# Run a command and send a notification to DesktopHelper when it has
+# finished.
+"$@" &&\
+    desktop-helper-client.py notify "SUCCEESFUL: \"$*\"" ||\
+        desktop-helper-client.py notify "FAILED: \"$*\""
