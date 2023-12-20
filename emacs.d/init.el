@@ -59,9 +59,7 @@
 
 (setq zk-frame-title-base-name (concat "[" zk-project-root "]"))
 
-(require 'vertico)
-(vertico-mode t)
-(setq completion-styles '(basic substring)
+(setq completion-styles '(substring)
       read-file-name-completion-ignore-case t
       read-buffer-completion-ignore-case t
       completion-ignore-case t)

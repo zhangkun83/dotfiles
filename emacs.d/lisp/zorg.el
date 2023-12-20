@@ -230,18 +230,37 @@ back to the current entry."
   (unless (eq 'headline (org-element-type (org-element-at-point)))
     (org-previous-visible-heading 1)))
 
+(defun zk-org-build-query-with-tag-completion (purpose)
+  "Build and return a query string by reading and concatenating
+multiple strings, providing tag completion when reading each string."
+  (let ((query "")
+        (continue-p t))
+    (while continue-p
+      (let ((input (completing-read
+                    (format "%s: %s" purpose (propertize query 'face '(bold default)))
+                    (org-global-tags-completion-table)
+                    nil
+                    nil
+                    nil
+                    t)))
+        (if (string-empty-p input)
+            (setq continue-p nil)
+          (setq query (concat query input)))))
+    query))
+
 (defun zk-org-tags-view (arg)
   "org-tags-view will always ask for the tags before switching to
 an existing view buffer if available, but it doesn't use the
 entered tags anyway if org-agenda-sticky is turned
-on. zk-org-tags-view will try to switch to the existing buffer
-without asking."
+on. zk-org-tags-view will always create a new buffer for the query."
   (interactive "P")
-  (let* ((view-buffer-name (if arg "*Org Agenda(M)*" "*Org Agenda(m)*"))
-         (view-buffer (get-buffer view-buffer-name)))
-    (if view-buffer
-        (switch-to-buffer view-buffer)
-      (org-tags-view arg))))
+  (org-tags-view arg (zk-org-build-query-with-tag-completion "Match")))
+
+(defun zk-org-search-view (arg)
+  "Like org-search-view but always create a new buffer for the
+query."
+  (interactive "P")
+  (org-search-view arg (zk-org-build-query-with-tag-completion "Search")))
 
 (defun zk-org-set-tags-command ()
   "Set tags to the current entry. It's better than
@@ -305,7 +324,7 @@ the current file for completion."
   "Register my own shortcuts for org mode"
   (local-set-key (kbd "C-c a") 'org-agenda-list)
   (local-set-key (kbd "C-c m") 'zk-org-tags-view)
-  (local-set-key (kbd "C-c s") 'org-search-view)
+  (local-set-key (kbd "C-c s") 'zk-org-search-view)
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
   (local-set-key (kbd "C-c g n") 'zk-zorg-goto-latest-note-file)
   (local-set-key (kbd "C-c l i") 'zk-org-generate-custom-id-at-point)
