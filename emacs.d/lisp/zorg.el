@@ -241,7 +241,7 @@ an existing view buffer if available, but it doesn't use the
 entered tags anyway if org-agenda-sticky is turned
 on. zk-org-tags-view will always create a new buffer for the query."
   (interactive "P")
-  (org-tags-view arg (read-string "Match: " nil nil nil t)))
+  (org-tags-view arg (read-string "Match: " nil 'org-tags-history nil t)))
 
 (defun zk-org-search-view (arg)
   "Like org-search-view but always create a new buffer for the
