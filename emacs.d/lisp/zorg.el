@@ -313,7 +313,6 @@ the current file for completion."
   (local-set-key (kbd "C-c m") 'zk-org-tags-view)
   (local-set-key (kbd "C-c s") 'zk-org-search-view)
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
-  (local-set-key (kbd "C-c g n") 'zk-zorg-goto-latest-note-file)
   (local-set-key (kbd "C-c l i") 'zk-org-generate-custom-id-at-point)
   (local-set-key (kbd "C-c l l") 'zk-org-set-generated-custom-id-and-copy-external-link)
   (local-set-key (kbd "C-c l r") 'zk-org-set-generated-custom-id-and-copy-external-reference)
@@ -454,6 +453,8 @@ check failed."
 (setq enable-recursive-minibuffers t)
 (minibuffer-depth-indicate-mode)
 (define-key minibuffer-local-map (kbd "C-i") 'zk-org-insert-tag-completion)
+
+(global-set-key (kbd "<f5>") 'zk-zorg-goto-latest-note-file)
 
 (add-hook 'org-mode-hook 'zk-org-setup-bindings)
 (add-hook 'org-mode-hook 'zk-org-set-file-encoding)
