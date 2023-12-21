@@ -230,23 +230,10 @@ back to the current entry."
   (unless (eq 'headline (org-element-type (org-element-at-point)))
     (org-previous-visible-heading 1)))
 
-(defun zk-org-build-query-with-tag-completion (purpose)
-  "Build and return a query string by reading and concatenating
-multiple strings, providing tag completion when reading each string."
-  (let ((query "")
-        (continue-p t))
-    (while continue-p
-      (let ((input (completing-read
-                    (format "%s: %s" purpose (propertize query 'face '(bold default)))
-                    (org-global-tags-completion-table)
-                    nil
-                    nil
-                    nil
-                    t)))
-        (if (string-empty-p input)
-            (setq continue-p nil)
-          (setq query (concat query input)))))
-    query))
+(defun zk-org-insert-tag-completion ()
+  "Insert a tag to the current buffer with completion"
+  (interactive)
+  (insert (completing-read "Insert tag: " (org-global-tags-completion-table))))
 
 (defun zk-org-tags-view (arg)
   "org-tags-view will always ask for the tags before switching to
@@ -254,13 +241,13 @@ an existing view buffer if available, but it doesn't use the
 entered tags anyway if org-agenda-sticky is turned
 on. zk-org-tags-view will always create a new buffer for the query."
   (interactive "P")
-  (org-tags-view arg (zk-org-build-query-with-tag-completion "Match")))
+  (org-tags-view arg (read-string "Match: " nil nil nil t)))
 
 (defun zk-org-search-view (arg)
   "Like org-search-view but always create a new buffer for the
 query."
   (interactive "P")
-  (org-search-view arg (zk-org-build-query-with-tag-completion "Search")))
+  (org-search-view arg (read-string "Search: " nil 'org-agenda-search-history nil t)))
 
 (defun zk-org-set-tags-command ()
   "Set tags to the current entry. It's better than
@@ -460,6 +447,13 @@ check failed."
             (if (and (eq zk-zorg-status 'clean)
                      (zk-zorg-current-buffer-is-zorg-file-p))
                 (setq zk-zorg-status 'modified))))
+
+;; Allow tag completion input (bound to TAB (C-i)) in minibuffers.
+;; enable-recursive-minibuffers is needed because
+;; zk-org-insert-tag-completion uses minibuffer
+(setq enable-recursive-minibuffers t)
+(minibuffer-depth-indicate-mode)
+(define-key minibuffer-local-map (kbd "C-i") 'zk-org-insert-tag-completion)
 
 (add-hook 'org-mode-hook 'zk-org-setup-bindings)
 (add-hook 'org-mode-hook 'zk-org-set-file-encoding)
