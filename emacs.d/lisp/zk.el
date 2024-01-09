@@ -402,7 +402,7 @@ buffer.  Move the point to the current point of the indirect
     ;; If this session has more than one frames, add the current
     ;; buffer name to the frame title
     (when (> (length (frame-list)) 1)
-      (setq retval (concat (buffer-name (window-buffer)) " @" retval)))
+      (setq retval (concat (buffer-name (window-buffer)) " [" retval "]")))
     (setf (frame-parameter nil 'name) retval)
     retval))
 

@@ -57,7 +57,7 @@
 ;; non-latin characters. This will fix it.
 (set-default-coding-systems 'utf-8)
 
-(setq zk-frame-title-base-name (concat "[" zk-project-root "]"))
+(setq zk-frame-title-base-name (concat "Emacs:" zk-project-root))
 
 (setq completion-styles '(substring)
       read-file-name-completion-ignore-case t
