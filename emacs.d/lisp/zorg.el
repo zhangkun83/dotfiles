@@ -325,15 +325,6 @@ the current file for completion."
   ;; Force unix newline format, even on Windows
   (setq buffer-file-coding-system 'utf-8-unix))
 
-(defun zk-zorg-generate-frame-title ()
-  (let ((retval zk-zorg-profile-name))
-    ;; If this session has more than one frames, add the current
-    ;; buffer name to the frame title
-    (when (> (length (frame-list)) 1)
-      (setq retval (concat (buffer-name (window-buffer)) " @" retval)))
-    (setf (frame-parameter nil 'name) retval)
-    retval))
-
 (defun zk-zorg-startup-init ()
   "Initializes zorg session."
   (unless zk-zorg-rsync-backup-dir
