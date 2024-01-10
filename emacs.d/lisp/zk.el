@@ -467,7 +467,11 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
                    ((eq system-type 'darwin) "open")
                    (t (user-error "Unsupported system: %s" system-type)))))
     ;; Use 'cmd /C "" <file-name>' to open on native Windows.
-    ;; TODO: it doesn't work with unicode file names
+    ;; XXX: it doesn't work with unicode file names.  See
+    ;; https://lists.gnu.org/archive/html/help-gnu-emacs/2016-06/msg00404.html
+    ;; "the native Windows build of Emacs always encodes the
+    ;; command-line arguments of programs it invokes using the current
+    ;; system ANSI codepage"
     (if (eq 0 (cond ((eq system-type 'windows-nt) (call-process cmd nil nil nil "/C" "start" "" file))
                     (t (call-process cmd nil nil nil file))))
         (message "Successfully opened '%s' in '%s'" file system-type)
