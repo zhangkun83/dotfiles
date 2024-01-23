@@ -1,6 +1,12 @@
 #!/bin/bash
 # Run a command and send a notification to DesktopHelper when it has
-# finished.
-"$@" &&\
-    desktop-helper-client.py notify "SUCCEESFUL: \"$*\"" ||\
-        desktop-helper-client.py notify "FAILED: \"$*\""
+# finished.  The return code is from the original command, regardless
+# of whether the notification has been successfully sent.
+"$@"
+return_value="$?"
+if [[ $return_value -eq 0 ]]; then
+    desktop-helper-client.py notify "SUCCEESFUL: \"$*\""
+else
+    desktop-helper-client.py notify "FAILED: \"$*\""
+fi
+exit $return_value
