@@ -438,6 +438,23 @@ check failed."
                      (zk-zorg-current-buffer-is-zorg-file-p))
                 (setq zk-zorg-status 'modified))))
 
+(defun zk-org-get-heading-string ()
+  "Returns the current org heading string.  nil if not under an
+ org heading."
+  (ignore-errors
+    (nth 4 (org-heading-components))))
+
+(defun zk-zorg-frame-title-frame-name-function ()
+  (or (and (not (buffer-base-buffer))  ; Keep the default title for
+                                       ; indirect buffers
+           (eq major-mode 'org-mode)
+           (concat (zk-org-get-heading-string)
+                   " (" (zk-frame-title-frame-name-default-function) ")"))
+      (zk-frame-title-frame-name-default-function)))
+
+(setq zk-frame-title-frame-name-function
+      'zk-zorg-frame-title-frame-name-function)
+
 ;; Allow tag completion input (bound to TAB (C-i)) in minibuffers.
 ;; enable-recursive-minibuffers is needed because
 ;; zk-org-insert-tag-completion uses minibuffer
