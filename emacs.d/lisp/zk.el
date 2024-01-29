@@ -522,6 +522,20 @@ apps are not started from a shell."
     (setenv "PATH" path-from-shell)
     (setq exec-path (split-string path-from-shell path-separator))))
 
+(defun zk-shorten-url-at-point ()
+  (interactive)
+  "Returns a shortened version of the url at point."
+  (let ((url-bounds (bounds-of-thing-at-point 'url)))
+    (unless url-bounds (user-error "No URL at point"))
+    (let ((url-start (car url-bounds))
+          (url-end (cdr url-bounds)))
+      (or (replace-regexp-in-region
+           "https?://b\\(uganizer\\)?\\.corp\\.google\\.com/issues/"
+           "http://b/" url-start url-end)
+          (replace-regexp-in-region
+           "https?://critique.corp.google.com/cl/"
+           "http://cl/" url-start url-end)))))
+
 ;; Cygwin-specific hacks
 (when (eq system-type 'cygwin)
   (message "Cygwin detected, installing advices")
