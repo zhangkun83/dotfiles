@@ -4,7 +4,7 @@
 (setq zk-frame-title-base-name "scratch")
 (setq confirm-kill-emacs 'yes-or-no-p)
 (if (display-graphic-p)
-    (load-theme 'light-blue t))
+    (load-theme 'deeper-blue t))
 
 (defconst zk-scratch-dir (concat zk-user-home-dir "/scratch"))
 
@@ -40,6 +40,7 @@ server to open it.  The link format must be like
 (advice-add 'org-open-at-point :around #'zk-scratch-advice-open-link-at-point)
 
 (global-set-key (kbd "<f5>") 'zk-scratch-init)
+(global-set-key (kbd "<f6>") 'zk-scratch-open-lisp-window)
 
 (setq create-lockfiles nil)
 (kill-buffer "*scratch*")
@@ -47,11 +48,11 @@ server to open it.  The link format must be like
 (defun zk-scratch-init ()
   (interactive)
   (delete-other-windows)
-  (find-file (concat zk-scratch-dir "/scratch-org.org"))
-  (split-window-below)
-  (other-window 1)
-  (find-file (concat zk-scratch-dir "/scratch-lisp"))
-  (lisp-interaction-mode)
-  (other-window 1))
+  (find-file (concat zk-scratch-dir "/scratch-org.org")))
+
+(defun zk-scratch-open-lisp-window ()
+  (interactive)
+  (find-file-other-window (concat zk-scratch-dir "/scratch-lisp"))
+  (lisp-interaction-mode))
 
 (zk-scratch-init)
