@@ -13,7 +13,28 @@
     (when link-prop
       (nth 1 link-prop))))
 
+(defun zk-scratch-org-up-element()
+  (ignore-errors
+    (org-up-element)))
+
+(defun zk-scratch-org-backward-heading-same-level()
+  (org-backward-heading-same-level nil))
+
+(defun zk-scratch-insert-to-task-queue (content)
+  "Add a bullet line to the beginning of the task queue, which is
+the first top-level heading of the scratch file."
+  (zk-scratch-open-org-file)
+  (zk-repeat-until-stuck 'zk-scratch-org-up-element)
+  (org-forward-heading-same-level nil)
+  (zk-repeat-until-stuck 'zk-scratch-org-backward-heading-same-level)
+  (move-end-of-line nil)
+  (newline)
+  (insert "- " content))
+
 (require 'server)
+(setq server-name "scratch")
+(server-start)
+
 (defun zk-scratch-advice-open-link-at-point(orig-open-link-at-point)
   "Opens the link at point. If it's a local org link, ask the zorg
 server to open it.  The link format must be like
@@ -45,10 +66,13 @@ server to open it.  The link format must be like
 (setq create-lockfiles nil)
 (kill-buffer "*scratch*")
 
+(defun zk-scratch-open-org-file()
+  (find-file (concat zk-scratch-dir "/scratch-org.org")))
+
 (defun zk-scratch-init ()
   (interactive)
   (delete-other-windows)
-  (find-file (concat zk-scratch-dir "/scratch-org.org")))
+  (zk-scratch-open-org-file))
 
 (defun zk-scratch-open-lisp-window ()
   (interactive)

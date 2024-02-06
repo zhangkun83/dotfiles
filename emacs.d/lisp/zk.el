@@ -27,6 +27,17 @@ White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."
     )
   )
 
+(defun zk-repeat-until-stuck (move-func)
+  "Repeatly call move-func that moves the point, until it no
+ longer moves the point."
+  (let ((continue-loop-p t) (last-point -1))
+    (while continue-loop-p
+      (progn
+        (funcall move-func)
+        (if (eq (point) last-point)
+            (setq continue-loop-p nil)
+          (setq last-point (point)))))))
+
 (defun zk-move-to-next-char (char)
   "Move point to where the char appears next"
   (if (search-forward (char-to-string char) nil t)

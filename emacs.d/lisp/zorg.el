@@ -91,7 +91,7 @@ CUSTOM_ID already exists in the file."
                            (setq found-p t))))
     found-p))
   
-(defun zk-org-set-generated-custom-id-and-copy-external-link (&optional arg)
+(defun zk-org-copy-external-link (&optional arg)
   "Copy the external link based on the CUSTOM_ID to the kill ring.
 When called with the prefix argument, the link will include
 zk-zorg-profile-name so that it can be used for scratch.el"
@@ -102,7 +102,7 @@ zk-zorg-profile-name so that it can be used for scratch.el"
     (kill-new link)
     (message "Copied \"%s\"" link)))
 
-(defun zk-org-set-generated-custom-id-and-copy-external-reference (&optional arg)
+(defun zk-org-copy-external-reference (&optional arg)
   "Copy a reference, with the headline string followed by a link
 based on the CUSTOM_ID, to the kill ring.  When called with the
 prefix argument, the link will include zk-zorg-profile-name so
@@ -122,6 +122,18 @@ for scratch.el"
          (headline-text (nth 1 link-pair))
          (reference (format "%s ([[%s][link]])" headline-text link)))
     reference))
+
+(defun zk-org-insert-external-reference-to-scratch-task-queue ()
+  "Insert the external reference of the current heading to the task
+queue of the scratch server."
+  (interactive)
+  (let ((content (zk-org-get-external-reference t)))
+    (server-eval-at
+     "scratch"
+     (list 'progn
+           (list 'zk-scratch-insert-to-task-queue content)
+         '(raise-frame)
+         (list 'message "Added to queue: %s" content)))))
 
 (defun zk-org-clone-narrowed-buffer ()
   "Clone the current org buffer and narrow to the current
@@ -314,9 +326,10 @@ the current file for completion."
   (local-set-key (kbd "C-c s") 'zk-org-search-view)
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
   (local-set-key (kbd "C-c l i") 'zk-org-generate-custom-id-at-point)
-  (local-set-key (kbd "C-c l l") 'zk-org-set-generated-custom-id-and-copy-external-link)
-  (local-set-key (kbd "C-c l r") 'zk-org-set-generated-custom-id-and-copy-external-reference)
+  (local-set-key (kbd "C-c l l") 'zk-org-copy-external-link)
+  (local-set-key (kbd "C-c l r") 'zk-org-copy-external-reference)
   (local-set-key (kbd "C-c l b") 'zk-org-log-backlink-at-point)
+  (local-set-key (kbd "C-c l s") 'zk-org-insert-external-reference-to-scratch-task-queue)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
   (local-set-key (kbd "C-c r u") 'zk-zorg-rsync-upload)
   (local-set-key (kbd "C-c c") 'zk-org-clone-narrowed-buffer))
