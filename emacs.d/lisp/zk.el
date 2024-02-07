@@ -544,8 +544,12 @@ apps are not started from a shell."
            "https?://b\\(uganizer\\)?\\.corp\\.google\\.com/issues/"
            "http://b/" url-start url-end)
           (replace-regexp-in-region
+           "https?://yaqs.corp.google.com/eng/q/"
+           "http://yaqs/" url-start url-end)
+          (replace-regexp-in-region
            "https?://critique.corp.google.com/cl/"
-           "http://cl/" url-start url-end)))))
+           "http://cl/" url-start url-end)
+          (message "No shorter form for this URL.")))))
 
 ;; Cygwin-specific hacks
 (when (eq system-type 'cygwin)
