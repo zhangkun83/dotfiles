@@ -125,7 +125,7 @@ for scratch.el"
 
 (defun zk-org-insert-external-reference-to-scratch-task-queue ()
   "Insert the external reference of the current heading to the task
-queue of the scratch server."
+queue of the scratch server, and set the priority to A"
   (interactive)
   (let ((content (zk-org-get-external-reference t)))
     (server-eval-at
@@ -133,7 +133,9 @@ queue of the scratch server."
      (list 'progn
            (list 'zk-scratch-insert-to-task-queue content)
          '(raise-frame)
-         (list 'message "Added to queue: %s" content)))))
+         (list 'message "Added to queue: %s" content)))
+    (org-priority ?A)
+    (message "Sent reference to scratch.  Priority set to A")))
 
 (defun zk-org-clone-narrowed-buffer ()
   "Clone the current org buffer and narrow to the current
