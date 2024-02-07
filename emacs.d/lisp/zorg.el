@@ -98,9 +98,9 @@ zk-zorg-profile-name so that it can be used for scratch.el"
   (interactive "P")
   (let* ((link-pair (zk-org-get-headline-link-at-point arg))
          (link (nth 0 link-pair))
-         (headline-text (nth 1 link-pair)))
-    (kill-new link)
-    (message "Copied \"%s\"" link)))
+         (link-with-text (format "([[%s][link]])" link)))
+    (kill-new link-with-text)
+    (message "Copied \"%s\"" link-with-text)))
 
 (defun zk-org-copy-external-reference (&optional arg)
   "Copy a reference, with the headline string followed by a link
