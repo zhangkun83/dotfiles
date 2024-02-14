@@ -324,6 +324,7 @@ the current file for completion."
 (defun zk-org-setup-bindings ()
   "Register my own shortcuts for org mode"
   (local-set-key (kbd "C-c a") 'org-agenda-list)
+  (local-set-key (kbd "C-c t") 'org-todo-list)
   (local-set-key (kbd "C-c m") 'zk-org-tags-view)
   (local-set-key (kbd "C-c s") 'zk-org-search-view)
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
