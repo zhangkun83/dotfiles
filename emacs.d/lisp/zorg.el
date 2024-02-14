@@ -349,6 +349,7 @@ the current file for completion."
     (user-error "zk-zorg-rsync-backup-dir not set"))
   (unless zk-zorg-profile-name
     (user-error "zk-zorg-profile-name not set"))
+  (setq default-directory (zk-zorg-directory))
   (setq org-agenda-files (list (zk-zorg-directory))
         zk-frame-title-base-name zk-zorg-profile-name)
   (setq org-agenda-span 'fortnight)
