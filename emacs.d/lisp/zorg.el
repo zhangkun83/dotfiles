@@ -1,6 +1,7 @@
 (require 'zk)
 (require 'org)
 (require 'org-element)
+(require 'org-tempo)
 (require 'dash)
 
 (defvar zk-zorg-rsync-backup-dir
