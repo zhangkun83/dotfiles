@@ -170,6 +170,7 @@
 (global-set-key (kbd "C-z j") 'zk-remove-line-breaks-within-paragraphs)
 (global-set-key (kbd "C-z c") 'zk-copy-region-to-temp-buffer)
 (global-set-key (kbd "C-M-y") 'zk-yank-to-register)
+(global-set-key (kbd "C-M-q") 'zk-fill-paragraph-after-point)
 
 (add-hook 'shell-mode-hook
           (lambda()

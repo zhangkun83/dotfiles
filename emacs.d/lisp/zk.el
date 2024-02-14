@@ -559,6 +559,17 @@ apps are not started from a shell."
            "http://cl/" url-start url-end)
           (message "No shorter form for this URL.")))))
 
+(defun zk-fill-paragraph-after-point (arg)
+  "Like `fill-paragraph`, but instead of affecting the whole paragraph,
+affect only the part after the point."
+  (interactive "P")
+  (save-mark-and-excursion
+    (let ((start (point)))
+      (if (eq major-mode 'org-mode)
+          (org-forward-paragraph)
+        (forward-paragraph))
+      (fill-region start (point) arg))))
+
 ;; Cygwin-specific hacks
 (when (eq system-type 'cygwin)
   (message "Cygwin detected, installing advices")
