@@ -24,8 +24,8 @@ initial view once initialization has succeeded")
   "Returns the absolute directory for local org files"
   (concat zk-user-home-dir "/" zk-zorg-profile-name))
 
-;; Possible values: outdated, downloading, uploading, clean, modified
-(setq zk-zorg-status 'outdated)
+;; Possible values: init, outdated, downloading, uploading, clean, modified, dirty
+(setq zk-zorg-status 'init)
 
 ;; Most values are copied from the default mode-line-format. I added
 ;; zk-zorg-status.
@@ -334,6 +334,8 @@ the current file for completion."
   (local-set-key (kbd "C-c l s") 'zk-org-insert-external-reference-to-scratch-task-queue)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
   (local-set-key (kbd "C-c r u") 'zk-zorg-rsync-upload)
+  (local-set-key (kbd "C-c r d") 'zk-zorg-rsync-download)
+  (local-set-key (kbd "C-c r o") 'zk-zorg-set-outdated)
   (local-set-key (kbd "C-c c") 'zk-org-clone-narrowed-buffer))
 
 (defun zk-org-set-file-encoding ()
@@ -346,13 +348,23 @@ the current file for completion."
     (user-error "zk-zorg-rsync-backup-dir not set"))
   (unless zk-zorg-profile-name
     (user-error "zk-zorg-profile-name not set"))
-  (unless (eq zk-zorg-status 'outdated)
-    (user-error "Unexpected zorg status: %s" zk-zorg-status))
   (setq org-agenda-files (list (zk-zorg-directory))
         zk-frame-title-base-name zk-zorg-profile-name)
   (setq org-agenda-span 'fortnight)
   (setq org-agenda-show-all-dates t)
   (setq org-deadline-warning-days 180)
+  (zk-zorg-set-outdated)
+  (zk-zorg-rsync-download)
+  (zk-zorg-startup-open))
+
+(defun zk-zorg-rsync-download ()
+  "Download zorg files from remote.  Update the zorg status
+ according to the result."
+  (interactive)
+  (when (zk-has-unsaved-files-p)
+    (user-error "There are unsaved files."))
+  (unless (eq zk-zorg-status 'outdated)
+    (user-error "Cannot download when zorg status is %s" zk-zorg-status))
   (setq zk-zorg-status 'downloading)
   (let ((default-directory (zk-zorg-directory)))
     (switch-to-buffer zk-zorg-rsync-buffer-name)
@@ -361,41 +373,45 @@ the current file for completion."
     (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
                             "-rtuv" (concat zk-zorg-rsync-backup-dir "/") "."))
         (progn
-          (setq zk-zorg-status 'clean)
-          (read-string "Download successful. Press Enter to continue ...")
-          (kill-buffer)
-          (zk-zorg-startup-open nil))
+          (read-string "Download successful. Press Enter to continue to check remote freshness ...")
+          (if (zk-zorg-rsync-check-remote-freshness)
+              (progn
+                (remove-hook 'org-mode-hook 'zk-zorg-make-buffer-read-only)
+                (mapc (function
+                       (lambda (buf) (with-current-buffer buf
+                                       (when (eq major-mode 'org-mode)
+                                         (read-only-mode -1)
+                                         (revert-buffer t t)))))
+                       (buffer-list))
+                (setq zk-zorg-status 'clean))
+            (setq zk-zorg-status 'dirty)))
       (setq zk-zorg-status 'outdated)
-      (if (y-or-n-p "Download failed. Press y to retry, n to open in read-only mode")
-          (zk-zorg-startup-init)
-        (kill-buffer)
-        (zk-zorg-startup-open t)))))
+      (read-string "Download failed.  Press Enter to continue ...")
+      (kill-buffer))))
 
 (defun zk-zorg-rsync-upload ()
   (interactive)
+  (when (zk-has-unsaved-files-p)
+    (user-error "There are unsaved files."))
   (unless (or
            (eq zk-zorg-status 'clean)
            (eq zk-zorg-status 'modified))
-    (user-error "Unexpected zorg status: %s" zk-zorg-status))
-  (let ((default-directory (zk-zorg-directory))
-        (do-it-p t))
-    (while do-it-p
-      (setq zk-zorg-status 'uploading)
-      (switch-to-buffer zk-zorg-rsync-buffer-name)
-      (erase-buffer)
-      (insert "Uploading local changes ...\n")
-      (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
-                              "-rtuv"
-                              (concat "--files-from=" (zk-zorg-generate-upload-list-file))
-                              "./" zk-zorg-rsync-backup-dir))
-          (progn
-            (setq zk-zorg-status 'clean)
-            (read-string "Upload successful. Press Enter to continue ...")
-            (kill-buffer)
-            (setq do-it-p nil))
-        (setq zk-zorg-status 'modified)
-        (unless (y-or-n-p "Upload failed. Retry?")
-            (setq do-it-p nil))))))
+    (user-error "Cannot upload when zorg status is %s" zk-zorg-status))
+  (let ((default-directory (zk-zorg-directory)))
+    (setq zk-zorg-status 'uploading)
+    (switch-to-buffer zk-zorg-rsync-buffer-name)
+    (erase-buffer)
+    (insert "Uploading local changes ...\n")
+    (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                            "-rtuv"
+                            (concat "--files-from=" (zk-zorg-generate-upload-list-file))
+                            "./" zk-zorg-rsync-backup-dir))
+        (progn
+          (setq zk-zorg-status 'clean)
+          (read-string "Upload successful. Press Enter to continue ..."))
+      (setq zk-zorg-status 'modified)
+      (read-string "Upload failed. Press Enter to continue ..."))
+    (kill-buffer)))
 
 (defun zk-zorg-rsync-check-remote-freshness ()
   "Called right after the initial download to make sure the remote
@@ -423,17 +439,40 @@ check failed."
           (setq do-it-p nil))))
     consistent-p))
 
-(defun zk-zorg-startup-open (readonly)
-  (when
-      (if readonly
-          (add-hook 'org-mode-hook (lambda() (read-only-mode 1)))
-        (zk-zorg-rsync-check-remote-freshness))
+(defun zk-zorg-make-buffer-read-only ()
+  (read-only-mode 1))
+
+(defun zk-zorg-set-outdated ()
+  "Set the zorg status to `outdated`.  Can be called only if the
+ status is `init`, `downloading` or `clean`.  This is useful when we are
+about to modify the files from a different location, and don't want
+to close the current sessions."
+  (interactive)
+  (when (zk-has-unsaved-files-p)
+    (user-error "There are unsaved files."))
+  (unless (or (eq zk-zorg-status 'init)
+              (eq zk-zorg-status 'downloading)
+              (eq zk-zorg-status 'clean))
+    (user-error "Cannot transit from %s to outdated"
+                zk-zorg-status))
+  (setq zk-zorg-status 'outdated)
+  (add-hook 'org-mode-hook 'zk-zorg-make-buffer-read-only)
+  (mapc (function
+         (lambda (buf) (with-current-buffer buf
+                         (when (eq major-mode 'org-mode)
+                           (zk-zorg-make-buffer-read-only)))))
+        (buffer-list))
+  (message "zorg is now outdated."))
+
+(defun zk-zorg-startup-open ()
+  (when (or (eq zk-zorg-status 'clean)
+            (eq zk-zorg-status 'outdated))
     (when zk-zorg-startup-view-func
       (funcall zk-zorg-startup-view-func))
     (setq server-name zk-zorg-profile-name)
     (server-start)
-    (message "Ready%s. Have a very safe and productive day!"
-             (if readonly " (read-only)" ""))))
+    (message "Ready (%s). Have a very safe and productive day!"
+             zk-zorg-status)))
 
 (defun zk-zorg-shutdown-confirm (prompt)
   (if (eq zk-zorg-status 'modified)

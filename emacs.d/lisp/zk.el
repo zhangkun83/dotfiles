@@ -533,6 +533,14 @@ apps are not started from a shell."
     (setenv "PATH" path-from-shell)
     (setq exec-path (split-string path-from-shell path-separator))))
 
+(defun zk-has-unsaved-files-p ()
+  "Return t if there is any file-visiting buffers that have
+ unsaved changes."
+  (memq t (mapcar (function
+                  (lambda (buf) (and (buffer-file-name buf)
+                                     (buffer-modified-p buf))))
+                (buffer-list))))
+
 (defun zk-shorten-url-at-point ()
   (interactive)
   "Returns a shortened version of the url at point."
