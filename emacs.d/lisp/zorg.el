@@ -32,9 +32,10 @@ initial view once initialization has succeeded")
 ;; zk-zorg-status.
 (setq-default
  mode-line-format
- '("%e" mode-line-front-space mode-line-mule-info mode-line-client mode-line-modified mode-line-remote mode-line-frame-identification mode-line-buffer-identification "   " mode-line-position
-   (:eval (format "[zorg: %s]" zk-zorg-status))
-   "  " mode-line-modes
+ '("%e" mode-line-front-space mode-line-mule-info mode-line-client mode-line-modified mode-line-remote
+   mode-line-frame-identification mode-line-buffer-identification " " mode-line-position
+   " " (:eval (format "[zorg: %s]" zk-zorg-status))
+   " " mode-line-modes
    mode-line-misc-info mode-line-end-spaces))
 
 (defun zk-zorg-generate-upload-list-file ()
