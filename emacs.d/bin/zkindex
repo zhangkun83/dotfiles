@@ -1,6 +1,5 @@
 #!/bin/bash
-#Generates TAGS and SRCFILES to be used by Emacs zk-* features.
-set -e
+#Generates index files to be used by Emacs zk-* features.
 
 if [ -z "$ZK_PROJECT_ROOT" ]; then
     echo "ZK_PROJECT_ROOT is not set"
@@ -27,11 +26,5 @@ echo "Using zkindex.listsrcs to generate src list ... "
 
 cd "$INDEX_DIR"
 
-# ctags.io is the best ctags implementation that I know
-echo "Regenerating TAGS using ctags.io ... "
-ctags -e -L - < "$SRC_LIST_FILE"
-
 echo "Regenerating JAVA_IMPORTS ..."
 cat "$SRC_LIST_FILE" | grep '\.java$' | xargs grep -h "^import .*\\<.*\\>;$" | sort | uniq > JAVA_IMPORTS
-
-zk-link-javasrc

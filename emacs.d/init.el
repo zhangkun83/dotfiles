@@ -225,7 +225,6 @@
  '(org-log-into-drawer t)
  '(org-startup-indented t)
  '(switch-to-buffer-obey-display-actions t)
- '(tags-revert-without-query t)
  '(use-dialog-box nil)
  '(whitespace-line-column nil)
  '(whitespace-style '(face lines-tail)))

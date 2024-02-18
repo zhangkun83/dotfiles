@@ -42,6 +42,7 @@ final class DesktopHelperServerWorker extends MessageWorker {
           } catch (Exception e) {}
           displayNotification("Notifications sent to the Desktop Helper will show like this.");
     }).start();
+    throw new RuntimeException("Error!");
   }
 
   private boolean displayNotification(String msg) {

@@ -379,23 +379,6 @@ or 'backward"
                                  (concat "cd " zk-project-root " && "
                                          diff-command " | zk-transform-patch.py"))))
 
-;;;; etags-select (better ctags search)
-(load "etags-select.el")
-(defun zk-load-tags-if-not-loaded ()
-  (interactive)
-  (unless (get-buffer "TAGS")
-    (visit-tags-table zk-project-index-path)))
-
-(global-set-key "\M-?" 'etags-select-find-tag-at-point)
-(global-set-key "\M-." 'etags-select-find-tag)
-
-;; From some point etags-select stopped loading TAGS.
-;; Work around it.
-(advice-add 'etags-select-find-tag :before #'zk-load-tags-if-not-loaded)
-
-;;; Always do case-sensitive search for tags
-(setq-default tags-case-fold-search nil)
-
 (setenv "EDITOR" "~/.emacs.d/bin/editor-stub")
 (setenv "PAGER" "cat")
 (setenv "P4EDITOR" "~/.emacs.d/bin/editor-stub")
@@ -418,9 +401,6 @@ or 'backward"
             (local-set-key (kbd "C-c C-p") 'zk-java-prev-argument)
             (local-set-key [backtab] (lambda() (interactive) (c-indent-line-or-region -1)))))
 
-; Java stacktrace detection in compilation-mode
-(require 'zk-java-stacktrace)
-(zk-java-stacktrace-detection-enable)
 (global-set-key (kbd "C-x \\") 'compile)
 
 (setq compile-command "runp ")
