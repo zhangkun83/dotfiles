@@ -383,7 +383,8 @@ the current file for completion."
                 (remove-hook 'org-mode-hook 'zk-zorg-make-buffer-read-only)
                 (mapc (function
                        (lambda (buf) (with-current-buffer buf
-                                       (when (eq major-mode 'org-mode)
+                                       (when (and (eq major-mode 'org-mode)
+                                                  buffer-file-name)
                                          (read-only-mode -1)
                                          (revert-buffer t t)))))
                        (buffer-list))
