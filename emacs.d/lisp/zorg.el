@@ -445,7 +445,9 @@ check failed."
     consistent-p))
 
 (defun zk-zorg-make-buffer-read-only ()
-  (read-only-mode 1))
+  (when (and (eq major-mode 'org-mode)
+             (buffer-file-name))
+    (read-only-mode 1)))
 
 (defun zk-zorg-set-outdated ()
   "Set the zorg status to `outdated`.  Can be called only if the
@@ -464,8 +466,7 @@ to close the current sessions."
   (add-hook 'org-mode-hook 'zk-zorg-make-buffer-read-only)
   (mapc (function
          (lambda (buf) (with-current-buffer buf
-                         (when (eq major-mode 'org-mode)
-                           (zk-zorg-make-buffer-read-only)))))
+                         (zk-zorg-make-buffer-read-only))))
         (buffer-list))
   (message "zorg is now outdated."))
 
