@@ -383,8 +383,7 @@ the current file for completion."
                 (remove-hook 'org-mode-hook 'zk-zorg-make-buffer-read-only)
                 (mapc (function
                        (lambda (buf) (with-current-buffer buf
-                                       (when (and (eq major-mode 'org-mode)
-                                                  buffer-file-name)
+                                       (when (zk-zorg-org-file-p)
                                          (read-only-mode -1)
                                          (revert-buffer t t)))))
                        (buffer-list))
@@ -444,9 +443,16 @@ check failed."
           (setq do-it-p nil))))
     consistent-p))
 
+(defun zk-zorg-org-file-p ()
+  "Return non-nil if the current buffer, or its base buffer, is a
+org file."
+  (let ((base-buffer (zk-get-base-buffer (current-buffer))))
+    (with-current-buffer base-buffer
+        (and (eq major-mode 'org-mode)
+             (buffer-file-name)))))
+
 (defun zk-zorg-make-buffer-read-only ()
-  (when (and (eq major-mode 'org-mode)
-             (buffer-file-name))
+  (when (zk-zorg-org-file-p)
     (read-only-mode 1)))
 
 (defun zk-zorg-set-outdated ()
