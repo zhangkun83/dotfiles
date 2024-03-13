@@ -195,6 +195,22 @@ zk-zorg-profile-name so that it can be used for scratch.el"
         (setq return-value (list link (zk-org-neutralize-timestamp headline-text)))))
     return-value))
 
+(defun zk-org-get-customid-at-point ()
+  "Returns the CUSTOM_ID of the current org entry.  nil if CUSTOM_ID
+is not there."
+  (save-excursion
+    (zk-org-move-to-current-heading)
+    (org-element-property :CUSTOM_ID (org-element-at-point))))
+
+(defun zk-org-find-references-to-current-entry ()
+  "Search for references to the current entry using the
+ CUSTOM_ID."
+  (interactive)
+  (let ((custom-id (zk-org-get-customid-at-point)))
+    (unless custom-id
+      (user-error "This entry doesn't have a CUSTOM_ID, thus it won't have any reference."))
+    (org-search-view nil custom-id)))
+
 (defun zk-org-neutralize-timestamp (text)
   "Convert org timestemps like \"[2023-07-27 Thu 14:58]\" or
 \"<2023-07-27 Thu 14:58>\" to a format that is not parsed by
@@ -334,6 +350,7 @@ the current file for completion."
   (local-set-key (kbd "C-c l l") 'zk-org-copy-external-link)
   (local-set-key (kbd "C-c l r") 'zk-org-copy-external-reference)
   (local-set-key (kbd "C-c l b") 'zk-org-log-backlink-at-point)
+  (local-set-key (kbd "C-c l f") 'zk-org-find-references-to-current-entry)
   (local-set-key (kbd "C-c l s") 'zk-org-insert-external-reference-to-scratch-task-queue)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
   (local-set-key (kbd "C-c r u") 'zk-zorg-rsync-upload)
