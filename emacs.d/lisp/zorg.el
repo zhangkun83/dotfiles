@@ -355,6 +355,7 @@ the current file for completion."
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
   (local-set-key (kbd "C-c r u") 'zk-zorg-rsync-upload)
   (local-set-key (kbd "C-c r d") 'zk-zorg-rsync-download)
+  (local-set-key (kbd "C-c r C-d") 'zk-zorg-rsync-diff)
   (local-set-key (kbd "C-c r o") 'zk-zorg-set-outdated)
   (local-set-key (kbd "C-c c") 'zk-org-clone-narrowed-buffer))
 
@@ -433,6 +434,24 @@ the current file for completion."
       (setq zk-zorg-status 'modified)
       (read-string "Upload failed. Press Enter to continue ..."))
     (kill-buffer)))
+
+(defun zk-zorg-rsync-diff ()
+  "Display the diff of the local files against the remote files."
+  (interactive)
+  (when (zk-has-unsaved-files-p)
+    (user-error "There are unsaved files."))
+  (let ((temp-directory (concat (zk-zorg-directory) ".tmp-diff-remote")))
+    (mkdir temp-directory t)
+    (let ((default-directory temp-directory))
+      (switch-to-buffer zk-zorg-rsync-buffer-name)
+      (erase-buffer)
+      (insert "Downloading remote files for diff'ing ...\n")
+      (unless (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                                  "-crti" (concat zk-zorg-rsync-backup-dir "/") "."))
+        (error "Failed to download remote files"))
+      (insert "Generating diff ...\n"))
+    (call-process "diff" nil zk-zorg-rsync-buffer-name t
+                                "-r" temp-directory (zk-zorg-directory))))
 
 (defun zk-zorg-rsync-check-remote-freshness ()
   "Called right after the initial download to make sure the remote
