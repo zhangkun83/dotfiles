@@ -20,6 +20,7 @@
 initial view once initialization has succeeded")
 
 (defconst zk-zorg-rsync-buffer-name "*zorg rsync*")
+(defconst zk-zorg-rsync-diff-buffer-name "*zorg diff*")
 
 (defun zk-zorg-directory ()
   "Returns the absolute directory for local org files"
@@ -440,18 +441,20 @@ the current file for completion."
   (interactive)
   (when (zk-has-unsaved-files-p)
     (user-error "There are unsaved files."))
-  (let ((temp-directory (concat (zk-zorg-directory) ".tmp-diff-remote")))
+  (let ((temp-directory (concat (zk-zorg-directory) ".tmp-diff-remote"))
+        (output-buffer zk-zorg-rsync-diff-buffer-name))
     (mkdir temp-directory t)
     (let ((default-directory temp-directory))
-      (switch-to-buffer zk-zorg-rsync-buffer-name)
+      (switch-to-buffer output-buffer)
       (erase-buffer)
       (insert "Downloading remote files for diff'ing ...\n")
-      (unless (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
-                                  "-crti" (concat zk-zorg-rsync-backup-dir "/") "."))
+      (unless (eq 0 (call-process "rsync" nil output-buffer t
+                                  "-crti" "--delete" (concat zk-zorg-rsync-backup-dir "/") "."))
         (error "Failed to download remote files"))
       (insert "Generating diff ...\n"))
-    (call-process "diff" nil zk-zorg-rsync-buffer-name t
-                                "-r" temp-directory (zk-zorg-directory))))
+    (call-process "diff" nil output-buffer t
+                  "-r" temp-directory (zk-zorg-directory))
+    (insert "End of diff.\n")))
 
 (defun zk-zorg-rsync-check-remote-freshness ()
   "Called right after the initial download to make sure the remote
