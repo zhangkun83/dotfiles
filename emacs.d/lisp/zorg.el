@@ -64,7 +64,7 @@ files (starting with .). Returns the list file name."
          (latest-file (car (last file-list))))
     (unless latest-file (user-error "No notes file found"))
     (let ((path (concat (zk-zorg-directory) "/" latest-file)))
-    (pop-to-buffer
+    (switch-to-buffer
      (or (find-buffer-visiting path)
          (find-file-noselect path))))))
 
