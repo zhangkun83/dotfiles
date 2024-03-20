@@ -222,6 +222,12 @@
  '(org-agenda-sticky t)
  '(org-agenda-window-setup 'current-window)
  '(org-fontify-quote-and-verse-blocks t)
+ '(org-link-frame-setup
+   '((vm . vm-visit-folder-other-frame)
+     (vm-imap . vm-visit-imap-folder-other-frame)
+     (gnus . org-gnus-no-new-news)
+     (file . find-file)
+     (wl . wl-other-frame)))
  '(org-log-into-drawer t)
  '(org-startup-indented t)
  '(switch-to-buffer-obey-display-actions t)
