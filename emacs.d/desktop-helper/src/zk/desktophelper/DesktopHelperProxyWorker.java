@@ -55,10 +55,17 @@ final class DesktopHelperProxyWorker extends MessageWorker {
   }
 
   private void ping() {
-    logger.info("Pinging server");
     Message response = requestServer(new Message("ping", ""));
-    logger.info("Ping result: " + response);
-    connectedToServer = RESPONSE_HEADER_OK.equals(response.header);
+    boolean successful = RESPONSE_HEADER_OK.equals(response.header);
+    if (successful != connectedToServer) {
+      logger.info("Ping result: " + response);
+      connectedToServer = successful;
+      if (connectedToServer) {
+        logger.info("Connection to server restored");
+      } else {
+        logger.info("Connection to server lost");
+      }
+    }
   }
 
   private Message requestServer(Message request) {
