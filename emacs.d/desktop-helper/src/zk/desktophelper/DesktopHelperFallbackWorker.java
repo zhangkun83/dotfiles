@@ -71,6 +71,8 @@ final class DesktopHelperFallbackWorker {
           String content = new String(is.readAllBytes(), "UTF-8");
           // The body is prepended with the key from the form ("content="), need to remove it.
           content = content.substring("content=".length());
+          // Convert HTTP line breaks to unix style
+          content = content.replaceAll("\r\n", "\n");
           // The value ends with a newline as part of the http protocol.  Also need to remove it.
           content = content.substring(0, content.length() - 1);
           logger.info("Set clipboard from HTTP request (" + content.length() + " chars)");
