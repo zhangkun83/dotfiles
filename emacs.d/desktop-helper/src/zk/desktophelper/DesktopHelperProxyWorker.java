@@ -1,5 +1,8 @@
 package zk.desktophelper;
 
+import static zk.desktophelper.Protocol.RESPONSE_HEADER_ERROR;
+import static zk.desktophelper.Protocol.RESPONSE_HEADER_OK;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,10 +20,13 @@ final class DesktopHelperProxyWorker extends MessageWorker {
   private final int serverPort;
   private final ScheduledExecutorService timerService =
       Executors.newSingleThreadScheduledExecutor();
+  private final DesktopHelperFallbackWorker fallbackWorker;
+  private volatile boolean connectedToServer;
   private ArrayBlockingQueue<Socket> socketToServer = new ArrayBlockingQueue<>(1);
 
-  DesktopHelperProxyWorker(int serverPort) {
+  DesktopHelperProxyWorker(int serverPort, DesktopHelperFallbackWorker fallbackWorker) {
     this.serverPort = serverPort;
+    this.fallbackWorker = fallbackWorker;
   }
 
   void start() {
@@ -35,8 +41,10 @@ final class DesktopHelperProxyWorker extends MessageWorker {
       logger.info("Connected to server at " + socket.getRemoteSocketAddress());
       socketToServer.add(socket);
       requestServer(new Message("notify", "A proxy is connected to this Desktop Helper"));
+      connectedToServer = true;
     } catch (IOException e) {
       logger.warning("Failed to connect to server at port " + serverPort + ": " + e);
+      connectedToServer = false;
       scheduleReconnect();
     }
   }
@@ -50,6 +58,7 @@ final class DesktopHelperProxyWorker extends MessageWorker {
     logger.info("Pinging server");
     Message response = requestServer(new Message("ping", ""));
     logger.info("Ping result: " + response);
+    connectedToServer = RESPONSE_HEADER_OK.equals(response.header);
   }
 
   private Message requestServer(Message request) {
@@ -61,7 +70,7 @@ final class DesktopHelperProxyWorker extends MessageWorker {
     }
     if (socket == null) {
       logger.warning("Proxy cannot get a connection to send " + request.header);
-      return new Message("ERROR", "Proxy cannot get a connection to server");
+      return new Message(RESPONSE_HEADER_ERROR, "Proxy cannot get a connection to server");
     } else {
       Message response;
       try {
@@ -76,7 +85,7 @@ final class DesktopHelperProxyWorker extends MessageWorker {
       } catch (IOException e) {
         logger.info("Proxy-server connection is broken: " + e);
         scheduleReconnect();
-        return new Message("ERROR", "Proxy-server connection is broken");
+        return new Message(RESPONSE_HEADER_ERROR, "Proxy-server connection is broken");
       }
     }
   }
@@ -86,7 +95,8 @@ final class DesktopHelperProxyWorker extends MessageWorker {
     while (true) {
       Message msg = stream.readMessage();
       logger.info("Received: " + msg);
-      stream.writeMessage(requestServer(msg));
+      stream.writeMessage(
+          connectedToServer ? requestServer(msg) : fallbackWorker.handleRequest(msg));
     }
   }
 }

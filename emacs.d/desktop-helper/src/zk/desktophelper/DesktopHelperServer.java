@@ -8,16 +8,6 @@ public class DesktopHelperServer {
   public static void main(String[] args) throws Exception {
     Flags flags = new Flags(args);
     logger.info("DesktopHelperServer started with flags: " + flags);
-    System.err.println(
-        "##################################################################################\n"
-        + "Local clients will work. To make remote clients work, use:\n"
-        + "$ ssh <host> -4 -R 127.0.0.1:5035:127.0.0.1:5032 -o ExitOnForwardFailure=yes"
-        + "-t ~/.emacs.d/bin/desktop-helper-proxy\n"
-        + "to create an SSH tunnel and start a proxy.\n"
-        + "The proxy will listen on the same port (5032) as the server, while SSH will tunnel\n"
-        + "the server port 5032 on the local machine to port 5035 on the remote machine that the\n"
-        + "proxy will connect to.\n"
-        + "##################################################################################");
     int port = flags.getInt("port");
     boolean useSystemNotifications =
         "true".equals(flags.getString("use_system_notifications", "false"));

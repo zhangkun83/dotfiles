@@ -1,5 +1,8 @@
 package zk.desktophelper;
 
+import static zk.desktophelper.Protocol.RESPONSE_HEADER_ERROR;
+import static zk.desktophelper.Protocol.RESPONSE_HEADER_OK;
+
 import java.awt.Image;
 import java.awt.SystemTray;
 import java.awt.Toolkit;
@@ -61,13 +64,14 @@ final class DesktopHelperServerWorker extends MessageWorker {
       logger.info("Received: " + msg);
       if (msg.header.equals("store-to-clipboard")) {
         clipboard.setContents(new StringSelection(msg.data), null);
-        stream.writeMessage("OK", "Stored " + msg.data.length() + " chars to clipboard");
+        stream.writeMessage(
+            RESPONSE_HEADER_OK, "Stored " + msg.data.length() + " chars to clipboard");
       } else if (msg.header.equals("retrieve-from-clipboard")) {
         try {
           String content = (String) clipboard.getData(DataFlavor.stringFlavor);
-          stream.writeMessage("OK", content);
+          stream.writeMessage(RESPONSE_HEADER_OK, content);
         } catch (UnsupportedFlavorException e) {
-          stream.writeMessage("ERROR", e.toString());
+          stream.writeMessage(RESPONSE_HEADER_ERROR, e.toString());
         }
       } else if (msg.header.equals("open-url")) {
         String os = System.getProperty("os.name");
@@ -75,29 +79,29 @@ final class DesktopHelperServerWorker extends MessageWorker {
         if (os.toLowerCase().contains("win")) {
           program = "c:/Program Files/Google/Chrome/Application/chrome.exe";
         } else if (os.toLowerCase().contains("linux")) {
-          program = "/usr/bin/google-chrome";
+          program = "google-chrome";
         }
         if (program == null) {
-          stream.writeMessage("ERROR", "Unsupported OS for open-url: " + os);
+          stream.writeMessage(RESPONSE_HEADER_ERROR, "Unsupported OS for open-url: " + os);
         } else {
           try {
             Runtime.getRuntime().exec(new String[]{program, msg.data});
-            stream.writeMessage("OK", "URL sent to " + program);
+            stream.writeMessage(RESPONSE_HEADER_OK, "URL sent to " + program);
           } catch (IOException e) {
-            stream.writeMessage("ERROR", e.toString());
+            stream.writeMessage(RESPONSE_HEADER_ERROR, e.toString());
           }
         }
       } else if (msg.header.equals("notify")) {
         boolean ret = displayNotification(msg.data);
         if (ret) {
-          stream.writeMessage("OK", "displayNotification() succeeded");
+          stream.writeMessage(RESPONSE_HEADER_OK, "displayNotification() succeeded");
         } else {
-          stream.writeMessage("ERROR", "displayNotification() failed");
+          stream.writeMessage(RESPONSE_HEADER_ERROR, "displayNotification() failed");
         }
       } else if (msg.header.equals("ping")) {
-        stream.writeMessage("OK", "Pong!");
+        stream.writeMessage(RESPONSE_HEADER_OK, "Pong!");
       } else {
-        stream.writeMessage("ERROR", "Unsupported command: " + msg.header);
+        stream.writeMessage(RESPONSE_HEADER_ERROR, "Unsupported command: " + msg.header);
       }
     }
   }

@@ -8,6 +8,8 @@ import java.nio.ByteBuffer;
 final class Protocol {
   private static final int SIZE_LENGTH = 4;
   private static final String CHARSET = "UTF-8";
+  static final String RESPONSE_HEADER_OK = "OK";
+  static final String RESPONSE_HEADER_ERROR = "ERROR";
 
   static final class Message {
     final String header;
