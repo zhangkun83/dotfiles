@@ -21,7 +21,7 @@ final class DesktopHelperProxyWorker extends MessageWorker {
   private final ScheduledExecutorService timerService =
       Executors.newSingleThreadScheduledExecutor();
   private final DesktopHelperFallbackWorker fallbackWorker;
-  private volatile boolean connectedToServer;
+  private volatile boolean connectedToServer = true;
   private ArrayBlockingQueue<Socket> socketToServer = new ArrayBlockingQueue<>(1);
 
   DesktopHelperProxyWorker(int serverPort, DesktopHelperFallbackWorker fallbackWorker) {
@@ -35,7 +35,7 @@ final class DesktopHelperProxyWorker extends MessageWorker {
   }
 
   private void connect() {
-    logger.info("Connecting to server");
+    logger.fine("Connecting to server");
     try {
       Socket socket = new Socket("localhost", serverPort);
       logger.info("Connected to server at " + socket.getRemoteSocketAddress());
@@ -43,14 +43,16 @@ final class DesktopHelperProxyWorker extends MessageWorker {
       requestServer(new Message("notify", "A proxy is connected to this Desktop Helper"));
       connectedToServer = true;
     } catch (IOException e) {
-      logger.warning("Failed to connect to server at port " + serverPort + ": " + e);
+      if (connectedToServer) {
+        logger.warning("Failed to connect to server at port " + serverPort + ": " + e);
+      }
       connectedToServer = false;
       scheduleReconnect();
     }
   }
 
   private void scheduleReconnect() {
-    logger.info("Waiting to reconnect to server");
+    logger.fine("Waiting to reconnect to server");
     timerService.schedule(this::connect, 5, TimeUnit.SECONDS);
   }
 
@@ -73,10 +75,14 @@ final class DesktopHelperProxyWorker extends MessageWorker {
     try {
       socket = socketToServer.poll(10, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
-      logger.warning("Failed to get a connection to server: " + e);
+      if (connectedToServer) {
+        logger.warning("Failed to get a connection to server: " + e);
+      }
     }
     if (socket == null) {
-      logger.warning("Proxy cannot get a connection to send " + request.header);
+      if (connectedToServer) {
+        logger.warning("Proxy cannot get a connection to send " + request.header);
+      }
       return new Message(RESPONSE_HEADER_ERROR, "Proxy cannot get a connection to server");
     } else {
       Message response;
