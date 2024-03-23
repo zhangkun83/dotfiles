@@ -42,7 +42,11 @@ final class DesktopHelperFallbackWorker {
         if (clipboardCopy == null) {
           httpRespondHtmlMessage(t, "<p>Desktop Helper's clipboard is empty.</p>");
         } else {
-          t.getResponseHeaders().set("Content-type", "text/plain;charset=utf-8");
+          if (t.getRequestURI().getPath().endsWith("/viewcliphtml")) {
+            t.getResponseHeaders().set("Content-type", "text/html;charset=utf-8");
+          } else {
+            t.getResponseHeaders().set("Content-type", "text/plain;charset=utf-8");
+          }
           byte[] responseBytes = clipboardCopy.getBytes("UTF-8");
           t.sendResponseHeaders(200, responseBytes.length);
           OutputStream os = t.getResponseBody();
@@ -102,6 +106,7 @@ final class DesktopHelperFallbackWorker {
         10);
     httpServer.createContext("/openurl", handlerOpenUrl);
     httpServer.createContext("/viewclip", handlerViewClip);
+    httpServer.createContext("/viewcliphtml", handlerViewClip);
     httpServer.createContext("/setclip", handlerSetClip);
     httpServer.setExecutor(null);
   }
