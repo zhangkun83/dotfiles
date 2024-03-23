@@ -107,7 +107,7 @@ final class DesktopHelperProxyWorker extends MessageWorker {
   public void workOnConnection(MessageStream stream) throws IOException {
     while (true) {
       Message msg = stream.readMessage();
-      logger.info("Received: " + msg);
+      logger.info("Received: " + msg.header);
       // Always send the request to the fallback server, so that the HTML server can function
       // regardless of whether the proxy is connected to the DesktopHelper server.
       Message fallbackResponse = fallbackWorker.handleRequest(msg);
