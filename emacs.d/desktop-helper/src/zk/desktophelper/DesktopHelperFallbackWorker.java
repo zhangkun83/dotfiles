@@ -94,8 +94,12 @@ final class DesktopHelperFallbackWorker {
   private volatile String clipboard;
   private volatile String url;
 
-  DesktopHelperFallbackWorker(int httpPort) throws IOException {
-    httpServer = HttpServer.create(new InetSocketAddress("127.0.0.1", httpPort), 10);
+  DesktopHelperFallbackWorker(int httpPort, boolean httpOpenToNetwork) throws IOException {
+    httpServer = HttpServer.create(
+        httpOpenToNetwork ?
+        new InetSocketAddress(httpPort) :
+        new InetSocketAddress("127.0.0.1", httpPort),
+        10);
     httpServer.createContext("/openurl", handlerOpenUrl);
     httpServer.createContext("/viewclip", handlerViewClip);
     httpServer.createContext("/setclip", handlerSetClip);

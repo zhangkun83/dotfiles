@@ -27,6 +27,20 @@ final class Flags {
     return value;
   }
 
+  boolean getBoolean(String name, boolean defaultValue) {
+    String value = data.get(name);
+    if (value == null) {
+      return false;
+    }
+    if ("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value)) {
+      return true;
+    }
+    if ("no".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
+      return false;
+    }
+    throw new IllegalArgumentException("Invalid boolean value: " + value);
+  }
+
   int getInt(String name) {
     return Integer.parseInt(getString(name));
   }
