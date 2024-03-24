@@ -14,20 +14,24 @@ import java.util.logging.Logger;
 import zk.desktophelper.Protocol.Message;
 
 /**
- * A fallback worker to use by the proxy when it cannot connect to the real server.  This worker
- * starts an HTTP server that supports redirecting to URLs, view and setting the embedded clipboard.
+ * An embedded HTTP server that supports redirecting to URLs, view and setting the embedded
+ * clipboard.
  */
-final class DesktopHelperFallbackWorker {
+final class DesktopHelperHttpServer {
   private static final Logger logger =
-      Logger.getLogger(DesktopHelperFallbackWorker.class.getName());
+      Logger.getLogger(DesktopHelperHttpServer.class.getName());
 
   private final HttpServer httpServer;
+  private final int port;
+  private final boolean portOpenToNetwork;
+  private final Backend backend;
+
   private final HttpHandler handlerOpenUrl = new HttpHandler() {
       @Override
       public void handle(HttpExchange t) throws IOException {
-        String urlCopy = url;
+        String urlCopy = backend.getUrlToOpen();
         if (urlCopy == null) {
-          httpRespondHtmlMessage(t, "<p>No URL was sent to the Desktop Helper.</p>");
+          httpRespondHtmlMessage(t, "<p>No URL was sent to " + backend.getName() + ".</p>");
         } else {
           t.getResponseHeaders().set("Location", urlCopy);
           t.sendResponseHeaders(302, 0);
@@ -38,9 +42,17 @@ final class DesktopHelperFallbackWorker {
   private final HttpHandler handlerViewClip = new HttpHandler() {
       @Override
       public void handle(HttpExchange t) throws IOException {
-        String clipboardCopy = clipboard;
+        String clipboardCopy;
+        try {
+          clipboardCopy = backend.getClipboard();
+        } catch (Exception e) {
+            httpRespondHtmlMessage(
+                t,
+                "<p>Failed to retrieve clipboard.  Exception: " + e);
+            return;
+        }
         if (clipboardCopy == null) {
-          httpRespondHtmlMessage(t, "<p>Desktop Helper's clipboard is empty.</p>");
+          httpRespondHtmlMessage(t, "<p>" + backend.getName() + "'s clipboard is empty.</p>");
         } else {
           if (t.getRequestURI().getPath().endsWith("/viewcliphtml")) {
             t.getResponseHeaders().set("Content-type", "text/html;charset=utf-8");
@@ -79,14 +91,14 @@ final class DesktopHelperFallbackWorker {
           content = content.replaceAll("\r\n", "\n");
           // The value ends with a newline as part of the http protocol.  Also need to remove it.
           content = content.substring(0, content.length() - 1);
+          backend.setClipboard(content);
           logger.info("Set clipboard from HTTP request (" + content.length() + " chars)");
-          clipboard = content;
           t.getResponseHeaders().set("Location", "/viewclip");
           t.sendResponseHeaders(302, 0);
         } else {
           httpRespondHtmlMessage(
               t,
-              "<p>Set the DesktopHelper clipboard:</p>\n"
+              "<p>Set " + backend.getName() + "'s clipboard:</p>\n"
               + "<form action=\"/setclip\" method=\"post\" enctype=\"text/plain\">\n"
               + "<textarea id=\"content\" name=\"content\" rows=\"10\" cols=\"100\"></textarea>\n"
               + "<br><br>\n"
@@ -95,14 +107,14 @@ final class DesktopHelperFallbackWorker {
       }
     };
 
-  private volatile String clipboard;
-  private volatile String url;
-
-  DesktopHelperFallbackWorker(int httpPort, boolean httpOpenToNetwork) throws IOException {
+  DesktopHelperHttpServer(int port, boolean portOpenToNetwork, Backend backend) throws IOException {
+    this.port = port;
+    this.portOpenToNetwork = portOpenToNetwork;
+    this.backend = backend;
     httpServer = HttpServer.create(
-        httpOpenToNetwork ?
-        new InetSocketAddress(httpPort) :
-        new InetSocketAddress("127.0.0.1", httpPort),
+        portOpenToNetwork ?
+        new InetSocketAddress(port) :
+        new InetSocketAddress("127.0.0.1", port),
         10);
     httpServer.createContext("/openurl", handlerOpenUrl);
     httpServer.createContext("/viewclip", handlerViewClip);
@@ -111,29 +123,24 @@ final class DesktopHelperFallbackWorker {
     httpServer.setExecutor(null);
   }
 
-  void startHttpServer() {
+  void start() {
     httpServer.start();
+    logger.info("HTTP server started on port " + port
+        + (portOpenToNetwork ? " for ALL network interfaces"
+            : " for 127.0.0.1 only"));
+    if (portOpenToNetwork) {
+      logger.warning(
+          "HTTP port is open to network.  Use this only in VMs whose ports can"
+          + " only be accessed from the local machine.");
+    }
   }
 
-  Message handleRequest(Message request) {
-    logger.info("Handling " + request.header);
-    if (request.header.equals("store-to-clipboard")) {
-      clipboard = request.data;
-      return new Message(
-          RESPONSE_HEADER_OK, "Stored " + request.data.length() + " chars in fallback worker");
-    }
-    if (request.header.equals("retrieve-from-clipboard")) {
-      String clipboardCopy = clipboard;
-      if (clipboardCopy == null) {
-        return new Message(RESPONSE_HEADER_ERROR, "Fallback worker doesn't have data in clipboard");
-      }
-      return new Message(RESPONSE_HEADER_OK, clipboardCopy);
-    }
-    if (request.header.equals("open-url")) {
-      url = request.data;
-      return new Message(RESPONSE_HEADER_OK, "URL stored in fallback worker");
-    }
-    return new Message(
-        RESPONSE_HEADER_ERROR, "Fallback worker doesn't support " + request.header);
+  interface Backend {
+    // Nullable
+    String getClipboard() throws Exception;
+    void setClipboard(String content);
+    // Nullable
+    String getUrlToOpen();
+    String getName();
   }
 }

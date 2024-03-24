@@ -10,7 +10,6 @@ import java.awt.TrayIcon;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.logging.Logger;
 import zk.desktophelper.Protocol;
@@ -20,8 +19,35 @@ final class DesktopHelperServerWorker extends MessageWorker {
   private static final Logger logger = Logger.getLogger(DesktopHelperServerWorker.class.getName());
   private final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
   private final TrayIcon trayIcon;
+  private final DesktopHelperHttpServer httpServer;
+  private final DesktopHelperHttpServer.Backend httpBackend =
+      new DesktopHelperHttpServer.Backend() {
+        @Override
+        public String getClipboard() throws Exception {
+          return DesktopHelperServerWorker.this.getClipboard();
+        }
 
-  DesktopHelperServerWorker(boolean useSystemNotifications) {
+        @Override
+        public void setClipboard(String content) {
+          DesktopHelperServerWorker.this.setClipboard(content);
+        }
+
+        @Override
+        public String getUrlToOpen() {
+          return cachedUrlToOpen;
+        }
+
+        @Override
+        public String getName() {
+          return "DesktopHelper Server";
+        }
+      };
+  private volatile String cachedUrlToOpen;
+
+  DesktopHelperServerWorker(
+      boolean useSystemNotifications, int httpPort, boolean httpOpenToNetwork) throws IOException {
+    this.httpServer = new DesktopHelperHttpServer(httpPort, httpOpenToNetwork, httpBackend);
+
     TrayIcon trayIcon = null;
     if (useSystemNotifications) {
       try {
@@ -45,6 +71,8 @@ final class DesktopHelperServerWorker extends MessageWorker {
           } catch (Exception e) {}
           displayNotification("Notifications sent to the Desktop Helper will show like this.");
     }).start();
+
+    this.httpServer.start();
   }
 
   private boolean displayNotification(String msg) {
@@ -57,23 +85,33 @@ final class DesktopHelperServerWorker extends MessageWorker {
     }
   }
 
+  private void setClipboard(String content) {
+    clipboard.setContents(new StringSelection(content), null);
+  }
+
+  private String getClipboard() throws Exception {
+    return (String) clipboard.getData(DataFlavor.stringFlavor);
+  }
+
   @Override
   public void workOnConnection(MessageStream stream) throws IOException {
     while (true) {
       Message msg = stream.readMessage();
       logger.info("Received: " + msg);
       if (msg.header.equals("store-to-clipboard")) {
-        clipboard.setContents(new StringSelection(msg.data), null);
+        setClipboard(msg.data);
         stream.writeMessage(
             RESPONSE_HEADER_OK, "Stored " + msg.data.length() + " chars to clipboard");
       } else if (msg.header.equals("retrieve-from-clipboard")) {
         try {
-          String content = (String) clipboard.getData(DataFlavor.stringFlavor);
+          String content = getClipboard();
           stream.writeMessage(RESPONSE_HEADER_OK, content);
-        } catch (UnsupportedFlavorException e) {
+        } catch (Exception e) {
           stream.writeMessage(RESPONSE_HEADER_ERROR, e.toString());
         }
       } else if (msg.header.equals("open-url")) {
+        String url = msg.data;
+        cachedUrlToOpen = url;
         String os = System.getProperty("os.name");
         String program = null;
         if (os.toLowerCase().contains("win")) {
@@ -85,7 +123,7 @@ final class DesktopHelperServerWorker extends MessageWorker {
           stream.writeMessage(RESPONSE_HEADER_ERROR, "Unsupported OS for open-url: " + os);
         } else {
           try {
-            Runtime.getRuntime().exec(new String[]{program, msg.data});
+            Runtime.getRuntime().exec(new String[]{program, url});
             stream.writeMessage(RESPONSE_HEADER_OK, "URL sent to " + program);
           } catch (IOException e) {
             stream.writeMessage(RESPONSE_HEADER_ERROR, e.toString());

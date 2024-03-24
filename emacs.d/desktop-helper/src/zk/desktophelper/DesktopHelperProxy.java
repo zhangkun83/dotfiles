@@ -23,16 +23,8 @@ public class DesktopHelperProxy {
     int serverPort = flags.getInt("server_port");
     int httpPort = flags.getInt("http_port");
     boolean httpOpenToNetwork = flags.getBoolean("http_open_to_network", false);
-    if (httpOpenToNetwork) {
-      logger.warning(
-          "HTTP port is open to network.  Use this only in VMs whose ports can"
-          + " only be accessed from the local machine.");
-    }
-    logger.info("Starting HTTP server on port " + httpPort);
-    DesktopHelperFallbackWorker fallbackWorker =
-        new DesktopHelperFallbackWorker(httpPort, httpOpenToNetwork);
-    fallbackWorker.startHttpServer();
-    DesktopHelperProxyWorker worker = new DesktopHelperProxyWorker(serverPort, fallbackWorker);
+    DesktopHelperProxyWorker worker =
+        new DesktopHelperProxyWorker(serverPort, httpPort, httpOpenToNetwork);
     worker.start();
     new BlockingServer(proxyPort, worker).runServer();
   }

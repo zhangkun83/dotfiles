@@ -20,17 +20,43 @@ final class DesktopHelperProxyWorker extends MessageWorker {
   private final int serverPort;
   private final ScheduledExecutorService timerService =
       Executors.newSingleThreadScheduledExecutor();
-  private final DesktopHelperFallbackWorker fallbackWorker;
   private volatile boolean connectedToServer = true;
-  private ArrayBlockingQueue<Socket> socketToServer = new ArrayBlockingQueue<>(1);
+  private volatile String fallbackClipboard;
+  private volatile String fallbackUrlToOpen;
+  private final ArrayBlockingQueue<Socket> socketToServer = new ArrayBlockingQueue<>(1);
+  private final DesktopHelperHttpServer.Backend fallbackBackend =
+      new DesktopHelperHttpServer.Backend() {
+        @Override
+        public String getClipboard() {
+          return fallbackClipboard;
+        }
 
-  DesktopHelperProxyWorker(int serverPort, DesktopHelperFallbackWorker fallbackWorker) {
+        @Override
+        public void setClipboard(String content) {
+          fallbackClipboard = content;
+        }
+
+        @Override
+        public String getUrlToOpen() {
+          return fallbackUrlToOpen;
+        }
+
+        @Override
+        public String getName() {
+          return "Proxy Fallback Mode";
+        }
+      };
+  private final DesktopHelperHttpServer httpServer;
+
+  DesktopHelperProxyWorker(int serverPort, int httpPort, boolean httpOpenToNetwork)
+      throws IOException {
     this.serverPort = serverPort;
-    this.fallbackWorker = fallbackWorker;
+    this.httpServer = new DesktopHelperHttpServer(httpPort, httpOpenToNetwork, fallbackBackend);
   }
 
   void start() {
     connect();
+    httpServer.start();
     timerService.scheduleWithFixedDelay(this::ping, 0, 60, TimeUnit.SECONDS);
   }
 
@@ -108,11 +134,31 @@ final class DesktopHelperProxyWorker extends MessageWorker {
     while (true) {
       Message msg = stream.readMessage();
       logger.info("Received: " + msg.header);
-      // Always send the request to the fallback server, so that the HTML server can function
-      // regardless of whether the proxy is connected to the DesktopHelper server.
-      Message fallbackResponse = fallbackWorker.handleRequest(msg);
       stream.writeMessage(
-          connectedToServer ? requestServer(msg) : fallbackResponse);
+          connectedToServer ? requestServer(msg) : fallbackHandleRequest(msg));
     }
+  }
+
+  private Message fallbackHandleRequest(Message request) {
+    logger.info("Fallback handling " + request.header);
+    if (request.header.equals("store-to-clipboard")) {
+      fallbackClipboard = request.data;
+      return new Message(
+          RESPONSE_HEADER_OK,
+          "Stored " + request.data.length() + " chars in proxy fallback clipboard");
+    }
+    if (request.header.equals("retrieve-from-clipboard")) {
+      String clipboardCopy = fallbackClipboard;
+      if (clipboardCopy == null) {
+        return new Message(RESPONSE_HEADER_ERROR, "Proxy fallback clipboard is not set");
+      }
+      return new Message(RESPONSE_HEADER_OK, clipboardCopy);
+    }
+    if (request.header.equals("open-url")) {
+      fallbackUrlToOpen = request.data;
+      return new Message(RESPONSE_HEADER_OK, "URL stored in proxy fallback mode");
+    }
+    return new Message(
+        RESPONSE_HEADER_ERROR, "Proxy fallback mode doesn't support " + request.header);
   }
 }
