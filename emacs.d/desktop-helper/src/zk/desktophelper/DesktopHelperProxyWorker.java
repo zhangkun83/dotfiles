@@ -123,6 +123,9 @@ final class DesktopHelperProxyWorker extends MessageWorker {
         return response;
       } catch (IOException e) {
         logger.info("Proxy-server connection is broken: " + e);
+        try {
+          socket.close();
+        } catch (IOException ignored) {}
         scheduleReconnect();
         return new Message(RESPONSE_HEADER_ERROR, "Proxy-server connection is broken");
       }
