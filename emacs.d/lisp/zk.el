@@ -7,6 +7,9 @@ On linux it's the same as $HOME. On Windows it's $USERPFOFILE,
 whose value is \"C:\\Users\\foo\" and more preferrable
 than $HOME which is \"c:\\Users\\foo\\AppData\\Roaming\".")
 
+(defconst zk-desktop-helper-client-path
+  (concat (file-name-directory user-init-file) "bin/desktop-helper-client.py"))
+
 (defun zk-trim-string (string)
   "Remove white spaces in beginning and ending of STRING.
 White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."
@@ -239,7 +242,7 @@ remote directory suddenly becomes inaccessible."
                         "cygstart /cygdrive/c/Program\\ Files/Google/Chrome/Application/chrome.exe")
                        ((eq system-type 'darwin)
                         "open")
-                       (t "desktop-helper-client.py open-url"))))
+                       (t (concat zk-desktop-helper-client-path " open-url")))))
     (shell-command (concat program " "
                          (prin1-to-string url)))))
 

@@ -18,7 +18,7 @@ buffer."
         (with-current-buffer buffer
           (call-process-region
            begin end
-           "desktop-helper-client.py"
+           zk-desktop-helper-client-path
            nil temp-buffer nil
            "store-to-clipboard")))
       (message (zk-trim-string (buffer-string)))))
@@ -30,7 +30,7 @@ buffer."
   ;; Use a temp file for client output that is not the content
   (let ((temp-file (make-temp-file "zk-clipboard-paste")))
     (call-process
-     "desktop-helper-client.py"
+     zk-desktop-helper-client-path
      nil (list t temp-file) nil
      "retrieve-from-clipboard")
     (with-temp-buffer
