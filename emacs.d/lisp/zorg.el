@@ -1,4 +1,5 @@
 (require 'zk)
+(require 'zk-org)
 (require 'org)
 (require 'org-element)
 (require 'org-tempo)
@@ -358,6 +359,7 @@ the current file for completion."
   (local-set-key (kbd "C-c r d") 'zk-zorg-rsync-download)
   (local-set-key (kbd "C-c r C-d") 'zk-zorg-rsync-diff)
   (local-set-key (kbd "C-c r o") 'zk-zorg-set-outdated)
+  (local-set-key (kbd "C-c e h") 'zk-org-export-html-to-clipboard)
   (local-set-key (kbd "C-c c") 'zk-org-clone-narrowed-buffer))
 
 (defun zk-org-set-file-encoding ()

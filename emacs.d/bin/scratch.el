@@ -1,6 +1,8 @@
 ;; Set up the scratch environment
 
 (require 'zk)
+(require 'zk-org)
+
 (setq zk-frame-title-base-name "scratch")
 (setq confirm-kill-emacs 'yes-or-no-p)
 (if (display-graphic-p)
@@ -62,6 +64,9 @@ server to open it.  The link format must be like
 
 (global-set-key (kbd "<f5>") 'zk-scratch-init)
 (global-set-key (kbd "<f6>") 'zk-scratch-open-lisp-window)
+(add-hook 'org-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c e h") 'zk-org-export-html-to-clipboard)))
 
 (setq create-lockfiles nil)
 (kill-buffer "*scratch*")
