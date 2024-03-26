@@ -60,12 +60,17 @@ server to open it.  The link format must be like
             (let ((zorg-profile (match-string-no-properties 1 link))
                   (actual-link (concat "file:" (match-string-no-properties 2 link))))
               ;; Open org file links in zorg
-              (server-eval-at
-               zorg-profile
-               (list 'progn
-                     (list 'org-link-open-from-string actual-link)
-                     '(raise-frame)))
-              (message "Asked %s to open \"%s\"" zorg-profile actual-link)))
+              (if (server-eval-at
+                   zorg-profile
+                   (list 'ignore-errors
+                         ;; org-link-open-from-string throws an error
+                         ;; if the link cannot be opened.  That will
+                         ;; be turned into a nil by ignore-errors.
+                         (list 'org-link-open-from-string actual-link)
+                         '(raise-frame)
+                         t))
+                  (message "Asked %s to open \"%s\"" zorg-profile actual-link)
+                (message "%s failed to open \"%s\"" zorg-profile actual-link))))
         ;; Open other links normally
         (funcall orig-open-link-at-point)))))
 
