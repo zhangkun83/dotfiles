@@ -191,6 +191,8 @@ Returns the CUSTOM_ID."
                               (zk-org-generate-custom-id-from-text headline-text)))
                          (org-set-property "CUSTOM_ID" new-id)
                          new-id))))
+      (when (called-interactively-p 'any)
+        (message "CUSTOM_ID: %s" custom-id))
       custom-id)))
 
 (defun zk-org-get-headline-link-at-point (with-profile-name)
