@@ -154,8 +154,9 @@ of the scratch server, if they don't exist in the queue yet."
        (when (and (eq todo-type 'todo)
                   (eq priority ?A))
          (let ((id (zk-org-generate-custom-id-at-point)))
-           (when (zk-org-insert-external-reference-to-scratch-task-queue)
-             (message "Sent to scratch task queue: %s" id))))))
+           (if (zk-org-insert-external-reference-to-scratch-task-queue)
+               (message "Scratch task queue ACCEPTED: %s" id)
+             (message "Scratch task queue REJECTED: %s" id))))))
    t
    'agenda-with-archives))
 
