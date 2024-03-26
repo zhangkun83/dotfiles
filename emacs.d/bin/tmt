@@ -1,0 +1,11 @@
+#!/bin/bash
+# Run a given command line while setting the tmux window name.
+# When the command exits, the window name will be reset.
+# Usage: tmt <tmux-window-name> <the rest of command line>
+if [[ -n "$TMUX" ]]; then
+    current_window_id=$(tmux display-message -p '#I')
+    tmux rename-window -t $current_window_id $1
+    trap "tmux set -wt:$current_window_id automatic-rename on" EXIT
+fi
+shift
+"$@"

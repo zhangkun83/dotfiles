@@ -1,8 +1,3 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && realpath $(pwd) )"
-if [[ -n "$TMUX" ]]; then
-    current_window_id=$(tmux display-message -p '#I')
-    tmux rename-window -t $current_window_id "scratch"
-    trap "tmux set -wt:$current_window_id automatic-rename on" EXIT
-fi
-emacs -nw --load="$DIR/scratch.el"
+$DIR/tmt scratch emacs -nw --load="$DIR/scratch.el"
