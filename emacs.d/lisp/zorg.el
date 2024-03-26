@@ -129,17 +129,31 @@ for scratch.el"
 
 (defun zk-org-insert-external-reference-to-scratch-task-queue ()
   "Insert the external reference of the current heading to the task
-queue of the scratch server, and set the priority to A."
-  (interactive)
-  (let ((content (zk-org-get-external-reference t)))
+queue of the scratch server, if the reference ID doesn't exist in
+ the queue.  Returns t if inserted, nil if already exists."
+  (let* ((content (zk-org-get-external-reference t))
+         (link-pair (zk-org-get-headline-link-at-point t))
+         (id (nth 0 link-pair)))
     (server-eval-at
-     "scratch"
-     (list 'progn
-           (list 'zk-scratch-insert-to-task-queue content)
-         '(raise-frame)
-         (list 'message "Added to queue: %s" content)))
-    (org-priority ?A)
-    (message "Sent reference to scratch.  Priority set to A.")))
+         "scratch"
+         (list 'zk-scratch-insert-to-task-queue content id))))
+
+(defun zk-org-fill-scratch-task-queue ()
+  "Insert all undone TODO entries with priority A to the task queue
+of the scratch server, if they don't exist in the queue yet."
+  (interactive)
+  (org-map-entries
+   (lambda ()
+     (let* ((headline (org-element-at-point))
+            (todo-type (org-element-property :todo-type headline))
+            (priority (org-element-property :priority headline)))
+       (when (and (eq todo-type 'todo)
+                  (eq priority ?A))
+         (let ((id (zk-org-generate-custom-id-at-point)))
+           (when (zk-org-insert-external-reference-to-scratch-task-queue)
+             (message "Sent to scratch task queue: %s" id))))))
+   t
+   'agenda-with-archives))
 
 (defun zk-org-clone-narrowed-buffer ()
   "Clone the current org buffer and narrow to the current
@@ -158,7 +172,8 @@ subtree"
 
 (defun zk-org-generate-custom-id-at-point ()
   "If CUSTOM_ID of the current org headline doesn't exist,
-generate one based on the text of the headline and set it."
+generate one based on the text of the headline and set it.
+Returns the CUSTOM_ID."
   (interactive)
   (unless (eq major-mode 'org-mode)
     (user-error "Not in org-mode"))
@@ -172,7 +187,7 @@ generate one based on the text of the headline and set it."
                               (zk-org-generate-custom-id-from-text headline-text)))
                          (org-set-property "CUSTOM_ID" new-id)
                          new-id))))
-      (message "CUSTOM_ID: %s" custom-id))))
+      custom-id)))
 
 (defun zk-org-get-headline-link-at-point (with-profile-name)
   "Returns a list of (link headline), where link is the external
@@ -353,7 +368,7 @@ the current file for completion."
   (local-set-key (kbd "C-c l r") 'zk-org-copy-external-reference)
   (local-set-key (kbd "C-c l b") 'zk-org-log-backlink-at-point)
   (local-set-key (kbd "C-c l f") 'zk-org-find-references-to-current-entry)
-  (local-set-key (kbd "C-c l s") 'zk-org-insert-external-reference-to-scratch-task-queue)
+  (local-set-key (kbd "C-c l s") 'zk-org-fill-scratch-task-queue)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
   (local-set-key (kbd "C-c r u") 'zk-zorg-rsync-upload)
   (local-set-key (kbd "C-c r d") 'zk-zorg-rsync-download)

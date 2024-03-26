@@ -22,16 +22,23 @@
 (defun zk-scratch-org-backward-heading-same-level()
   (org-backward-heading-same-level nil))
 
-(defun zk-scratch-insert-to-task-queue (content)
+(defun zk-scratch-insert-to-task-queue (content id)
   "Add a bullet line to the beginning of the task queue, which is
-the first top-level heading of the scratch file."
+the first top-level heading of the scratch file, if the id
+doesn't appear in the queue.  Returns t if inserted, nil if
+already exists."
   (zk-scratch-open-org-file)
   (zk-repeat-until-stuck 'zk-scratch-org-up-element)
   (org-forward-heading-same-level nil)
   (zk-repeat-until-stuck 'zk-scratch-org-backward-heading-same-level)
-  (move-end-of-line nil)
-  (newline)
-  (insert "- " content))
+  (if (save-mark-and-excursion
+            (org-mark-element)
+            (search-forward (concat "[" id "]") (region-end) t))
+      nil
+    (move-end-of-line nil)
+    (newline)
+    (insert "- [NEW] " content)
+    t))
 
 (require 'server)
 (setq server-name "scratch")
