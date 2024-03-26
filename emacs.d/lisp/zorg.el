@@ -135,8 +135,12 @@ queue of the scratch server, if the reference ID doesn't exist in
          (link-pair (zk-org-get-headline-link-at-point t))
          (id (nth 0 link-pair)))
     (server-eval-at
-         "scratch"
-         (list 'zk-scratch-insert-to-task-queue content id))))
+     "scratch"
+     ;; If error occurs on the server side, the call will be stuck.
+     ;; It seems the error cannot be sent back to the client.  So we
+     ;; explicitly ignore the errors there.
+     (list 'ignore-errors
+           (list 'zk-scratch-insert-to-task-queue content id)))))
 
 (defun zk-org-fill-scratch-task-queue ()
   "Insert all undone TODO entries with priority A to the task queue

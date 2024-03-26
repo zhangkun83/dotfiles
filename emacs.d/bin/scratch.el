@@ -28,6 +28,8 @@ the first top-level heading of the scratch file, if the id
 doesn't appear in the queue.  Returns t if inserted, nil if
 already exists."
   (zk-scratch-open-org-file)
+  (unless (org-get-heading)
+    (user-error "No heading exists in the scratch"))
   (zk-repeat-until-stuck 'zk-scratch-org-up-element)
   (org-forward-heading-same-level nil)
   (zk-repeat-until-stuck 'zk-scratch-org-backward-heading-same-level)
