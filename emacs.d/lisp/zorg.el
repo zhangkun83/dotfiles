@@ -421,8 +421,8 @@ the current file for completion."
     (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
                             "-rtuv" (concat zk-zorg-rsync-backup-dir "/") "."))
         (progn
-          (read-string "Download successful. Press Enter to continue to check remote freshness ...")
-          (if (zk-zorg-rsync-check-remote-freshness)
+          (read-string "Download successful. Press Enter to continue to check remote consistency ...")
+          (if (zk-zorg-rsync-check-remote-consistency)
               (progn
                 (remove-hook 'org-mode-hook 'zk-zorg-make-buffer-read-only)
                 (mapc (function
@@ -481,17 +481,16 @@ the current file for completion."
                   "-r" temp-directory (zk-zorg-directory))
     (insert "End of diff.\n")))
 
-(defun zk-zorg-rsync-check-remote-freshness ()
-  "Called right after the initial download to make sure the remote
-is as fresh as the local copy.  Returns t if check passes, nil if
-check failed."
+(defun zk-zorg-rsync-check-remote-consistency ()
+  "Returns t if the local files are consistent with the remote
+files, nil if check failed."
   (let ((default-directory (zk-zorg-directory))
         (do-it-p t)
         (consistent-p nil))
     (while do-it-p
       (switch-to-buffer zk-zorg-rsync-buffer-name)
       (erase-buffer)
-      (insert "Checking remote freshness ...\n")
+      (insert "Checking remote consistency ...\n")
       (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
                               "-ncrti"
                               (concat "--files-from=" (zk-zorg-generate-upload-list-file))
@@ -503,7 +502,7 @@ check failed."
               (read-string "Local files are consistent with remote.  Press Enter to continue ...")
               (kill-buffer)
               (setq consistent-p t)))
-        (unless (y-or-n-p "Failed to check remote freshness. Retry?")
+        (unless (y-or-n-p "Failed to check remote consistency. Retry?")
           (setq do-it-p nil))))
     consistent-p))
 
