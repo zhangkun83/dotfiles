@@ -190,6 +190,7 @@ Returns the CUSTOM_ID."
                        (org-element-property :CUSTOM_ID headline)
                        (let ((new-id
                               (zk-org-generate-custom-id-from-text headline-text)))
+                         (barf-if-buffer-read-only)
                          (org-set-property "CUSTOM_ID" new-id)
                          new-id))))
       (when (called-interactively-p 'any)
