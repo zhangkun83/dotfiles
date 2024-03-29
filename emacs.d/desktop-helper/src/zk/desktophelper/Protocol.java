@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 final class Protocol {
   private static final int SIZE_LENGTH = 4;
   private static final String CHARSET = "UTF-8";
+  private static final int TO_STRING_DISPLAYED_DATA_LIMIT = 100;
   static final String RESPONSE_HEADER_OK = "OK";
   static final String RESPONSE_HEADER_ERROR = "ERROR";
 
@@ -22,7 +23,11 @@ final class Protocol {
 
     @Override
     public String toString() {
-      return "[header=" + header + ", data=" + data + "]";
+      String displayedData = data;
+      if (displayedData.length() > TO_STRING_DISPLAYED_DATA_LIMIT) {
+        displayedData = displayedData.substring(0, TO_STRING_DISPLAYED_DATA_LIMIT - 3) + "...";
+      }
+      return "[header=" + header + ", data=" + displayedData + "]";
     }
   }
 
