@@ -397,6 +397,8 @@ the current file for completion."
     (user-error "zk-zorg-profile-name not set"))
   (setq default-directory (zk-zorg-directory))
   (setq org-agenda-files (list (zk-zorg-directory))
+        org-agenda-file-regexp "\\`[^.#].*\\.org\\'"
+        org-directory (zk-zorg-directory)
         zk-frame-title-base-name zk-zorg-profile-name)
   (setq org-agenda-span 'fortnight)
   (setq org-agenda-show-all-dates t)
