@@ -508,19 +508,14 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
              (display-pixel-width)
              (* (display-mm-width) 0.0393701)))))
 
-(defun zk-get-default-font-height ()
-  (if (> (zk-get-monitor-dpi) 100)
-      ;; HiDPI
-      105
-    ;; Low DPI.  Use larger font for better readability.
-    115))
+(defconst zk-default-font-height 105)
 
 (defun zk-set-default-font (family factor)
   "Set the default font for Emacs.  `factor' is used to multiply
-`(zk-get-default-font-height)' to calculate the actual font height"
+`zk-default-font-height' to calculate the actual font height"
   (set-face-attribute 'default nil
 		      :family family
-                      :height (round (* (zk-get-default-font-height) factor))))
+                      :height (round (* zk-default-font-height factor))))
 
 (defun set-exec-path-from-shell-PATH ()
   "Set up Emacs' `exec-path' and PATH environment variable to match
@@ -592,7 +587,7 @@ affect only the part after the point."
     (message "SHELL environment is not set, forcing shell-file-name to bash")
     (setq shell-file-name "/bin/bash")))
 
-(defconst zk-font-family "Liberation Mono")
+(defconst zk-font-family "IBM Plex Mono")
 (when (display-graphic-p)
   ;; Set font
   (zk-set-default-font zk-font-family 1)
