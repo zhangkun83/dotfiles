@@ -513,7 +513,7 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
       ;; HiDPI
       105
     ;; Low DPI.  Use larger font for better readability.
-    125))
+    115))
 
 (defun zk-set-default-font (family factor)
   "Set the default font for Emacs.  `factor' is used to multiply
