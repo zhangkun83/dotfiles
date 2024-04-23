@@ -587,7 +587,7 @@ affect only the part after the point."
     (message "SHELL environment is not set, forcing shell-file-name to bash")
     (setq shell-file-name "/bin/bash")))
 
-(defconst zk-font-family "IBM Plex Mono")
+(defconst zk-font-family "Liberation Mono")
 (when (display-graphic-p)
   ;; Set font
   (zk-set-default-font zk-font-family 1)
