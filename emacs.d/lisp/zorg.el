@@ -309,17 +309,20 @@ query."
 (defun zk-org-set-tags-command ()
   "Set tags to the current entry. It's better than
 org-set-tags-command in that it uses the agenda files instead of
-the current file for completion."
+the current file for completion.  It keeps asking for new tag until
+an empty line is entered."
   (interactive)
-  (let* ((current-tags (org-get-tags nil t))
-         (new-tag (completing-read
-                   (concat "Tags: " (org-make-tag-string current-tags))
-                   (org-global-tags-completion-table)
-                   nil
-                   nil
-                   nil
-                   t)))
-    (org-toggle-tag new-tag 'on)))
+  (let ((new-tag nil))
+    (while (not (equal new-tag ""))
+      (setq new-tag (completing-read
+                     (concat "New tag: " (org-make-tag-string (org-get-tags nil t)))
+                     (org-global-tags-completion-table)
+                     nil
+                     nil
+                     nil
+                     t))
+      (when (not (equal new-tag ""))
+        (org-toggle-tag new-tag 'on)))))
 
 (defun zk-org-rename-tag-command ()
   "Rename a tag throughout the agenda files."
