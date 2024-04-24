@@ -1,0 +1,16 @@
+(global-set-key (kbd "C-z . .") (lambda () (interactive) (insert #x3002)))
+(global-set-key (kbd "C-z . ,") (lambda () (interactive) (insert #xff0c)))
+(global-set-key (kbd "C-z . !") (lambda () (interactive) (insert #xff01)))
+(global-set-key (kbd "C-z . ?") (lambda () (interactive) (insert #xff1f)))
+(global-set-key (kbd "C-z . ;") (lambda () (interactive) (insert #xff1b)))
+(global-set-key (kbd "C-z . :") (lambda () (interactive) (insert #xff1a)))
+(global-set-key (kbd "C-z . \"") (lambda () (interactive) (insert #x201c)))
+(global-set-key (kbd "C-z . M-\"") (lambda () (interactive) (insert #x201d)))
+(global-set-key (kbd "C-z . '") (lambda () (interactive) (insert #x2018)))
+(global-set-key (kbd "C-z . M-'") (lambda () (interactive) (insert #x2019)))
+(global-set-key (kbd "C-z . (") (lambda () (interactive) (insert #xff08)))
+(global-set-key (kbd "C-z . )") (lambda () (interactive) (insert #xff09)))
+(global-set-key (kbd "C-z . `") (lambda () (interactive) (insert #x3001)))
+
+(provide 'chinese-punct)
+

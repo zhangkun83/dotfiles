@@ -4,6 +4,7 @@
 
 (require 'kotlin-mode)
 (require 'zk)
+(require 'chinese-punct)
 
 ;; Disable tool-bar
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
