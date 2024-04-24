@@ -477,14 +477,14 @@ an empty line is entered."
     (let ((default-directory temp-directory))
       (switch-to-buffer output-buffer)
       (erase-buffer)
-      (insert "Downloading remote files for diff'ing ...\n")
+      (insert "#### Downloading remote files ...\n")
       (unless (eq 0 (call-process "rsync" nil output-buffer t
                                   "-crti" "--delete" (concat zk-zorg-rsync-backup-dir "/") "."))
         (error "Failed to download remote files"))
-      (insert "Generating diff ...\n"))
+      (insert "\n#### Generating diff ...\n"))
     (call-process "diff" nil output-buffer t
                   "-r" temp-directory (zk-zorg-directory))
-    (insert "End of diff.\n")))
+    (insert "#### End of diff.\n")))
 
 (defun zk-zorg-rsync-check-remote-consistency ()
   "Returns t if the local files are consistent with the remote
