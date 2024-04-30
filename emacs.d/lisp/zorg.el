@@ -569,6 +569,15 @@ to close the current sessions."
      ;; Exclude ".upload-list" and other dot files
      (not (string-prefix-p "." file-name)))))
 
+(add-to-list
+ 'write-file-functions
+ (lambda()
+   (when (and
+          (buffer-modified-p)
+          (eq zk-zorg-status 'outdated)
+          (zk-zorg-current-buffer-is-zorg-file-p))
+     (error "File modified in outdated status, which shouldn't have happened"))))
+
 (add-hook 'after-save-hook
           (lambda ()
             (if (and (eq zk-zorg-status 'clean)
