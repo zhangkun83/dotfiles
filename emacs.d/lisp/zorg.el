@@ -569,6 +569,11 @@ to close the current sessions."
      ;; Exclude ".upload-list" and other dot files
      (not (string-prefix-p "." file-name)))))
 
+
+;; Prevent modified file from being saved in outdated status.  This is
+;; another layer of protection in addition to the read-only mode,
+;; because I found sometimes some strange change got in even though
+;; the buffer is read-only.
 (add-to-list
  'write-file-functions
  (lambda()
