@@ -66,7 +66,7 @@ server to open it.  The link format must be like
                          ;; org-link-open-from-string throws an error
                          ;; if the link cannot be opened.  That will
                          ;; be turned into a nil by ignore-errors.
-                         (list 'org-link-open-from-string actual-link)
+                         (list 'zk-zorg-link-open-from-string actual-link)
                          '(raise-frame)
                          t))
                   (message "Asked %s to open \"%s\"" zorg-profile actual-link)

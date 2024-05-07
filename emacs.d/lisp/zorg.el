@@ -557,6 +557,12 @@ to close the current sessions."
     (message "Ready (%s). Have a very safe and productive day!"
              zk-zorg-status)))
 
+(defun zk-zorg-link-open-from-string (link)
+  "Like org-link-open-from-string, but will always do it from the
+ zorg directory."
+ (let ((default-directory (zk-zorg-directory)))
+   (org-link-open-from-string link)))
+
 (defun zk-zorg-shutdown-confirm (prompt)
   (if (eq zk-zorg-status 'modified)
       (string-equal
