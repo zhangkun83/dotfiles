@@ -69,7 +69,8 @@ final class DesktopHelperServerWorker extends MessageWorker {
           try {
             Thread.sleep(2000);
           } catch (Exception e) {}
-          displayNotification("Notifications sent to the Desktop Helper will show like this.");
+          displayNotification(
+              "Testing, testing.\nThis is a test notification from the Desktop Helper.");
     }).start();
 
     this.httpServer.start();

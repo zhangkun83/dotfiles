@@ -6,6 +6,7 @@ import static zk.desktophelper.Protocol.RESPONSE_HEADER_OK;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
@@ -66,7 +67,11 @@ final class DesktopHelperProxyWorker extends MessageWorker {
       Socket socket = new Socket("localhost", serverPort);
       logger.info("Connected to server at " + socket.getRemoteSocketAddress());
       socketToServer.add(socket);
-      requestServer(new Message("notify", "A proxy is connected to this Desktop Helper."));
+      requestServer(
+          new Message(
+              "notify",
+              "Testing, testing.\nThis is a proxy from "
+              + InetAddress.getLocalHost().getHostName() + "."));
       connectedToServer = true;
     } catch (IOException e) {
       if (connectedToServer) {
