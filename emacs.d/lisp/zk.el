@@ -536,7 +536,12 @@ apps are not started from a shell."
  unsaved changes."
   (memq t (mapcar (function
                   (lambda (buf) (and (buffer-file-name buf)
-                                     (buffer-modified-p buf))))
+                                     (buffer-modified-p buf)
+                                     ;; Make sure the value is t if
+                                     ;; the above two function return
+                                     ;; non-nil, in order for "memq t"
+                                     ;; to work.
+                                     t)))
                 (buffer-list))))
 
 (defun zk-shorten-url-at-point ()
