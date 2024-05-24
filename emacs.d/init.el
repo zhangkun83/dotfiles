@@ -54,7 +54,8 @@
 ;; non-latin characters. This will fix it.
 (set-default-coding-systems 'utf-8)
 
-(setq zk-frame-title-base-name (concat "Emacs:" zk-project-root))
+(setq zk-frame-title-base-name
+      (directory-file-name (zk-abbrev-home-dir-from-path zk-project-root)))
 
 (setq completion-styles '(substring)
       read-file-name-completion-ignore-case t
