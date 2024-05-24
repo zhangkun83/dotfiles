@@ -48,12 +48,13 @@ files (starting with .). Returns the list file name."
   (let* ((list-file-name ".upload-list")
          (list-file (concat (zk-zorg-directory) "/" list-file-name))
          (file-list (directory-files (zk-zorg-directory))))
-    (with-current-buffer (find-file-noselect list-file)
+    (with-current-buffer (get-buffer-create "*zorg upload list*")
       (erase-buffer)
       (dolist (file file-list)
         (when (string-match-p "^[^.#].+\\.\\(org\\)\\|\\(org_archive\\)$" file)
           (insert file "\n")))
-      (save-buffer)
+      ;; Call with VISIT=1 to not display the "Write file" message
+      (write-region nil nil list-file nil 1)
       (kill-buffer))
     list-file-name))
 
@@ -419,14 +420,14 @@ an empty line is entered."
   (unless (eq zk-zorg-status 'outdated)
     (user-error "Cannot download when zorg status is %s" zk-zorg-status))
   (setq zk-zorg-status 'downloading)
+  (message "Downloading zorg files ...")
   (let ((default-directory (zk-zorg-directory)))
     (switch-to-buffer zk-zorg-rsync-buffer-name)
     (erase-buffer)
-    (insert "Downloading remote files ...\n")
     (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
                             "-rtuv" (concat zk-zorg-rsync-backup-dir "/") "."))
         (progn
-          (read-string "Download successful. Press Enter to continue to check remote consistency ...")
+          (read-string "Download successful.  Press Enter to start consistency check ...")
           (if (zk-zorg-rsync-check-remote-consistency)
               (progn
                 (remove-hook 'org-mode-hook 'zk-zorg-make-buffer-read-only)
@@ -454,16 +455,16 @@ an empty line is entered."
     (setq zk-zorg-status 'uploading)
     (switch-to-buffer zk-zorg-rsync-buffer-name)
     (erase-buffer)
-    (insert "Uploading local changes ...\n")
+    (message "Uploading local changes ...")
     (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
                             "-rtuv"
                             (concat "--files-from=" (zk-zorg-generate-upload-list-file))
                             "./" zk-zorg-rsync-backup-dir))
         (progn
           (setq zk-zorg-status 'clean)
-          (read-string "Upload successful. Press Enter to continue ..."))
+          (read-string "Upload successful.  Press Enter to continue ..."))
       (setq zk-zorg-status 'modified)
-      (read-string "Upload failed. Press Enter to continue ..."))
+      (read-string "Upload failed.  Press Enter to continue ..."))
     (kill-buffer)))
 
 (defun zk-zorg-rsync-diff ()
@@ -496,16 +497,16 @@ files, nil if check failed."
         (do-it-p t)
         (consistent-p nil))
     (while do-it-p
+      (message "Checking consistency ...")
       (switch-to-buffer zk-zorg-rsync-buffer-name)
       (erase-buffer)
-      (insert "Checking remote consistency ...\n")
       (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
                               "-ncrti"
                               (concat "--files-from=" (zk-zorg-generate-upload-list-file))
                               "./" zk-zorg-rsync-backup-dir))
           (with-current-buffer zk-zorg-rsync-buffer-name
             (setq do-it-p nil)
-            (if (> (count-lines (point-min) (point-max)) 1)
+            (if (> (count-lines (point-min) (point-max)) 0)
                 (read-string "WARNING: local files differ from remote.  Please check ...")
               (read-string "Local files are consistent with remote.  Press Enter to continue ...")
               (kill-buffer)
@@ -551,6 +552,7 @@ to close the current sessions."
   (when (or (eq zk-zorg-status 'clean)
             (eq zk-zorg-status 'outdated))
     (when zk-zorg-startup-view-func
+      (message "Opening the initial view ...")
       (funcall zk-zorg-startup-view-func))
     (setq server-name zk-zorg-profile-name)
     (server-start)
