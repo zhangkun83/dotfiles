@@ -517,7 +517,7 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
              (display-pixel-width)
              (* (display-mm-width) 0.0393701)))))
 
-(defconst zk-default-font-height 105)
+(defconst zk-default-font-height (if (eq system-type 'darwin) 210 105))
 
 (defun zk-set-default-font (family factor)
   "Set the default font for Emacs.  `factor' is used to multiply
