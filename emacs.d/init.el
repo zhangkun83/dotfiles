@@ -221,6 +221,11 @@
  '(global-hl-line-sticky-flag t)
  '(inhibit-startup-screen t)
  '(ns-command-modifier nil)
+ '(org-agenda-sorting-strategy
+   '((agenda habit-down time-up category-keep)
+     (todo category-keep)
+     (tags category-keep)
+     (search category-keep)))
  '(org-agenda-sticky t)
  '(org-agenda-window-setup 'current-window)
  '(org-fontify-quote-and-verse-blocks t)
