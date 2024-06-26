@@ -245,6 +245,10 @@
 (put 'narrow-to-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
 
+;; Stop making links for Java stack trace elements.  Use
+;; zk-jump-to-src-file-line-at-point for that.
+(setq compilation-error-regexp-alist (remove 'java compilation-error-regexp-alist))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
