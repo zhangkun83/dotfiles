@@ -61,6 +61,35 @@ They must not be equal, and must start with 'import '."
       (if (string-prefix-p "import static" line2)
           nil (string< p1 p2)))))
 
+(defun zk-jump-to-src-file-line-at-point ()
+  (interactive)
+  "Jump to the src file (in zk-project) and line number indicated by
+the content of the line at point."
+  (let ((line (thing-at-point 'line))
+        (case-fold-search nil))
+    (cond ((string-match
+            "[\t ]*at \\([a-z0-9_.]+\\)[^(]*(\\([a-zA-Z0-9_.]+\\):\\([0-9]+\\))"
+            line)
+           ;; Matches " at foo.bar.server.ServerImpl.listenOnUds(ServerImpl.java:940)"
+           ;; Will use "foo/bar/server/" and "ServerImpl.java" to match the file,
+           ;; and jump to line 940.
+           (let* ((directory (replace-regexp-in-string "\\." "/" (match-string 1 line)))
+                  (file-name (match-string 2 line))
+                  (line-number (string-to-number (match-string 3 line)))
+                  (matched-files (process-lines "bash" "-c"
+                                                (concat "grep -F '" directory "' '" zk-project-index-path "/SRCFILES' | grep -F '" file-name "'; echo -n"))))
+             (cond ((= (length matched-files) 1)
+                    (progn
+                      (find-file (car matched-files))
+                      (goto-line line-number)
+                      (message "Jumped to %s at line %s" (zk-project-get-relative-path (car matched-files)) line-number)))
+                   ((> (length matched-files) 1)
+                    (message "More than one files found for the position pattern"))
+                   (t
+                    (message "No file found for the position pattern")))))
+          ;; TODO: we can add more pattern here
+          (t (message "Unrecognized position pattern")))))
+
 (defun zk-extract-package-name-from-import (line)
   "Extracts a java package name out of the import line, which must start with 'import '."
   (replace-regexp-in-string
@@ -419,5 +448,7 @@ or 'backward"
 (add-to-list 'grep-search-path zk-project-root)
 
 (global-set-key (kbd "C-z f") 'zk-find-src-file-in-project)
+(global-set-key (kbd "C-z C-j") 'zk-jump-to-src-file-line-at-point)
+
 
 (provide 'zk-programming-posix)
