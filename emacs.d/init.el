@@ -247,6 +247,7 @@
 
 ;; Stop making links for Java stack trace elements.  Use
 ;; zk-jump-to-src-file-line-at-point for that.
+(require 'compile)
 (setq compilation-error-regexp-alist (remove 'java compilation-error-regexp-alist))
 
 (custom-set-faces
