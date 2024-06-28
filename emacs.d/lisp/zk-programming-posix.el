@@ -61,6 +61,28 @@ They must not be equal, and must start with 'import '."
       (if (string-prefix-p "import static" line2)
           nil (string< p1 p2)))))
 
+(defun zk-open-src-file-matching-substrings (substrings)
+  "Open the src file (in zk-project) whose path match all of the
+substrings (given as a list of strings).  If more than one files
+match, let the user select one.  Return the file path."
+  (let ((command-line (format "cat '%s/SRCFILES'" zk-project-index-path)))
+    (dolist (substring substrings)
+      (setq command-line (concat command-line " | grep -F '" substring "'")))
+    ;; Use "echo -n" to swallow the exit value of grep, because it
+    ;; returns -1 if the pattern is not found and that will cause
+    ;; process-lines to error out.
+    (setq command-line (concat command-line "; echo -n"))
+    (let ((matched-files (process-lines "bash" "-c" command-line)))
+      (let ((selected-file
+             (cond ((= (length matched-files) 1)
+                    (car matched-files))
+                   ((> (length matched-files) 1)
+                    (completing-read "Select a file: " matched-files))
+                   (t
+                    (error "No file found for the position pattern")))))
+        (find-file selected-file)
+        selected-file))))
+
 (defun zk-jump-to-src-file-line-at-point ()
   (interactive)
   "Jump to the src file (in zk-project) and line number indicated by
@@ -74,19 +96,14 @@ the content of the line at point."
            ;; Will use "foo/bar/server/" and "ServerImpl.java" to match the file,
            ;; and jump to line 940.
            (let* ((directory (replace-regexp-in-string "\\." "/" (match-string 1 line)))
-                  (file-name (match-string 2 line))
+                  ;; Prefix the file name with "/" so that it matches
+                  ;; the whole file name
+                  (file-name (concat "/" (match-string 2 line)))
                   (line-number (string-to-number (match-string 3 line)))
-                  (matched-files (process-lines "bash" "-c"
-                                                (concat "grep -F '" directory "' '" zk-project-index-path "/SRCFILES' | grep -F '" file-name "'; echo -n"))))
-             (cond ((= (length matched-files) 1)
-                    (progn
-                      (find-file (car matched-files))
-                      (goto-line line-number)
-                      (message "Jumped to %s at line %s" (zk-project-get-relative-path (car matched-files)) line-number)))
-                   ((> (length matched-files) 1)
-                    (message "More than one files found for the position pattern"))
-                   (t
-                    (message "No file found for the position pattern")))))
+                  (found-file (zk-open-src-file-matching-substrings
+                               (list directory file-name))))
+             (goto-line line-number)
+             (message "Jumped to %s at line %s" (zk-project-get-relative-path found-file) line-number)))
           ;; TODO: we can add more pattern here
           (t (message "Unrecognized position pattern")))))
 
