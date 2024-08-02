@@ -22,6 +22,28 @@
 (defun zk-scratch-org-backward-heading-same-level()
   (org-backward-heading-same-level nil))
 
+
+(defun zk-scratch-remote-insert-all-to-task-queue (ref-metadata-list)
+  "(To be called from a client) For each reference metadata in
+ref-metadata-list, in the form of ((content1 id1) (content2 id2)
+...), add a bullet line to the beginning of the task queue, which
+is the first top-level heading of the scratch file, if the id
+doesn't appear in the queue.  Returns a message indicating the
+result."
+  ;; If error occurs on the server side, the call will be stuck.  It
+  ;; seems the error cannot be sent back to the client.  So we catch
+  ;; the errors and return the message.
+  (condition-case err
+      (let ((inserted-count 0))
+        (dolist (elt ref-metadata-list inserted-count)
+          (when (zk-scratch-insert-to-task-queue
+                 (car elt)
+                 (car (cdr elt)))
+            (setq inserted-count (+ inserted-count 1))))
+        (message "scratch: added %d of %d tasks" inserted-count (length ref-metadata-list)))
+    (error (message "scratch: error in zk-scratch-remote-insert-all-to-task-queue: %s"
+                   (error-message-string err)))))
+
 (defun zk-scratch-insert-to-task-queue (content id)
   "Add a bullet line to the beginning of the task queue, which is
 the first top-level heading of the scratch file, if the id

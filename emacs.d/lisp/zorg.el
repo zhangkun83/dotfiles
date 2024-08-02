@@ -128,38 +128,43 @@ for scratch.el"
          (reference (format "%s ([[%s][link]])" headline-text link)))
     reference))
 
-(defun zk-org-insert-external-reference-to-scratch-task-queue ()
-  "Insert the external reference of the current heading to the task
-queue of the scratch server, if the reference ID doesn't exist in
- the queue.  Returns t if inserted, nil if already exists."
+(defun zk-org-get-scratch-reference-metadata ()
+  "Returns a list of two elements representing an external reference
+to be used in the scratch.  The first element is the text content
+and the second element is the reference ID."
   (let* ((content (zk-org-get-external-reference t))
          (link-pair (zk-org-get-headline-link-at-point t))
          (id (nth 0 link-pair)))
-    (server-eval-at
-     "scratch"
-     ;; If error occurs on the server side, the call will be stuck.
-     ;; It seems the error cannot be sent back to the client.  So we
-     ;; explicitly ignore the errors there.
-     (list 'ignore-errors
-           (list 'zk-scratch-insert-to-task-queue content id)))))
+    (list content id)))
 
 (defun zk-org-fill-scratch-task-queue ()
   "Insert all undone TODO entries with priority A to the task queue
 of the scratch server, if they don't exist in the queue yet."
   (interactive)
-  (org-map-entries
-   (lambda ()
-     (let* ((headline (org-element-at-point))
-            (todo-type (org-element-property :todo-type headline))
-            (priority (org-element-property :priority headline)))
-       (when (and (eq todo-type 'todo)
-                  (eq priority ?A))
-         (let ((id (zk-org-generate-custom-id-at-point)))
-           (if (zk-org-insert-external-reference-to-scratch-task-queue)
-               (message "Scratch task queue ACCEPTED: %s" id)
-             (message "Scratch task queue REJECTED: %s" id))))))
-   t
-   'agenda-with-archives))
+  (let ((reference-metadata-list
+         (--filter
+          it ; this is the filter condition, effectively excluding nil values
+          (org-map-entries
+           (lambda ()
+             (let* ((headline (org-element-at-point))
+                    (todo-type (org-element-property :todo-type headline))
+                    (priority (org-element-property :priority headline)))
+               (when (and (eq todo-type 'todo)
+                          (eq priority ?A))
+                 (zk-org-generate-custom-id-at-point)
+                 ;; Convert ("content" "id") to (list "content" "id"),
+                 ;; so that it can be evaluated on the scratch server.
+                 (cons 'list (zk-org-get-scratch-reference-metadata)))))
+           t
+           'agenda-with-archives))))
+    (message "%s"
+             (server-eval-at
+              "scratch"
+              (list 'zk-scratch-remote-insert-all-to-task-queue
+                    ;; Convert ((list "c1 "id1") (list "c2" "id2)) to
+                    ;; (list (list "c1 "id1") (list "c2" "id2)) so that
+                    ;; it can be evaluated on the scratch server
+                    (cons 'list reference-metadata-list))))))
 
 (defun zk-org-clone-narrowed-buffer ()
   "Clone the current org buffer and narrow to the current
