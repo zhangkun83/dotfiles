@@ -371,7 +371,7 @@ an empty line is entered."
 
 (defun zk-zorg-show-status ()
   (interactive)
-  (message "zorg status: %s" zk-zorg-status))
+  (message "%s status: %s" zk-zorg-profile-name zk-zorg-status))
 
 (defun zk-org-setup-bindings ()
   "Register my own shortcuts for org mode"
@@ -423,9 +423,9 @@ an empty line is entered."
   (when (zk-has-unsaved-files-p)
     (user-error "There are unsaved files."))
   (unless (eq zk-zorg-status 'outdated)
-    (user-error "Cannot download when zorg status is %s" zk-zorg-status))
+    (user-error "Cannot download when status is %s" zk-zorg-status))
   (setq zk-zorg-status 'downloading)
-  (message "Downloading zorg files ...")
+  (message "Downloading %s files ..." zk-zorg-profile-name)
   (let ((default-directory (zk-zorg-directory)))
     (switch-to-buffer zk-zorg-rsync-buffer-name)
     (erase-buffer)
@@ -455,7 +455,7 @@ an empty line is entered."
   (unless (or
            (eq zk-zorg-status 'clean)
            (eq zk-zorg-status 'modified))
-    (user-error "Cannot upload when zorg status is %s" zk-zorg-status))
+    (user-error "Cannot upload when status is %s" zk-zorg-status))
   (let ((default-directory (zk-zorg-directory)))
     (setq zk-zorg-status 'uploading)
     (switch-to-buffer zk-zorg-rsync-buffer-name)
@@ -551,7 +551,7 @@ to close the current sessions."
          (lambda (buf) (with-current-buffer buf
                          (zk-zorg-make-buffer-read-only))))
         (buffer-list))
-  (message "zorg is now outdated."))
+  (message "%s is now outdated." zk-zorg-profile-name))
 
 (defun zk-zorg-startup-open ()
   (when (or (eq zk-zorg-status 'clean)
