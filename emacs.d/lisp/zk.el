@@ -582,6 +582,22 @@ affect only the part after the point."
         (forward-paragraph))
       (fill-region start (point) arg))))
 
+(defun zk-get-server-lock-file-name ()
+  (concat zk-user-home-dir "/.zk-emacs-server-locks/" server-name))
+
+(defun zk-check-and-write-server-lock ()
+  (let ((zk-server-lock-file-name (zk-get-server-lock-file-name)))
+    (make-directory (file-name-directory zk-server-lock-file-name) t)
+    (if (file-exists-p zk-server-lock-file-name)
+        (error "Server lock %s already exists" zk-server-lock-file-name)
+      (with-temp-buffer
+        (insert (format "%d" (emacs-pid)))
+        (write-region (point-min) (point-max) zk-server-lock-file-name))))
+  (add-hook 'kill-emacs-hook 'zk-remove-server-lock))
+
+(defun zk-remove-server-lock ()
+  (delete-file (zk-get-server-lock-file-name)))
+
 (defun zk-start-server-or-create-frame (name)
   "Start the server with the given name.  If the server cannot be
 started (most likely because the server already exists), ask that
@@ -597,8 +613,13 @@ server to create a frame and quit myself."
      (message "Asked server to make frame.  Killing myself ...")
      (kill-emacs))
     (error
-     ;; Server doesn't already exists
-     (server-start))))
+     ;; Server doesn't already exists.  Because emacs server sometimes
+     ;; silently stops, it can't be used as a reliable way to check if
+     ;; there is already an instance with the same name.  I
+     ;; implemented my own lock.
+     (zk-check-and-write-server-lock)
+     (server-start)
+     (message "%s server started" server-name))))
 
 (defun zk-remote-make-frame ()
   "(To be called from a client) create a frame and display a message
