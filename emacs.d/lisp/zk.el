@@ -624,8 +624,7 @@ server to create a frame and quit myself."
 (defun zk-remote-make-frame ()
   "(To be called from a client) create a frame and display a message
 indicating this frame is from an existing server."
-  (make-frame)
-  (raise-frame)
+  (raise-frame (make-frame))
   (message "New frame from existing %s instance" server-name))
 
 ;; Cygwin-specific hacks
