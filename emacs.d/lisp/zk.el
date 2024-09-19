@@ -582,6 +582,30 @@ affect only the part after the point."
         (forward-paragraph))
       (fill-region start (point) arg))))
 
+(defun zk-start-server-or-create-frame (name)
+  "Start the server with the given name.  If the server cannot be
+started (most likely because the server already exists), ask that
+server to create a frame and quit myself."
+  (require 'server)
+  (setq server-name name)
+  (condition-case err
+      ;; Try to connect to the server
+      (server-eval-at name '(emacs-pid))
+    (:success
+     ;; Server exists, make frame and kill myself
+     (server-eval-at name '(zk-remote-make-frame))
+     (message "Asked server to make frame.  Killing myself ...")
+     (kill-emacs))
+    (error
+     ;; Server doesn't already exists
+     (server-start))))
+
+(defun zk-remote-make-frame ()
+  "(To be called from a client) create a frame and display a message
+indicating this frame is from an existing server."
+  (make-frame)
+  (message "New frame from existing %s instance" server-name))
+
 ;; Cygwin-specific hacks
 (when (eq system-type 'cygwin)
   (message "Cygwin detected, installing advices")

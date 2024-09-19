@@ -403,6 +403,7 @@ an empty line is entered."
 
 (defun zk-zorg-startup-init ()
   "Initializes zorg session."
+  (zk-start-server-or-create-frame zk-zorg-profile-name)
   (unless zk-zorg-rsync-backup-dir
     (user-error "zk-zorg-rsync-backup-dir not set"))
   (unless zk-zorg-profile-name
@@ -562,8 +563,6 @@ to close the current sessions."
     (when zk-zorg-startup-view-func
       (message "Opening the initial view ...")
       (funcall zk-zorg-startup-view-func))
-    (setq server-name zk-zorg-profile-name)
-    (server-start)
     (message "Ready (%s). Have a very safe and productive day!"
              zk-zorg-status)))
 

@@ -1,6 +1,8 @@
 ;; Set up the scratch environment
 
 (require 'zk)
+(zk-start-server-or-create-frame "scratch")
+
 (require 'zk-org)
 
 (setq zk-frame-title-base-name "scratch")
@@ -64,9 +66,6 @@ already exists."
     (insert "- [NEW] " content)
     t))
 
-(require 'server)
-(setq server-name "scratch")
-(server-start)
 
 (defun zk-scratch-advice-open-link-at-point(orig-open-link-at-point)
   "Opens the link at point. If it's a local org link, ask the zorg
