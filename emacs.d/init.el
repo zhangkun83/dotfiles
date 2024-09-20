@@ -1,3 +1,4 @@
+(switch-to-buffer "*Messages*")
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp"))
 
 (global-unset-key (kbd "C-z"))

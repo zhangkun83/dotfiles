@@ -607,10 +607,10 @@ server to create a frame and quit myself."
   (require 'server)
   (setq server-name name)
 
-  (switch-to-buffer "*Messages*")
-
   (let ((zk-server-lock-name (zk-server-lock-get-file-name)))
     (when (file-exists-p (zk-server-lock-get-file-name))
+      (unless (display-graphic-p)
+        (error "\"%s\" already up, but we are not running in graphics mode" name))
       (message "\"%s\" already up.  Requesting new frame ..." name)
       (server-eval-at name '(zk-remote-make-frame))
       (message "Requested \"%s\" for new frame.  Exiting ..." name)

@@ -416,6 +416,7 @@ an empty line is entered."
   (setq org-agenda-span 'fortnight)
   (setq org-agenda-show-all-dates t)
   (setq org-deadline-warning-days 180)
+  (setq confirm-kill-emacs 'zk-zorg-shutdown-confirm)
   (zk-zorg-set-outdated)
   (zk-zorg-rsync-download)
   (zk-zorg-startup-open))
@@ -644,8 +645,6 @@ to close the current sessions."
 (add-hook 'org-mode-hook 'zk-org-setup-bindings)
 (add-hook 'org-mode-hook 'zk-org-set-file-encoding)
 (add-hook 'org-agenda-mode-hook 'zk-org-setup-bindings)
-
-(setq confirm-kill-emacs 'zk-zorg-shutdown-confirm)
 
 (when (display-graphic-p)
   (setq leuven-scale-outline-headlines nil
