@@ -626,6 +626,18 @@ server to create a frame and quit myself."
   (server-start)
   (message "\"%s\" server started" server-name))
 
+(defun zk-buffer-to-register ()
+  "Put the current buffer to a register.  This is different from
+point-to-register in that this command doesn't save the point, so
+it's best suited in situations you want to go back to a buffer
+but stay at the point where you left, rather than the point when
+you saved the register."
+  (interactive)
+  (let ((register (register-read-with-preview "Buffer to register: ")))
+    ;; This usage is from
+    ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/File-and-Buffer-Registers.html
+    (set-register register (cons 'buffer (buffer-name)))))
+
 (defun zk-remote-make-frame ()
   "(To be called from a client) create a frame and display a message
 indicating this frame is from an existing server."
