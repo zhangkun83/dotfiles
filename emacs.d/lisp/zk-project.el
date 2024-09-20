@@ -56,6 +56,8 @@
   ;; Do not display the file column in the benchmark menu, because zk-bookmark-set
   ;; already includes (nicer) file names in the bookmark names.
   (bookmark-bmenu-toggle-filenames nil)
+  ;; The name column's default length is 30, which is too short
+  (setq bookmark-bmenu-file-column 75)
   (global-set-key (kbd "C-x r m") 'zk-bookmark-set))
 
 (provide 'zk-project)
