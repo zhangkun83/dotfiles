@@ -1,3 +1,5 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && realpath $(pwd) )"
+mkdir -p ~/scratch
+cd ~/scratch
 $DIR/tmt scratch emacs -nw --load="$DIR/scratch.el"

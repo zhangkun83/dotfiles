@@ -1,3 +1,5 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && realpath $(pwd) )"
+mkdir -p ~/orgwork
+cd ~/orgwork
 $DIR/tmt orgwork emacs -nw --load="$DIR/orgwork.el"
