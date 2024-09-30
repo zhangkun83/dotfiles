@@ -333,6 +333,32 @@ an empty line is entered."
       (when (not (equal new-tag ""))
         (org-toggle-tag new-tag 'on)))))
 
+(defun zk-org-populate-todays-agenda-command ()
+  "Find TODO entries scheduled for today that match a
+ tag.  It's useful for populating meeting agenda."
+  (interactive)
+  (let* ((all-tags (mapcar #'car (org-global-tags-completion-table)))
+         (tag (completing-read
+                    "Populate agenda for tag: "
+                    all-tags
+                    nil
+                    t
+                    nil
+                    t))
+         (links nil))
+    (org-map-entries
+     (lambda ()
+       (when (zk-org-scheduled-for-today-p (org-element-at-point))
+         (zk-org-generate-custom-id-at-point)
+         (push (zk-org-get-external-reference) links)))
+     (concat tag "/!")
+     'agenda)
+    (dolist (link links)
+      (insert "- " link)
+      (org-fill-paragraph)
+      (newline))))
+
+
 (defun zk-org-rename-tag-command ()
   "Rename a tag throughout the agenda files."
   (interactive)
@@ -384,6 +410,7 @@ an empty line is entered."
   (local-set-key (kbd "C-c s") 'zk-org-search-view)
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
   (local-set-key (kbd "C-c l i") 'zk-org-generate-custom-id-at-point)
+  (local-set-key (kbd "C-c l a") 'zk-org-populate-todays-agenda-command)
   (local-set-key (kbd "C-c l l") 'zk-org-copy-external-link)
   (local-set-key (kbd "C-c l r") 'zk-org-copy-external-reference)
   (local-set-key (kbd "C-c l b") 'zk-org-log-backlink-at-point)
