@@ -355,7 +355,6 @@ an empty line is entered."
      'agenda)
     (dolist (link links)
       (insert "- " link)
-      (org-fill-paragraph)
       (newline))))
 
 
