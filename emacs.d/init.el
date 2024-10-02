@@ -208,6 +208,12 @@
 (add-hook 'dired-mode-hook
           (lambda() (dired-hide-details-mode 1)))
 
+;; The cache sometimes get corrupted, and could lead to hanging in tag
+;; search, or scheduled TODO not displayed in agenda view.  I don't
+;; notice performance difference when it's enabled, so I'd rather
+;; disable it.
+(setq org-element-cache-persistent nil)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
