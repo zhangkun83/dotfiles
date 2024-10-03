@@ -355,7 +355,8 @@ an empty line is entered."
      'agenda)
     (dolist (link links)
       (insert "- " link)
-      (newline))))
+      (newline))
+    (message "Populated %d agenda items" (length links))))
 
 
 (defun zk-org-rename-tag-command ()
