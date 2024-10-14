@@ -1,5 +1,6 @@
 (require 'zk)
 (require 'zk-project)
+(require 'google-c-style)
 
 (defvar zk-grep--history nil)
 (defun zk-grep ()
@@ -446,6 +447,8 @@ or 'backward"
             (local-set-key (kbd "C-c C-n") 'zk-java-next-argument)
             (local-set-key (kbd "C-c C-p") 'zk-java-prev-argument)
             (local-set-key [backtab] (lambda() (interactive) (c-indent-line-or-region -1)))))
+
+(add-hook 'c++-mode-hook 'google-set-c-style)
 
 (global-set-key (kbd "C-x \\") 'compile)
 
