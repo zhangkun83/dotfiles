@@ -457,28 +457,30 @@ an empty line is entered."
   (unless (eq zk-zorg-status 'outdated)
     (user-error "Cannot download when status is %s" zk-zorg-status))
   (setq zk-zorg-status 'downloading)
-  (message "Downloading %s files ..." zk-zorg-profile-name)
   (let ((default-directory (zk-zorg-directory)))
     (switch-to-buffer zk-zorg-rsync-buffer-name)
-    (erase-buffer)
-    (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
-                            "-rtuv" (concat zk-zorg-rsync-backup-dir "/") "."))
-        (progn
-          (read-string "Download successful.  Press Enter to start consistency check ...")
-          (if (zk-zorg-rsync-check-remote-consistency)
-              (progn
-                (remove-hook 'org-mode-hook 'zk-zorg-make-buffer-read-only)
-                (mapc (function
-                       (lambda (buf) (with-current-buffer buf
-                                       (when (zk-zorg-org-file-p)
-                                         (read-only-mode -1)
-                                         (revert-buffer t t)))))
-                       (buffer-list))
-                (setq zk-zorg-status 'clean))
-            (setq zk-zorg-status 'dirty)))
-      (setq zk-zorg-status 'outdated)
-      (read-string "Download failed.  Press Enter to continue ...")
-      (kill-buffer))))
+    (with-current-buffer zk-zorg-rsync-buffer-name
+      (erase-buffer)
+      (insert (format "Downloading %s files ...\n" zk-zorg-profile-name))
+      (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                              "-rtuv" (concat zk-zorg-rsync-backup-dir "/") "."))
+          (progn
+            (insert "Download successful.\n")
+            (if (zk-zorg-rsync-check-remote-consistency)
+                (progn
+                  (remove-hook 'org-mode-hook 'zk-zorg-make-buffer-read-only)
+                  (mapc (function
+                         (lambda (buf) (with-current-buffer buf
+                                         (when (zk-zorg-org-file-p)
+                                           (read-only-mode -1)
+                                           (revert-buffer t t)))))
+                        (buffer-list))
+                  (setq zk-zorg-status 'clean))
+              (setq zk-zorg-status 'dirty)))
+        (setq zk-zorg-status 'outdated)
+        (insert "Download failed.\n")
+        (read-string "Press Enter to continue ...")
+        (kill-buffer)))))
 
 (defun zk-zorg-rsync-upload ()
   (interactive)
@@ -491,18 +493,21 @@ an empty line is entered."
   (let ((default-directory (zk-zorg-directory)))
     (setq zk-zorg-status 'uploading)
     (switch-to-buffer zk-zorg-rsync-buffer-name)
-    (erase-buffer)
-    (message "Uploading local changes ...")
-    (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
-                            "-rtuv"
-                            (concat "--files-from=" (zk-zorg-generate-upload-list-file))
-                            "./" zk-zorg-rsync-backup-dir))
-        (progn
-          (setq zk-zorg-status 'clean)
-          (read-string "Upload successful.  Press Enter to continue ..."))
-      (setq zk-zorg-status 'modified)
-      (read-string "Upload failed.  Press Enter to continue ..."))
-    (kill-buffer)))
+    (with-current-buffer zk-zorg-rsync-buffer-name
+      (erase-buffer)
+      (insert "Uploading local changes ...\n")
+      (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                              "-rtuv"
+                              (concat "--files-from=" (zk-zorg-generate-upload-list-file))
+                              "./" zk-zorg-rsync-backup-dir))
+          (progn
+            (setq zk-zorg-status 'clean)
+            (insert "Upload successful.\n")
+            (read-string "Press Enter to continue ..."))
+        (setq zk-zorg-status 'modified)
+        (insert "Upload failed.\n")
+        (read-string "Press Enter to continue ..."))
+      (kill-buffer))))
 
 (defun zk-zorg-rsync-diff ()
   "Display the diff of the local files against the remote files."
@@ -534,22 +539,25 @@ files, nil if check failed."
         (do-it-p t)
         (consistent-p nil))
     (while do-it-p
-      (message "Checking consistency ...")
       (switch-to-buffer zk-zorg-rsync-buffer-name)
-      (erase-buffer)
-      (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
-                              "-ncrti"
-                              (concat "--files-from=" (zk-zorg-generate-upload-list-file))
-                              "./" zk-zorg-rsync-backup-dir))
-          (with-current-buffer zk-zorg-rsync-buffer-name
-            (setq do-it-p nil)
-            (if (> (count-lines (point-min) (point-max)) 0)
-                (read-string "WARNING: local files differ from remote.  Please check ...")
-              (read-string "Local files are consistent with remote.  Press Enter to continue ...")
-              (kill-buffer)
-              (setq consistent-p t)))
-        (unless (y-or-n-p "Failed to check remote consistency. Retry?")
-          (setq do-it-p nil))))
+      (with-current-buffer zk-zorg-rsync-buffer-name
+        (insert "Checking consistency ...\n")
+        (let ((original-lines (count-lines (point-min) (point-max))))
+          (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                                  "-ncrti"
+                                  (concat "--files-from=" (zk-zorg-generate-upload-list-file))
+                                  "./" zk-zorg-rsync-backup-dir))
+              (progn
+                (setq do-it-p nil)
+                (if (> (count-lines (point-min) (point-max)) original-lines)
+                    (insert "WARNING: local files differ from remote.  Please check ...\n")
+                  (insert "Local files are consistent with remote.\n")
+                  (read-string "Press Enter to continue ...")
+                  (kill-buffer)
+                  (setq consistent-p t)))
+            (insert "Failed to check remote consistency.\n")
+            (unless (y-or-n-p "Retry? ")
+              (setq do-it-p nil))))))
     consistent-p))
 
 (defun zk-zorg-org-file-p ()
