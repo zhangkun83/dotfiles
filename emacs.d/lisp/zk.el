@@ -638,6 +638,15 @@ you saved the register."
     ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/File-and-Buffer-Registers.html
     (set-register register (cons 'buffer (buffer-name)))))
 
+(defun zk-log-to-current-buffer (format-string &rest args)
+  "Append the given message to the current buffer, followed by a
+newline, and also display it in the echo area.  It tries to
+redraw the buffer after appending the message."
+  (goto-char (point-max))
+  (insert (apply #'message format-string args) "\n")
+  ;; Allow the buffer to redraw
+  (sit-for .1))
+
 (defun zk-remote-make-frame ()
   "(To be called from a client) create a frame and display a message
 indicating this frame is from an existing server."

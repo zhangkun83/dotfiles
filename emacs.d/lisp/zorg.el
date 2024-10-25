@@ -461,11 +461,11 @@ an empty line is entered."
     (switch-to-buffer zk-zorg-rsync-buffer-name)
     (with-current-buffer zk-zorg-rsync-buffer-name
       (erase-buffer)
-      (insert (format "Downloading %s files ...\n" zk-zorg-profile-name))
+      (zk-log-to-current-buffer "Downloading %s files ..." zk-zorg-profile-name)
       (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
                               "-rtuv" (concat zk-zorg-rsync-backup-dir "/") "."))
           (progn
-            (insert "Download successful.\n")
+            (zk-log-to-current-buffer "Download successful.")
             (if (zk-zorg-rsync-check-remote-consistency)
                 (progn
                   (remove-hook 'org-mode-hook 'zk-zorg-make-buffer-read-only)
@@ -478,7 +478,7 @@ an empty line is entered."
                   (setq zk-zorg-status 'clean))
               (setq zk-zorg-status 'dirty)))
         (setq zk-zorg-status 'outdated)
-        (insert "Download failed.\n")
+        (zk-log-to-current-buffer "Download failed.")
         (read-string "Press Enter to continue ...")
         (kill-buffer)))))
 
@@ -495,17 +495,17 @@ an empty line is entered."
     (switch-to-buffer zk-zorg-rsync-buffer-name)
     (with-current-buffer zk-zorg-rsync-buffer-name
       (erase-buffer)
-      (insert "Uploading local changes ...\n")
+      (zk-log-to-current-buffer "Uploading local changes ...")
       (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
                               "-rtuv"
                               (concat "--files-from=" (zk-zorg-generate-upload-list-file))
                               "./" zk-zorg-rsync-backup-dir))
           (progn
             (setq zk-zorg-status 'clean)
-            (insert "Upload successful.\n")
+            (zk-log-to-current-buffer "Upload successful.")
             (read-string "Press Enter to continue ..."))
         (setq zk-zorg-status 'modified)
-        (insert "Upload failed.\n")
+        (zk-log-to-current-buffer "Upload failed.")
         (read-string "Press Enter to continue ..."))
       (kill-buffer))))
 
@@ -541,7 +541,7 @@ files, nil if check failed."
     (while do-it-p
       (switch-to-buffer zk-zorg-rsync-buffer-name)
       (with-current-buffer zk-zorg-rsync-buffer-name
-        (insert "Checking consistency ...\n")
+        (zk-log-to-current-buffer "Checking consistency ...")
         (let ((original-lines (count-lines (point-min) (point-max))))
           (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
                                   "-ncrti"
@@ -550,12 +550,12 @@ files, nil if check failed."
               (progn
                 (setq do-it-p nil)
                 (if (> (count-lines (point-min) (point-max)) original-lines)
-                    (insert "WARNING: local files differ from remote.  Please check ...\n")
-                  (insert "Local files are consistent with remote.\n")
+                    (zk-log-to-current-buffer "WARNING: local files differ from remote.  Please check.")
+                  (zk-log-to-current-buffer "Local files are consistent with remote.")
                   (read-string "Press Enter to continue ...")
                   (kill-buffer)
                   (setq consistent-p t)))
-            (insert "Failed to check remote consistency.\n")
+            (zk-log-to-current-buffer "Failed to check remote consistency.")
             (unless (y-or-n-p "Retry? ")
               (setq do-it-p nil))))))
     consistent-p))
