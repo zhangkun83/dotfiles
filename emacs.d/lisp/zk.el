@@ -569,6 +569,9 @@ apps are not started from a shell."
           (replace-regexp-in-region
            "https?://critique.corp.google.com/cl/"
            "http://cl/" url-start url-end)
+          (replace-regexp-in-region
+           "https?://goto.google.com/"
+           "http://go/" url-start url-end)
           (message "No shorter form for this URL.")))))
 
 (defun zk-fill-paragraph-after-point (arg)
