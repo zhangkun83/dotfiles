@@ -1,9 +1,14 @@
 (require 'org)
 (require 'zk-clipboard)
 
-(defun zk-org-export-html-to-clipboard ()
-  (interactive)
-  (let* ((org-export-show-temporary-export-buffer nil)
+(require 'ox)  ; defines org-export-with-drawers
+(defun zk-org-export-html-to-clipboard (arg)
+  "Export the whole file or the active region as HTML to the
+clipboard.  If called with prefix argument, also export LOGBOOK
+ drawers."
+  (interactive "P")
+  (let* ((org-export-with-drawers (if arg t org-export-with-drawers))
+         (org-export-show-temporary-export-buffer nil)
          (buffer (org-html-export-as-html)))
     (with-current-buffer buffer
       (zk-clipboard-copy t))))
