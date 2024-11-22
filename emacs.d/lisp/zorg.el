@@ -131,6 +131,35 @@ for scratch.el"
                             (if arg zk-zorg-profile-name "link"))))
     reference))
 
+(defun zk-org-copy-region-with-backlink ()
+  "Copy the content of the current active region, with a
+backlink to the current headline.  The content of the headline
+won't be included, but the first timestamp will be included.
+
+This is useful for copying contents from a note entry to a task."
+  (interactive)
+  (unless mark-active
+    (user-error "Region not active"))
+  (let* ((link-pair (zk-org-get-headline-link-at-point nil))
+         (link (nth 0 link-pair))
+         (headline-text (nth 1 link-pair))
+         (backlink (format "([[%s][%s]])"
+                           link
+                           (if (string-match
+                                ;; The "<>" and "[]" have been
+                                ;; converted to "()" by
+                                ;; zk-org-get-headline-link-at-point using
+                                ;; zk-org-neutralize-timestamp
+                                "(\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*\\))"
+                                headline-text)
+                               (match-string 1 headline-text)
+                             "ref"))))
+    (kill-new (concat (buffer-substring (region-beginning) (region-end))
+                      " "
+                      backlink))
+    (message "Copied region with backlink to this headline.")
+    (deactivate-mark)))
+
 (defun zk-org-get-scratch-reference-metadata ()
   "Returns a list of two elements representing an external reference
 to be used in the scratch.  The first element is the text content
@@ -413,6 +442,7 @@ an empty line is entered."
   (local-set-key (kbd "C-c l a") 'zk-org-populate-todays-agenda-command)
   (local-set-key (kbd "C-c l l") 'zk-org-copy-external-link)
   (local-set-key (kbd "C-c l r") 'zk-org-copy-external-reference)
+  (local-set-key (kbd "C-c l w") 'zk-org-copy-region-with-backlink)
   (local-set-key (kbd "C-c l b") 'zk-org-log-backlink-at-point)
   (local-set-key (kbd "C-c l f") 'zk-org-find-references-to-current-entry)
   (local-set-key (kbd "C-c l s") 'zk-org-fill-scratch-task-queue)
