@@ -4,7 +4,7 @@
 (setq zk-zorg-profile-name "orgwork")
 (setq zk-zorg-startup-view-func
       (lambda ()
-        (org-tags-view nil "keep_in_mind")
+        (org-agenda-list)
         (split-window)
         (org-tags-view nil "tbs")))
 
