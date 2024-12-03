@@ -75,13 +75,16 @@ files (starting with .). Returns the list file name."
 underscores from a natural text. Throw an error if the generated
 CUSTOM_ID already exists in the file."
   (let ((new-id
-         (downcase
-          (replace-regexp-in-string
-           "\\`_*" ""  ; remove leading underscores
+         (concat
+          (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))
+          "_"
+          (downcase
            (replace-regexp-in-string
-            "_*\\'" ""  ; remove trailing underscores
-            (replace-regexp-in-string  ; replace non alphanumerics to underscores
-             "[^a-zA-Z0-9_]+" "_" text))))))
+            "\\`_*" ""  ; remove leading underscores
+            (replace-regexp-in-string
+             "_*\\'" ""  ; remove trailing underscores
+             (replace-regexp-in-string  ; replace non alphanumerics to underscores
+              "[^a-zA-Z0-9_]+" "_" text)))))))
     (if (zk-org-custom-id-exists-p new-id)
         (user-error "CUSTOM_ID \"%s\" already exists in the file. Try changing the headline to make it unique."
                     new-id))
