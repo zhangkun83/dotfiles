@@ -61,7 +61,7 @@ files (starting with .). Returns the list file name."
 (defun zk-zorg-goto-latest-note-file ()
   "Go to the latest note org file under the same directory."
   (interactive)
-  (let* ((file-list (directory-files (zk-zorg-directory) nil "notes.*\\.org"))
+  (let* ((file-list (directory-files (zk-zorg-directory) nil "notes.*\\.org$"))
          ;; directory-files sort the files alphabeticaly
          (latest-file (car (last file-list))))
     (unless latest-file (user-error "No notes file found"))
