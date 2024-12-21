@@ -157,9 +157,9 @@ This is useful for copying contents from a note entry to a task."
                                 headline-text)
                                (match-string 1 headline-text)
                              "ref"))))
-    (kill-new (concat (buffer-substring (region-beginning) (region-end))
-                      " "
-                      backlink))
+    (kill-new (concat backlink
+                      "\n"
+                      (buffer-substring (region-beginning) (region-end))))
     (message "Copied region with backlink to this headline.")
     (deactivate-mark)))
 
