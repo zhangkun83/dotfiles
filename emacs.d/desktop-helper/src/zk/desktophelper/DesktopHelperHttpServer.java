@@ -35,6 +35,7 @@ final class DesktopHelperHttpServer {
         } else {
           t.getResponseHeaders().set("Location", urlCopy);
           t.sendResponseHeaders(302, 0);
+          t.getResponseBody().close();
         }
       }
     };

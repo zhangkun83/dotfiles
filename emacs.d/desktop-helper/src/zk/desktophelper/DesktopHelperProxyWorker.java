@@ -24,6 +24,7 @@ final class DesktopHelperProxyWorker extends MessageWorker {
   private volatile boolean connectedToServer = true;
   private volatile String fallbackClipboard;
   private volatile String fallbackUrlToOpen;
+  private volatile boolean forceFallbackMode;
   private final ArrayBlockingQueue<Socket> socketToServer = new ArrayBlockingQueue<>(1);
   private final DesktopHelperHttpServer.Backend fallbackBackend =
       new DesktopHelperHttpServer.Backend() {
@@ -142,8 +143,16 @@ final class DesktopHelperProxyWorker extends MessageWorker {
     while (true) {
       Message msg = stream.readMessage();
       logger.info("Received: " + msg.header);
+      if (msg.header.equals("force-fallback")) {
+        forceFallbackMode = msg.data.toLowerCase().equals("true");
+        stream.writeMessage(new Message(
+            RESPONSE_HEADER_OK,
+            "Force fallback mode: " + forceFallbackMode));
+        return;
+      }
       stream.writeMessage(
-          connectedToServer ? requestServer(msg) : fallbackHandleRequest(msg));
+          (connectedToServer && !forceFallbackMode)
+          ? requestServer(msg) : fallbackHandleRequest(msg));
     }
   }
 
