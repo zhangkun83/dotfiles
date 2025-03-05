@@ -173,8 +173,9 @@ and the second element is the reference ID."
     (list content id)))
 
 (defun zk-org-fill-scratch-task-queue ()
-  "Insert all undone TODO entries with priority A to the task queue
-of the scratch server, if they don't exist in the queue yet."
+  "Insert all undone TODO entries with priority A and scheduled for
+today to the task queues of the scratch server, if they don't
+exist in the queue yet."
   (interactive)
   (let ((reference-metadata-list
          (--filter
@@ -183,13 +184,19 @@ of the scratch server, if they don't exist in the queue yet."
            (lambda ()
              (let* ((headline (org-element-at-point))
                     (todo-type (org-element-property :todo-type headline))
-                    (priority (org-element-property :priority headline)))
-               (when (and (eq todo-type 'todo)
-                          (eq priority ?A))
-                 (zk-org-generate-custom-id-at-point)
-                 ;; Convert ("content" "id") to (list "content" "id"),
-                 ;; so that it can be evaluated on the scratch server.
-                 (cons 'list (zk-org-get-scratch-reference-metadata)))))
+                    (priority (org-element-property :priority headline))
+                    (scheduled-for-today-p (zk-org-scheduled-for-today-p headline)))
+               (when (eq todo-type 'todo)
+                 (let ((category
+                        (cond (scheduled-for-today-p
+                               (concat "Scheduled for " (format-time-string "%Y-%m-%d" (current-time))))
+                              ((eq priority ?A) "Long-term priorities"))))
+                   (when category
+                     (zk-org-generate-custom-id-at-point)
+                     ;; Convert ("content" "id") to ('list "category"
+                     ;; "content" "id"), so that it can be evaluated on
+                     ;; the scratch server.
+                     (cons 'list (cons category (zk-org-get-scratch-reference-metadata))))))))
            t
            'agenda-with-archives))))
     (message "%s"
