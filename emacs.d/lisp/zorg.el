@@ -503,6 +503,7 @@ an empty line is entered."
       (erase-buffer)
       (zk-log-to-current-buffer "Downloading %s files ..." zk-zorg-profile-name)
       (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                              "--whole-file"
                               "-rtuv" (concat zk-zorg-rsync-backup-dir "/") "."))
           (progn
             (zk-log-to-current-buffer "Download successful.")
@@ -537,6 +538,7 @@ an empty line is entered."
       (erase-buffer)
       (zk-log-to-current-buffer "Uploading local changes ...")
       (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                              "--whole-file"
                               "-rtuv"
                               (concat "--files-from=" (zk-zorg-generate-upload-list-file))
                               "./" zk-zorg-rsync-backup-dir))
@@ -563,6 +565,7 @@ an empty line is entered."
       (switch-to-buffer output-buffer)
       (insert "#### Downloading remote files ...\n")
       (unless (eq 0 (call-process "rsync" nil output-buffer t
+                                  "--whole-file"
                                   "-crti" "--delete" (concat zk-zorg-rsync-backup-dir "/") "."))
         (error "Failed to download remote files"))
       (insert "\n#### Generating diff ...\n"))
@@ -584,6 +587,7 @@ files, nil if check failed."
         (zk-log-to-current-buffer "Checking consistency ...")
         (let ((original-lines (count-lines (point-min) (point-max))))
           (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                                  "--whole-file"
                                   "-ncrti"
                                   (concat "--files-from=" (zk-zorg-generate-upload-list-file))
                                   "./" zk-zorg-rsync-backup-dir))
