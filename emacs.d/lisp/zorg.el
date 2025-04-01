@@ -258,8 +258,7 @@ zk-zorg-profile-name so that it can be used for scratch.el"
       (zk-org-move-to-current-heading)
       (let* ((headline (org-element-at-point))
              (headline-text (substring-no-properties (org-get-heading t t t t)))
-             (custom-id (or (org-element-property :CUSTOM_ID headline)
-                            (user-error "This entry doesn't have a CUSTOM_ID")))
+             (custom-id (zk-org-generate-custom-id-at-point))
              (link (concat "file:"
                            (if with-profile-name (concat "@" zk-zorg-profile-name ":"))
                            (file-name-nondirectory (buffer-file-name (zk-get-base-buffer (current-buffer))))
