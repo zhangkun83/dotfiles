@@ -392,8 +392,8 @@ an empty line is entered."
      (concat tag "/!")
      'agenda)
     (dolist (link links)
-      (insert "- " link)
-      (newline))
+      (insert "RE: " link)
+      (newline 2))
     (message "Populated %d agenda items" (length links))))
 
 
