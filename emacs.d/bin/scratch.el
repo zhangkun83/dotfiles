@@ -48,7 +48,7 @@ the queue.  Returns a message indicating the result."
   "Add a bullet line to the beginning of the heading whose name
 is category, if the id doesn't appear in the queue.  Returns t if
 inserted, nil if already exists."
-  (zk-scratch-open-org-file)
+  (zk-scratch-open-kanban-file)
   (let ((case-fold-search nil))
     (goto-char (point-min))
     ;; If the category heading doesn't exist, create it
@@ -104,13 +104,13 @@ server to open it.  The link format must be like
 (setq create-lockfiles nil)
 (kill-buffer "*scratch*")
 
-(defun zk-scratch-open-org-file()
-  (find-file (concat zk-scratch-dir "/scratch-org.org")))
+(defun zk-scratch-open-kanban-file()
+  (find-file (concat zk-scratch-dir "/kanban.org")))
 
 (defun zk-scratch-init ()
   (interactive)
   (delete-other-windows)
-  (zk-scratch-open-org-file))
+  (zk-scratch-open-kanban-file))
 
 (defun zk-scratch-open-lisp-window ()
   (interactive)
