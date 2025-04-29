@@ -128,10 +128,10 @@ for scratch.el"
   (let* ((link-pair (zk-org-get-headline-link-at-point arg))
          (link (nth 0 link-pair))
          (headline-text (nth 1 link-pair))
-         (reference (format "%s ([[%s][%s]])"
+         (reference (format "%s %s[[%s][^]]"
                             headline-text
-                            link
-                            (if arg zk-zorg-profile-name "link"))))
+                            (if arg (concat "#" zk-zorg-profile-name) "")
+                            link)))
     reference))
 
 (defun zk-org-copy-region-with-backlink ()
