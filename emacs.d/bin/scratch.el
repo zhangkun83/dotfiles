@@ -105,7 +105,10 @@ server to open it.  The link format must be like
 (kill-buffer "*scratch*")
 
 (defun zk-scratch-open-kanban-file()
-  (find-file (concat zk-scratch-dir "/kanban.org")))
+  (find-file (concat zk-scratch-dir "/kanban.org"))
+  (unhighlight-regexp t)
+  (hi-lock-face-phrase-buffer "#orgwork" 'hi-yellow)
+  (hi-lock-face-phrase-buffer "#orglife" 'hi-pink))
 
 (defun zk-scratch-init ()
   (interactive)
