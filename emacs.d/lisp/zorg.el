@@ -190,7 +190,8 @@ exist in the queue yet."
                  (let ((category
                         (cond (scheduled-for-today-p
                                (concat "Scheduled for " (format-time-string "%Y-%m-%d" (current-time))))
-                              ((eq priority ?A) "Current priorities"))))
+                              ((eq priority ?A) "Priorities")
+                              ((eq priority ?B) "Back burner"))))
                    (when category
                      (zk-org-generate-custom-id-at-point)
                      ;; Convert ("content" "id") to ('list "category"
