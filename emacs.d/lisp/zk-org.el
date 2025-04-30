@@ -28,4 +28,17 @@ element.  If there is no SCHEDULED timestamp, return nil."
     (if scheduled-timestamp (= 0 (org-time-stamp-to-now scheduled-timestamp))
       nil)))
 
+(defun zk-org-push-mark-ring-advice (orig-fun &rest args)
+  "Put this advice around any function to push the original
+  buffer and point to the org mark ring if the function changes
+ the point"
+  (let ((pos (point))
+        (buffer (current-buffer)))
+    (apply orig-fun args)
+    (unless (and (equal buffer (current-buffer))
+                 (equal pos (point)))
+      (org-mark-ring-push pos buffer))))
+
+(advice-add 'org-agenda-switch-to :around #'zk-org-push-mark-ring-advice)
+
 (provide 'zk-org)
