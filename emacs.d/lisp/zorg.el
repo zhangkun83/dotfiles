@@ -106,7 +106,7 @@ zk-zorg-profile-name so that it can be used for scratch.el"
   (interactive "P")
   (let* ((link-pair (zk-org-get-headline-link-at-point arg))
          (link (nth 0 link-pair))
-         (link-with-text (format "([[%s][link]])" link)))
+         (link-with-text (format "[[%s][^]]" link)))
     (kill-new link-with-text)
     (message "Copied \"%s\"" link-with-text)))
 
