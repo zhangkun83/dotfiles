@@ -10,6 +10,7 @@ import java.awt.TrayIcon;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 import zk.desktophelper.Protocol;
@@ -117,6 +118,9 @@ final class DesktopHelperServerWorker extends MessageWorker {
         String program = null;
         if (os.toLowerCase().contains("win")) {
           program = "c:/Program Files/Google/Chrome/Application/chrome.exe";
+          if (!(new File(program).exists())) {
+            program = "c:/Program Files (x86)/Google/Chrome/Application/chrome.exe";
+          }
         } else if (os.toLowerCase().contains("linux")) {
           program = "google-chrome";
         }

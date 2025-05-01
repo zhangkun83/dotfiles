@@ -246,8 +246,6 @@ remote directory suddenly becomes inaccessible."
   ;; new-window ignored
   (let ((program (cond ((eq system-type 'windows-nt)
                         "\"C:/Program Files/Google/Chrome/Application/chrome.exe\"")
-                       ((eq system-type 'cygwin)
-                        "cygstart /cygdrive/c/Program\\ Files/Google/Chrome/Application/chrome.exe")
                        ((eq system-type 'darwin)
                         "open")
                        (t (concat zk-desktop-helper-client-path " open-url")))))
