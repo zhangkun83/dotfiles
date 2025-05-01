@@ -28,6 +28,22 @@ element.  If there is no SCHEDULED timestamp, return nil."
     (if scheduled-timestamp (= 0 (org-time-stamp-to-now scheduled-timestamp))
       nil)))
 
+(defun zk-org-link-at-point-p ()
+  "Return t if the point is on a link.  nil otherwise."
+   (let* ((context (org-element-context))
+          (type (org-element-type context)))
+     (eq type 'link)))
+
+(defun zk-org-open-next-link (arg)
+  "If the point is on a link, open it.  Otherwise, move point to the
+next link and open it.  If the prefix arg is non-nil, move
+backward."
+  (interactive "P")
+  (if (zk-org-link-at-point-p)
+      (org-open-at-point)
+    (org-next-link arg)
+    (org-open-at-point)))
+
 (defun zk-org-push-mark-ring-advice (orig-fun &rest args)
   "Put this advice around any function to push the original
   buffer and point to the org mark ring if the function changes

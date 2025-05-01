@@ -462,6 +462,7 @@ an empty line is entered."
   (local-set-key (kbd "C-c r C-d") 'zk-zorg-rsync-diff)
   (local-set-key (kbd "C-c r o") 'zk-zorg-set-outdated)
   (local-set-key (kbd "C-c e h") 'zk-org-export-html-to-clipboard)
+  (local-set-key (kbd "C-c o") 'zk-org-open-next-link)
   (local-set-key (kbd "C-c c") 'zk-org-clone-narrowed-buffer))
 
 (defun zk-org-set-file-encoding ()
