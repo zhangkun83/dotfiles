@@ -28,7 +28,8 @@
 ref-metadata-list, in the form of ((category1 content1
 id1) (category2 content2 id2) ...), add a bullet line to the
 beginning of the category heading, if the id doesn't appear in
-the queue.  Returns a message indicating the result."
+the queue.  Raises the scratch frame.  Returns a message
+indicating the result."
   ;; If error occurs on the server side, the call will be stuck.  It
   ;; seems the error cannot be sent back to the client.  So we catch
   ;; the errors and return the message.
@@ -40,6 +41,7 @@ the queue.  Returns a message indicating the result."
                  (nth 1 elt)
                  (nth 2 elt))
             (setq inserted-count (+ inserted-count 1))))
+        (raise-frame)
         (message "scratch: added %d of %d tasks" inserted-count (length ref-metadata-list)))
     (error (message "scratch: error in zk-scratch-remote-insert-all-to-task-queue: %s"
                    (error-message-string err)))))
@@ -61,7 +63,7 @@ inserted, nil if already exists."
             (search-forward (concat "[" id "]") nil t))
           nil
         (newline)
-        (insert "- [NEW] " content)
+        (insert "- % " content)
         t))))
 
 
