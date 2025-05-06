@@ -338,7 +338,23 @@ back to the current entry."
 (defun zk-org-insert-tag-completion ()
   "Insert a tag to the current buffer with completion"
   (interactive)
-  (insert (completing-read "Insert tag: " (org-global-tags-completion-table))))
+  ;; Search forward for the first portion of the tag that the user may
+  ;; have typed.
+  (let ((tag-begin (point))
+        (point (point)))
+    (save-excursion
+      (while (zk-org-valid-tag-char-p (char-before))
+        (backward-char))
+      (setq tag-begin (point)))
+    (let ((result (completing-read
+                   "Complete tag: "
+                   (org-global-tags-completion-table)
+                   nil
+                   nil
+                   (buffer-substring tag-begin point))))
+      (when result
+        (delete-region tag-begin point)
+        (insert result)))))
 
 (defun zk-org-tags-view (arg)
   "org-tags-view will always ask for the tags before switching to
@@ -346,13 +362,13 @@ an existing view buffer if available, but it doesn't use the
 entered tags anyway if org-agenda-sticky is turned
 on. zk-org-tags-view will always create a new buffer for the query."
   (interactive "P")
-  (org-tags-view arg (read-string "Match (TAB to search tag): " nil 'org-tags-history nil t)))
+  (org-tags-view arg (read-string "View for tags: " nil 'org-tags-history nil t)))
 
 (defun zk-org-search-view (arg)
   "Like org-search-view but always create a new buffer for the
 query."
   (interactive "P")
-  (org-search-view arg (read-string "Search (TAB to search tag): " nil 'org-agenda-search-history nil t)))
+  (org-search-view arg (read-string "View for search term: " nil 'org-agenda-search-history nil t)))
 
 (defun zk-org-set-tags-command ()
   "Set tags to the current entry. It's better than
@@ -363,7 +379,7 @@ an empty line is entered."
   (let ((new-tag nil))
     (while (not (equal new-tag ""))
       (setq new-tag (completing-read
-                     (concat "New tag: " (org-make-tag-string (org-get-tags nil t)))
+                     (concat "Tags: " (org-make-tag-string (org-get-tags nil t)))
                      (org-global-tags-completion-table)
                      nil
                      nil

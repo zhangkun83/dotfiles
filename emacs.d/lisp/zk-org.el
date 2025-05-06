@@ -55,6 +55,16 @@ backward."
                  (equal pos (point)))
       (org-mark-ring-push pos buffer))))
 
+(defun zk-org-valid-tag-char-p (c)
+  (or (and (>= c ?a) (<= c ?z))
+      (and (>= c ?A) (<= c ?A))
+      (and (>= c ?0) (<= c ?9))
+      (= c ?_)
+      (= c ?@)
+      ;; "#" is not listed as a valid char in the doc, but I'm using
+      ;; it just fine.
+      (= c ?#)))
+
 (advice-add 'org-agenda-switch-to :around #'zk-org-push-mark-ring-advice)
 (advice-add 'org-next-link :around #'zk-push-mark-ring-advice)
 (advice-add 'org-next-visible-heading :around #'zk-push-mark-ring-advice)
