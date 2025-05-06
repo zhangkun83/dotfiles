@@ -56,5 +56,8 @@ backward."
       (org-mark-ring-push pos buffer))))
 
 (advice-add 'org-agenda-switch-to :around #'zk-org-push-mark-ring-advice)
+(advice-add 'org-next-link :around #'zk-push-mark-ring-advice)
+(advice-add 'org-next-visible-heading :around #'zk-push-mark-ring-advice)
+(advice-add 'outline-up-heading :around #'zk-push-mark-ring-advice)
 
 (provide 'zk-org)

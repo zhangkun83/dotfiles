@@ -648,6 +648,17 @@ redraw the buffer after appending the message."
   ;; Allow the buffer to redraw
   (sit-for .1))
 
+(defun zk-push-mark-ring-advice (orig-fun &rest args)
+  "Put this advice around any function to push the original
+point to the mark ring if the function changes the point while
+staying in the same buffer."
+  (let ((pos (point))
+        (buffer (current-buffer)))
+    (apply orig-fun args)
+    (when (and (equal buffer (current-buffer))
+               (not (equal pos (point))))
+      (push-mark pos))))
+
 (defun zk-remote-make-frame ()
   "(To be called from a client) create a frame and display a message
 indicating this frame is from an existing server."
