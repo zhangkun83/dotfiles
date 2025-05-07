@@ -172,6 +172,21 @@ and the second element is the reference ID."
          (id (nth 0 link-pair)))
     (list content id)))
 
+(defun zk-org-locate-in-scratch-task-queue ()
+  "Locate the current heading in the task queues of the scratch
+server."
+  (interactive)
+  (save-excursion
+    (zk-org-move-to-current-heading)
+    (let ((id (zk-org-get-customid-at-point)))
+      (unless id
+        (error "Entry doesn't have CUSTOM_ID"))
+      (message "%s"
+               (server-eval-at
+                "scratch"
+                (list 'zk-scratch-remote-locate-in-task-queue
+                      (zk-org-generate-link id t)))))))
+
 (defun zk-org-fill-scratch-task-queue ()
   "Insert all undone TODO entries with priority A and scheduled for
 today to the task queues of the scratch server, if they don't
@@ -246,6 +261,13 @@ Returns the CUSTOM_ID."
         (message "CUSTOM_ID: %s" custom-id))
       custom-id)))
 
+(defun zk-org-generate-link (custom-id with-profile-name)
+  (concat "file:"
+          (if with-profile-name (concat "@" zk-zorg-profile-name ":"))
+          (file-name-nondirectory (buffer-file-name (zk-get-base-buffer (current-buffer))))
+          "::#"
+          custom-id))
+
 (defun zk-org-get-headline-link-at-point (with-profile-name)
   "Returns a list of (link headline), where link is the external
 link based on the CUSTOM_ID, and headline is the headline text.
@@ -260,11 +282,7 @@ zk-zorg-profile-name so that it can be used for scratch.el"
       (let* ((headline (org-element-at-point))
              (headline-text (substring-no-properties (org-get-heading t t t t)))
              (custom-id (zk-org-generate-custom-id-at-point))
-             (link (concat "file:"
-                           (if with-profile-name (concat "@" zk-zorg-profile-name ":"))
-                           (file-name-nondirectory (buffer-file-name (zk-get-base-buffer (current-buffer))))
-                           "::#"
-                           custom-id)))
+             (link (zk-org-generate-link custom-id with-profile-name)))
         (setq return-value (list link (zk-org-neutralize-timestamp headline-text)))))
     return-value))
 
@@ -471,7 +489,8 @@ an empty line is entered."
   (local-set-key (kbd "C-c l w") 'zk-org-copy-region-with-backlink)
   (local-set-key (kbd "C-c l b") 'zk-org-log-backlink-at-point)
   (local-set-key (kbd "C-c l f") 'zk-org-find-references-to-current-entry)
-  (local-set-key (kbd "C-c l s") 'zk-org-fill-scratch-task-queue)
+  (local-set-key (kbd "C-c l s") 'zk-org-locate-in-scratch-task-queue)
+  (local-set-key (kbd "C-c l C-s") 'zk-org-fill-scratch-task-queue)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
   (local-set-key (kbd "C-c r u") 'zk-zorg-rsync-upload)
   (local-set-key (kbd "C-c r d") 'zk-zorg-rsync-download)

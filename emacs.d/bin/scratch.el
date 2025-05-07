@@ -19,9 +19,28 @@
   (ignore-errors
     (org-up-element)))
 
-(defun zk-scratch-org-backward-heading-same-level()
+(defun zk-scratch-org-backward-heading-same-level ()
   (org-backward-heading-same-level nil))
 
+(defun zk-scratch-remote-locate-in-task-queue (id)
+  "(To be called from a client) locate the ID in the task queues.
+Raises the scratch frame if found.  Returns a message indicating
+the result."
+  ;; If error occurs on the server side, the call will be stuck.  It
+  ;; seems the error cannot be sent back to the client.  So we catch
+  ;; the errors and return the message.
+  (condition-case err
+      (let ((pos (point)))
+        (zk-scratch-open-kanban-file)
+        (save-excursion
+          (goto-char 1)
+          (search-forward (concat "[" id "]"))
+          (org-beginning-of-line)
+          (setq pos (point))
+          (raise-frame))
+        (goto-char pos)
+        (message "scratch: located '%s'" id))
+    (error (message "scratch: %s" (error-message-string err)))))
 
 (defun zk-scratch-remote-insert-all-to-task-queue (ref-metadata-list)
   "(To be called from a client) For each reference metadata in
