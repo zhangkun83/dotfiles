@@ -350,8 +350,11 @@ back to the current entry."
 (defun zk-org-move-to-current-heading ()
   "Move to the current heading if not already at a heading."
   (interactive)
-  (unless (eq 'headline (org-element-type (org-element-at-point)))
-    (org-previous-visible-heading 1)))
+  ;; Don't use org-previous-visible-heading because it will push the
+  ;; mark thanks to zk-push-mark-ring-advice
+  (while (not (eq 'headline (org-element-type (org-element-at-point))))
+    (previous-line))
+  (org-beginning-of-line))
 
 (defun zk-org-insert-tag-completion ()
   "Insert a tag to the current buffer with completion"
