@@ -247,6 +247,7 @@
      (wl . wl-other-frame)))
  '(org-log-into-drawer t)
  '(org-startup-indented t)
+ '(set-mark-command-repeat-pop t)
  '(switch-to-buffer-obey-display-actions t)
  '(use-dialog-box nil)
  '(whitespace-line-column nil)
