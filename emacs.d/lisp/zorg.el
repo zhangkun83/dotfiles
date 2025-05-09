@@ -104,7 +104,7 @@ CUSTOM_ID already exists in the file."
 When called with the prefix argument, the link will include
 zk-zorg-profile-name so that it can be used for scratch.el"
   (interactive "P")
-  (let* ((link-pair (zk-org-get-headline-link-at-point arg))
+  (let* ((link-pair (zk-zorg-set-customid-and-get-headline-link-at-point arg))
          (link (nth 0 link-pair))
          (link-with-text (format "[[%s][^]]" link)))
     (kill-new link-with-text)
@@ -125,7 +125,7 @@ that it can be used for scratch.el"
 based on the CUSTOM_ID.  When called with the prefix argument,
 the link will include zk-zorg-profile-name so that it can be used
 for scratch.el"
-  (let* ((link-pair (zk-org-get-headline-link-at-point arg))
+  (let* ((link-pair (zk-zorg-set-customid-and-get-headline-link-at-point arg))
          (link (nth 0 link-pair))
          (headline-text (nth 1 link-pair))
          (reference (format "%s %s[[%s][^]]"
@@ -143,7 +143,7 @@ This is useful for copying contents from a note entry to a task."
   (interactive)
   (unless mark-active
     (user-error "Region not active"))
-  (let* ((link-pair (zk-org-get-headline-link-at-point nil))
+  (let* ((link-pair (zk-zorg-set-customid-and-get-headline-link-at-point nil))
          (link (nth 0 link-pair))
          (headline-text (nth 1 link-pair))
          (backlink (format "([[%s][%s]])"
@@ -151,7 +151,7 @@ This is useful for copying contents from a note entry to a task."
                            (if (string-match
                                 ;; The "<>" and "[]" have been
                                 ;; converted to "()" by
-                                ;; zk-org-get-headline-link-at-point using
+                                ;; zk-zorg-set-customid-and-get-headline-link-at-point using
                                 ;; zk-org-neutralize-timestamp
                                 "(\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*\\))"
                                 headline-text)
@@ -168,7 +168,7 @@ This is useful for copying contents from a note entry to a task."
 to be used in the scratch.  The first element is the text content
 and the second element is the reference ID."
   (let* ((content (zk-org-get-external-reference t))
-         (link-pair (zk-org-get-headline-link-at-point t))
+         (link-pair (zk-zorg-set-customid-and-get-headline-link-at-point t))
          (id (nth 0 link-pair)))
     (list content id)))
 
@@ -208,7 +208,7 @@ exist in the queue yet."
                               ((eq priority ?A) "Priorities")
                               ((eq priority ?B) "Back burner"))))
                    (when category
-                     (zk-org-generate-custom-id-at-point)
+                     (zk-zorg-set-customid-at-point)
                      ;; Convert ("content" "id") to ('list "category"
                      ;; "content" "id"), so that it can be evaluated on
                      ;; the scratch server.
@@ -239,7 +239,7 @@ subtree"
     (goto-char pos)
     (org-narrow-to-subtree)))
 
-(defun zk-org-generate-custom-id-at-point ()
+(defun zk-zorg-set-customid-at-point ()
   "If CUSTOM_ID of the current org headline doesn't exist,
 generate one based on the text of the headline and set it.
 Returns the CUSTOM_ID."
@@ -268,10 +268,11 @@ Returns the CUSTOM_ID."
           "::#"
           custom-id))
 
-(defun zk-org-get-headline-link-at-point (with-profile-name)
+(defun zk-zorg-set-customid-and-get-headline-link-at-point (with-profile-name)
   "Returns a list of (link headline), where link is the external
 link based on the CUSTOM_ID, and headline is the headline text.
-When with-profile-name is non-nil, the link will include
+Creates and sets the CUSTOM_ID if doesn't exist.  When
+with-profile-name is non-nil, the link will include
 zk-zorg-profile-name so that it can be used for scratch.el"
   (let ((return-value nil)
         (buffer (current-buffer)))
@@ -281,7 +282,7 @@ zk-zorg-profile-name so that it can be used for scratch.el"
       (zk-org-move-to-current-heading)
       (let* ((headline (org-element-at-point))
              (headline-text (substring-no-properties (org-get-heading t t t t)))
-             (custom-id (zk-org-generate-custom-id-at-point))
+             (custom-id (zk-zorg-set-customid-at-point))
              (link (zk-org-generate-link custom-id with-profile-name)))
         (setq return-value (list link (zk-org-neutralize-timestamp headline-text)))))
     return-value))
@@ -425,7 +426,7 @@ an empty line is entered."
     (org-map-entries
      (lambda ()
        (when (zk-org-scheduled-for-today-p (org-element-at-point))
-         (zk-org-generate-custom-id-at-point)
+         (zk-zorg-set-customid-at-point)
          (push (zk-org-get-external-reference) links)))
      (concat tag "/!")
      'agenda)
@@ -485,7 +486,7 @@ an empty line is entered."
   (local-set-key (kbd "C-c m") 'zk-org-tags-view)
   (local-set-key (kbd "C-c s") 'zk-org-search-view)
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
-  (local-set-key (kbd "C-c l i") 'zk-org-generate-custom-id-at-point)
+  (local-set-key (kbd "C-c l i") 'zk-zorg-set-customid-at-point)
   (local-set-key (kbd "C-c l a") 'zk-org-populate-todays-agenda-command)
   (local-set-key (kbd "C-c l l") 'zk-org-copy-external-link)
   (local-set-key (kbd "C-c l r") 'zk-org-copy-external-reference)
