@@ -733,25 +733,6 @@ to close the current sessions."
   (ignore-errors
     (nth 4 (org-heading-components))))
 
-(defun zk-zorg-frame-title-frame-name-function ()
-  (let* ((file-name (buffer-name))
-         (display-file-name
-          (if (string-match-p ".*\\.org$" file-name)
-              ;; For org files, remove the trailing ".org" when
-              ;; included in frame titles
-              (substring file-name 0 (- (length file-name) 4))
-            file-name)))
-    (or (and (not (buffer-base-buffer)) ; Keep the default title for
-                                        ; indirect buffers
-             (eq major-mode 'org-mode)
-             (concat display-file-name
-                     "/"
-                     (zk-org-get-heading-string)))
-        display-file-name)))
-
-(setq zk-frame-title-frame-name-function
-      'zk-zorg-frame-title-frame-name-function)
-
 ;; Allow tag completion input (bound to TAB (C-i)) in minibuffers.
 ;; enable-recursive-minibuffers is needed because
 ;; zk-org-insert-tag-completion uses minibuffer

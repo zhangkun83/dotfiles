@@ -420,7 +420,12 @@ buffer.  Move the point to the current point of the indirect
       (message "Copied: %s" pid))))
 
 (defun zk-frame-title-frame-name-default-function ()
-  (buffer-name (window-buffer)))
+  ;; Use the buffer name of the current window.  If the minibuffer
+  ;; window is active, use the buffer name of the next window, and add
+  ;; a "<!>" to indicate that the minibuffer is active.
+  (if (window-minibuffer-p)
+      (concat "<!>" (buffer-name (window-buffer (next-window))))
+    (buffer-name (window-buffer))))
 
 (defvar zk-frame-title-frame-name-function
   'zk-frame-title-frame-name-default-function
