@@ -1,3 +1,8 @@
+(when (display-graphic-p)
+  (setq leuven-scale-outline-headlines nil
+        leuven-scale-org-agenda-structure nil)
+  (load-theme 'leuven t))
+
 (require 'zk)
 (require 'zk-org)
 (require 'org)
@@ -745,10 +750,5 @@ to close the current sessions."
 (add-hook 'org-mode-hook 'zk-org-setup-bindings)
 (add-hook 'org-mode-hook 'zk-org-set-file-encoding)
 (add-hook 'org-agenda-mode-hook 'zk-org-setup-bindings)
-
-(when (display-graphic-p)
-  (setq leuven-scale-outline-headlines nil
-        leuven-scale-org-agenda-structure nil)
-  (load-theme 'leuven t))
 
 (provide 'zorg)

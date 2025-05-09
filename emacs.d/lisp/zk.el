@@ -689,7 +689,7 @@ indicating this frame is from an existing server."
     (message "SHELL environment is not set, forcing shell-file-name to bash")
     (setq shell-file-name "/bin/bash")))
 
-(defconst zk-font-family "Liberation Mono")
+(defconst zk-font-family "Aporetic Sans Mono")
 (when (display-graphic-p)
   ;; Set font
   (zk-set-default-font zk-font-family 1)

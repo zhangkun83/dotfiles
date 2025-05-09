@@ -1,5 +1,8 @@
 ;; Set up the scratch environment
 
+(when (display-graphic-p)
+  (load-theme 'deeper-blue t))
+
 (require 'zk)
 (zk-start-server-or-create-frame "scratch")
 
