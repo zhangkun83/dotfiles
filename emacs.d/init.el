@@ -22,8 +22,6 @@
 ;; Set default browser to chrome
 (setq browse-url-browser-function 'zk-browse-url)
 
-(setq echo-keystrokes 0.01)
-
 ;; Treat camelCase as multiple words instead of one
 (global-subword-mode)
 
