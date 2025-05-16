@@ -1,5 +1,6 @@
 (switch-to-buffer "*Messages*")
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp"))
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/modus-themes"))
 
 (global-unset-key (kbd "C-z"))
 

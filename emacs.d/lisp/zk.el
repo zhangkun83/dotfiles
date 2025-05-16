@@ -689,6 +689,8 @@ indicating this frame is from an existing server."
     (message "SHELL environment is not set, forcing shell-file-name to bash")
     (setq shell-file-name "/bin/bash")))
 
+;; "Aporetic Sans Mono" (https://protesilaos.com/) is a narrow coding
+;; font built from the Iosevka typeface.
 (defconst zk-font-family "Aporetic Sans Mono")
 (when (display-graphic-p)
   ;; Set font
