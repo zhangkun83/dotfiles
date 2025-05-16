@@ -516,18 +516,27 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
   "Return the DPI of the current monitor"
   (let ((mm-width (car (frame-monitor-attribute 'mm-size)))
         (pixel-width (nth 2 (frame-monitor-attribute 'geometry))))
-    (fround (/
+    (round (/
              (display-pixel-width)
              (* (display-mm-width) 0.0393701)))))
 
-(defconst zk-default-font-height (if (eq system-type 'darwin) 210 105))
+(defun zk-default-font-height ()
+  (let ((dpi (zk-get-monitor-dpi)))
+    (cond ((= dpi 284)
+           (progn
+             (message "Using font size for Thinkpad P1")
+             116))
+          (t
+           (progn
+             (message "Using default font size")
+             105)))))
 
 (defun zk-set-default-font (family factor)
   "Set the default font for Emacs.  `factor' is used to multiply
 `zk-default-font-height' to calculate the actual font height"
   (set-face-attribute 'default nil
 		      :family family
-                      :height (round (* zk-default-font-height factor))))
+                      :height (round (* (zk-default-font-height) factor))))
 
 (defun set-exec-path-from-shell-PATH ()
   "Set up Emacs' `exec-path' and PATH environment variable to match
