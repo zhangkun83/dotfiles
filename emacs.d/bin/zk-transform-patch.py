@@ -8,18 +8,18 @@ import sys
 
 ZK_PROJECT_ROOT = os.getenv('ZK_PROJECT_ROOT')
 FILENAME_LINE_PATTERNS = {
-    "diff-u-p4": re.compile(u'^\+\+\+ (\S*)\s+.+$',),  # P4DIFF="diff -u" g4 d
-    "git": re.compile(u'^\+\+\+ b/(.*)$'),  # git diff
+    "diff-u-p4": re.compile(r'^\+\+\+ (\S*)\s+.+$',),  # P4DIFF="diff -u" g4 d
+    "git": re.compile(r'^\+\+\+ b/(.*)$'),  # git diff
 }
 
 HUNK_HEADER_PATTERNS = {
-    "diff-u-p4": re.compile(u'^@@ -[0-9,]+ \+([0-9]+),[0-9]+ @@'),
-    "git": re.compile(u'^@@ -[0-9,]+ \+([0-9]+),[0-9]+ @@'),
+    "diff-u-p4": re.compile(r'^@@ -[0-9,]+ \+([0-9]+),[0-9]+ @@'),
+    "git": re.compile(r'^@@ -[0-9,]+ \+([0-9]+),[0-9]+ @@'),
 }
 
 COMMON_LINE_PATTERNS = {
-    "diff-u-p4": re.compile(u'^ '),
-    "git": re.compile(u'^ '),
+    "diff-u-p4": re.compile(r'^ '),
+    "git": re.compile(r'^ '),
 }
 
 def write(line):
