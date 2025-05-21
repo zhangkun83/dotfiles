@@ -512,53 +512,6 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
           (lambda ()
             (local-set-key (kbd "E") 'zk-dired-open-file-with-os)))
 
-(defun zk-get-monitor-dpi ()
-  "Return the DPI of the current monitor"
-  (let ((mm-width (car (frame-monitor-attribute 'mm-size)))
-        (pixel-width (nth 2 (frame-monitor-attribute 'geometry))))
-    (round (/
-             (display-pixel-width)
-             (* (display-mm-width) 0.0393701)))))
-
-(defun zk-set-default-font (family factor)
-  "Set the default font for Emacs.  `factor' is used to multiply
-`zk-default-font-height' to calculate the actual font height"
-  (let ((scaling-alist (zk-get-default-scaling-alist)))
-    (set-face-attribute 'default nil
-		        :family family
-                        :height (round (* (alist-get 'font-height scaling-alist) factor)))
-    (dolist (frame (frame-list))
-      (zk-scale-frame frame scaling-alist))))
-
-(defun zk-get-default-scaling-alist ()
-  (let ((font-height 105)
-        (frame-width-pixels 1000)
-        (frame-height-pixels 900)
-        (dpi (zk-get-monitor-dpi)))
-    (cond ((= dpi 284)
-           (progn
-             (message "Using scale settings for Thinkpad P1 screen")
-             (setq font-height 116
-                   frame-width-pixels 3000
-                   frame-height-pixels 2200)))
-          (t
-           (progn
-             (message "Using default scale settings"))))
-    (list (cons 'font-height font-height)
-          (cons 'frame-width-pixels frame-width-pixels)
-          (cons 'frame-height-pixels frame-height-pixels))))
-
-(defun zk-scale-frame (frame scaling-alist)
-  (set-frame-size frame
-                  (alist-get 'frame-width-pixels scaling-alist)
-                  (alist-get 'frame-height-pixels scaling-alist)
-                  t))
-
-(defun zk-reset-frame-size (frame)
-  (zk-scale-frame frame (zk-get-default-scaling-alist)))
-
-(add-hook 'after-make-frame-functions 'zk-reset-frame-size)
-
 (defun set-exec-path-from-shell-PATH ()
   "Set up Emacs' `exec-path' and PATH environment variable to match
 that used by the user's shell.
@@ -724,7 +677,50 @@ indicating this frame is from an existing server."
 (defconst zk-font-family "Aporetic Sans Mono")
 (when (display-graphic-p)
   ;; Set font
-  (zk-set-default-font zk-font-family 1)
+  (defun zk-get-monitor-dpi ()
+    "Return the DPI of the current monitor"
+    (let ((mm-width (car (frame-monitor-attribute 'mm-size)))
+          (pixel-width (nth 2 (frame-monitor-attribute 'geometry))))
+      (round (/
+              (display-pixel-width)
+              (* (display-mm-width) 0.0393701)))))
+
+  (defun zk-set-default-font (family factor)
+    "Set the default font for Emacs.  `factor' is used to multiply
+`zk-default-font-height' to calculate the actual font height"
+    (let ((scaling-alist (zk-get-default-scaling-alist)))
+      (set-face-attribute 'default nil
+		          :family family
+                          :height (round (* (alist-get 'font-height scaling-alist) factor)))
+      (dolist (frame (frame-list))
+        (zk-scale-frame frame scaling-alist))))
+
+  (defun zk-get-default-scaling-alist ()
+    (let ((font-height 105)
+          (frame-width-pixels 1000)
+          (frame-height-pixels 900)
+          (dpi (zk-get-monitor-dpi)))
+      (cond ((= dpi 284)
+             (progn
+               (message "Using scale settings for Thinkpad P1 screen")
+               (setq font-height 116
+                     frame-width-pixels 3000
+                     frame-height-pixels 2200)))
+            (t
+             (progn
+               (message "Using default scale settings"))))
+      (list (cons 'font-height font-height)
+            (cons 'frame-width-pixels frame-width-pixels)
+            (cons 'frame-height-pixels frame-height-pixels))))
+
+  (defun zk-scale-frame (frame scaling-alist)
+    (set-frame-size frame
+                    (alist-get 'frame-width-pixels scaling-alist)
+                    (alist-get 'frame-height-pixels scaling-alist)
+                    t))
+
+  (defun zk-reset-frame-size (frame)
+    (zk-scale-frame frame (zk-get-default-scaling-alist)))
 
   (defun zk-scale-default-font (factor)
     "Scale the default font by a percentage factor, where 100 is the
@@ -732,6 +728,9 @@ original size"
     (interactive (list (read-number "Scale default font (as percentage, between 50 and 500): " 100)))
     (when (or (> factor 500) (< factor 50))
         (user-error "Factor out of range"))
-    (zk-set-default-font zk-font-family (/ factor 100.0))))
+    (zk-set-default-font zk-font-family (/ factor 100.0)))
+
+  (zk-set-default-font zk-font-family 1)
+  (add-hook 'after-make-frame-functions 'zk-reset-frame-size))
 
 (provide 'zk)
