@@ -539,8 +539,8 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
            (progn
              (message "Using scale settings for Thinkpad P1 screen")
              (setq font-height 116
-                   frame-width-pixels 1920
-                   frame-height-pixels 2000)))
+                   frame-width-pixels 3000
+                   frame-height-pixels 2200)))
           (t
            (progn
              (message "Using default scale settings"))))
