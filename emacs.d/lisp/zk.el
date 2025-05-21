@@ -520,23 +520,44 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
              (display-pixel-width)
              (* (display-mm-width) 0.0393701)))))
 
-(defun zk-default-font-height ()
-  (let ((dpi (zk-get-monitor-dpi)))
-    (cond ((= dpi 284)
-           (progn
-             (message "Using font size for Thinkpad P1")
-             116))
-          (t
-           (progn
-             (message "Using default font size")
-             105)))))
-
 (defun zk-set-default-font (family factor)
   "Set the default font for Emacs.  `factor' is used to multiply
 `zk-default-font-height' to calculate the actual font height"
-  (set-face-attribute 'default nil
-		      :family family
-                      :height (round (* (zk-default-font-height) factor))))
+  (let ((scaling-alist (zk-get-default-scaling-alist)))
+    (set-face-attribute 'default nil
+		        :family family
+                        :height (round (* (alist-get 'font-height scaling-alist) factor)))
+    (dolist (frame (frame-list))
+      (zk-scale-frame frame scaling-alist))))
+
+(defun zk-get-default-scaling-alist ()
+  (let ((font-height 105)
+        (frame-width-pixels 1000)
+        (frame-height-pixels 900)
+        (dpi (zk-get-monitor-dpi)))
+    (cond ((= dpi 284)
+           (progn
+             (message "Using scale settings for Thinkpad P1 screen")
+             (setq font-height 116
+                   frame-width-pixels 1920
+                   frame-height-pixels 2000)))
+          (t
+           (progn
+             (message "Using default scale settings"))))
+    (list (cons 'font-height font-height)
+          (cons 'frame-width-pixels frame-width-pixels)
+          (cons 'frame-height-pixels frame-height-pixels))))
+
+(defun zk-scale-frame (frame scaling-alist)
+  (set-frame-size frame
+                  (alist-get 'frame-width-pixels scaling-alist)
+                  (alist-get 'frame-height-pixels scaling-alist)
+                  t))
+
+(defun zk-reset-frame-size (frame)
+  (zk-scale-frame frame (zk-get-default-scaling-alist)))
+
+(add-hook 'after-make-frame-functions 'zk-reset-frame-size)
 
 (defun set-exec-path-from-shell-PATH ()
   "Set up Emacs' `exec-path' and PATH environment variable to match
