@@ -122,7 +122,7 @@ final class DesktopHelperServerWorker extends MessageWorker {
             program = "c:/Program Files (x86)/Google/Chrome/Application/chrome.exe";
           }
         } else if (os.toLowerCase().contains("linux")) {
-          program = "google-chrome";
+          program = "xdg-open";
         }
         if (program == null) {
           stream.writeMessage(RESPONSE_HEADER_ERROR, "Unsupported OS for open-url: " + os);
