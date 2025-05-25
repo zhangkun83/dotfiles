@@ -677,13 +677,19 @@ indicating this frame is from an existing server."
 (defconst zk-font-family "Aporetic Sans Mono")
 (when (display-graphic-p)
   ;; Set font
-  (defun zk-get-monitor-dpi ()
-    "Return the DPI of the current monitor"
-    (let ((mm-width (car (frame-monitor-attribute 'mm-size)))
-          (pixel-width (nth 2 (frame-monitor-attribute 'geometry))))
-      (round (/
-              (display-pixel-width)
-              (* (display-mm-width) 0.0393701)))))
+  (defun zk-get-monitor-attributes-alist ()
+    "Return an alist of `width-pixels`, `height-pixels`, `dpi` of the current
+monitor."
+    (let* ((mm-width (car (frame-monitor-attribute 'mm-size)))
+           (geometry (frame-monitor-attribute 'geometry))
+           (width-pixels (nth 2 geometry))
+           (height-pixels (nth 3 geometry)))
+      (list (cons 'width-pixels width-pixels)
+            (cons 'height-pixels height-pixels)
+            (cons 'dpi
+                  (round (/
+                          (display-pixel-width)
+                          (* (display-mm-width) 0.0393701)))))))
 
   (defun zk-set-default-font (family factor)
     "Set the default font for Emacs.  `factor' is used to multiply
@@ -696,19 +702,25 @@ indicating this frame is from an existing server."
         (zk-scale-frame frame scaling-alist))))
 
   (defun zk-get-default-scaling-alist ()
-    (let ((font-height 105)
-          (frame-width-pixels 1000)
-          (frame-height-pixels 900)
-          (dpi (zk-get-monitor-dpi)))
-      (cond ((= dpi 284)
+    (let* ((font-height 105)
+           (frame-width-pixels 1000)
+           (frame-height-pixels 900)
+           (monitor-attributes-alist (zk-get-monitor-attributes-alist))
+	   (monitor-height-pixels
+	    (alist-get 'height-pixels monitor-attributes-alist))
+	   (monitor-dpi
+	    (alist-get 'dpi monitor-attributes-alist)))
+      (cond ((and (= monitor-dpi 284)
+		  (= monitor-height-pixels 2400))
              (progn
-               (message "Using scale settings for Thinkpad P1 screen")
+               (message "Using scale settings for Thinkpad P1 screen per %s"
+                        monitor-attributes-alist)
                (setq font-height 116
                      frame-width-pixels 3000
                      frame-height-pixels 2200)))
             (t
              (progn
-               (message "Using default scale settings"))))
+               (message "Using default scale settings per %s" monitor-attributes-alist))))
       (list (cons 'font-height font-height)
             (cons 'frame-width-pixels frame-width-pixels)
             (cons 'frame-height-pixels frame-height-pixels))))
@@ -727,7 +739,7 @@ indicating this frame is from an existing server."
 original size"
     (interactive (list (read-number "Scale default font (as percentage, between 50 and 500): " 100)))
     (when (or (> factor 500) (< factor 50))
-        (user-error "Factor out of range"))
+      (user-error "Factor out of range"))
     (zk-set-default-font zk-font-family (/ factor 100.0)))
 
   (zk-set-default-font zk-font-family 1)
