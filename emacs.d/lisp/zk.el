@@ -718,6 +718,13 @@ monitor."
                (setq font-height 116
                      frame-width-pixels 3000
                      frame-height-pixels 2200)))
+            ((and (= monitor-dpi 140)
+                  (= monitor-height-pixels 2160))
+             (progn
+               (message "Using scale settings for ThinkVision monitor 32\" per %s"
+                        monitor-attributes-alist)
+               (setq frame-width-pixels 1600
+                     frame-height-pixels 1500)))
             (t
              (progn
                (message "Using default scale settings per %s" monitor-attributes-alist))))
