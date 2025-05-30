@@ -21,19 +21,20 @@ class NotificationWindow extends JFrame {
   private final JLabel countDown;
   private final CountDownTimerHandler countDownTimerHandler;
   private final Timer countDownTimer;
+  private static final String fontFamily = "Aporetic Sans Mono";
   private static final DateTimeFormatter dateTimeFormatter =
       DateTimeFormatter.ofPattern("HH:mm");
 
   NotificationWindow(String title, String message) {
     setTitle(title);
     Image icon = Toolkit.getDefaultToolkit().createImage(getClass().getResource("trayicon.png"));
-    setResizable(false);
+    setResizable(true);
     setIconImage(icon);
     setLayout(new BorderLayout(5, 5));
     getContentPane().setBackground(Color.YELLOW);
 
     content = new JTextArea(message, 3, 30);
-    content.setFont(new Font(Font.SERIF, Font.PLAIN, 18));
+    content.setFont(new Font(fontFamily, Font.PLAIN, 16));
     content.setEditable(false);
     content.setLineWrap(true);
     content.setWrapStyleWord(true);
@@ -43,7 +44,7 @@ class NotificationWindow extends JFrame {
     add(jsp, BorderLayout.CENTER);
 
     countDown = new JLabel(" ", JLabel.CENTER);
-    countDown.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+    countDown.setFont(new Font(fontFamily, Font.PLAIN, 12));
     add(countDown, BorderLayout.PAGE_END);
 
     setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
