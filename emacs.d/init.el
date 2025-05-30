@@ -30,6 +30,10 @@
 ;;(semantic-mode 1)
 
 (require 'zk-project)
+(require 'org)
+(setq org-persist-directory
+      (concat (expand-file-name "~/.cache/org-persist") zk-project-root-as-suffix))
+
 (require 'subr-x)
 (unless (or
          ;; The following modules don't support native Windows
