@@ -702,7 +702,7 @@ monitor."
         (zk-scale-frame frame scaling-alist))))
 
   (defun zk-get-default-scaling-alist ()
-    (let* ((font-height 105)
+    (let* ((font-height 120)
            (frame-width-pixels 1000)
            (frame-height-pixels 900)
            (monitor-attributes-alist (zk-get-monitor-attributes-alist))
