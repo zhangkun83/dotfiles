@@ -493,7 +493,7 @@ an empty line is entered."
   "Register my own shortcuts for org mode"
   (local-set-key (kbd "C-c a") 'org-agenda-list)
   (local-set-key (kbd "C-c t") 'org-todo-list)
-  (local-set-key (kbd "C-c C-t") 'zk-zorg-open-tbs-agenda)
+  (local-set-key (kbd "C-c M-t") 'zk-zorg-open-tbs-agenda)
   (local-set-key (kbd "C-c m") 'zk-org-tags-view)
   (local-set-key (kbd "C-c s") 'zk-org-search-view)
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
