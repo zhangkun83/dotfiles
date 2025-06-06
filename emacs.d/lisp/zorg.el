@@ -484,10 +484,16 @@ an empty line is entered."
   (interactive)
   (message "%s status: %s" zk-zorg-profile-name zk-zorg-status))
 
+(defun zk-zorg-open-tbs-agenda ()
+  "Open the org agenda for tag `tbs` (to-be-sorted)."
+  (interactive)
+  (org-tags-view nil "tbs"))
+
 (defun zk-org-setup-bindings ()
   "Register my own shortcuts for org mode"
   (local-set-key (kbd "C-c a") 'org-agenda-list)
   (local-set-key (kbd "C-c t") 'org-todo-list)
+  (local-set-key (kbd "C-c C-t") 'zk-zorg-open-tbs-agenda)
   (local-set-key (kbd "C-c m") 'zk-org-tags-view)
   (local-set-key (kbd "C-c s") 'zk-org-search-view)
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)

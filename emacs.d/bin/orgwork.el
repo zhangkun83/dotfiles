@@ -6,6 +6,6 @@
       (lambda ()
         (org-agenda-list)
         (split-window)
-        (org-tags-view nil "tbs")))
+        (zk-zorg-open-tbs-agenda)))
 
 (zk-zorg-startup-init)
