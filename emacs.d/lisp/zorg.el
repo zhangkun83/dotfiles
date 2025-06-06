@@ -485,9 +485,11 @@ an empty line is entered."
   (message "%s status: %s" zk-zorg-profile-name zk-zorg-status))
 
 (defun zk-zorg-open-tbs-agenda ()
-  "Open the org agenda for tag `tbs` (to-be-sorted)."
+  "Open the org agenda for tag `tbs' (to-be-sorted) for raw meeting notes
+that need to be sorted, excluding `TODO' headings (meaning the meeting
+has not happened yet)."
   (interactive)
-  (org-tags-view nil "tbs"))
+  (org-tags-view nil "tbs/-TODO"))
 
 (defun zk-org-setup-bindings ()
   "Register my own shortcuts for org mode"
