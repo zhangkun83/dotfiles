@@ -415,25 +415,23 @@ an empty line is entered."
       (when (not (equal new-tag ""))
         (org-toggle-tag new-tag 'on)))))
 
-(defun zk-org-populate-todays-agenda-command ()
-  "Find TODO entries scheduled for today that match a
- tag.  It's useful for populating meeting agenda."
+(defun zk-zorg-populate-agenda-command ()
+  "Find and populate headings that have a `tbdis' tag (to-be-discussed) and
+also match another tag given by the user."
   (interactive)
   (let* ((all-tags (mapcar #'car (org-global-tags-completion-table)))
          (tag (completing-read
-                    "Populate agenda for tag: "
-                    all-tags
-                    nil
-                    t
-                    nil
-                    t))
+               "Populate agenda for tag: "
+               all-tags
+               nil
+               t
+               nil
+               t))
          (links nil))
     (org-map-entries
      (lambda ()
-       (when (zk-org-scheduled-for-today-p (org-element-at-point))
-         (zk-zorg-set-customid-at-point)
-         (push (zk-org-get-external-reference) links)))
-     (concat tag "/!")
+       (push (zk-org-get-external-reference) links))
+     (concat "tbdis" "+" tag)
      'agenda)
     (dolist (link links)
       (insert "RE: " link)
@@ -500,7 +498,7 @@ has not happened yet)."
   (local-set-key (kbd "C-c s") 'zk-org-search-view)
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
   (local-set-key (kbd "C-c l i") 'zk-zorg-set-customid-at-point)
-  (local-set-key (kbd "C-c l a") 'zk-org-populate-todays-agenda-command)
+  (local-set-key (kbd "C-c l a") 'zk-zorg-populate-agenda-command)
   (local-set-key (kbd "C-c l l") 'zk-org-copy-external-link)
   (local-set-key (kbd "C-c l r") 'zk-org-copy-external-reference)
   (local-set-key (kbd "C-c l w") 'zk-org-copy-region-with-backlink)
