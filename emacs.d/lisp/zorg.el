@@ -484,10 +484,9 @@ also match another tag given by the user."
 
 (defun zk-zorg-open-tbs-agenda ()
   "Open the org agenda for tag `tbs' (to-be-sorted) for raw meeting notes
-that need to be sorted, excluding `TODO' headings (meaning the meeting
-has not happened yet)."
+that need to be sorted."
   (interactive)
-  (org-tags-view nil "tbs/-TODO"))
+  (org-tags-view nil "tbs"))
 
 (defun zk-org-setup-bindings ()
   "Register my own shortcuts for org mode"
