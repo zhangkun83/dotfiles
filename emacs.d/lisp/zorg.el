@@ -416,7 +416,7 @@ an empty line is entered."
         (org-toggle-tag new-tag 'on)))))
 
 (defun zk-zorg-populate-agenda-command ()
-  "Find and populate headings that have a `tbdis' tag (to-be-discussed) and
+  "Find and populate headings that have a `tbdsc' tag (to-be-discussed) and
 also match another tag given by the user."
   (interactive)
   (let* ((all-tags (mapcar #'car (org-global-tags-completion-table)))
@@ -431,7 +431,7 @@ also match another tag given by the user."
     (org-map-entries
      (lambda ()
        (push (zk-org-get-external-reference) links))
-     (concat "tbdis" "+" tag)
+     (concat "tbdsc" "+" tag)
      'agenda)
     (dolist (link links)
       (insert "RE: " link)
