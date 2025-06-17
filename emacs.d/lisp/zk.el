@@ -547,7 +547,7 @@ apps are not started from a shell."
     (let ((url-start (car url-bounds))
           (url-end (cdr url-bounds)))
       (or (replace-regexp-in-region
-           "https?://b\\(uganizer\\)?\\.corp\\.google\\.com/issues/"
+           "https?://b\\(uganizer\\)?\\.corp\\.google\\.com/\\(issues/\\)?"
            "http://b/" url-start url-end)
           (replace-regexp-in-region
            "https?://yaqs.corp.google.com/eng/q/"
