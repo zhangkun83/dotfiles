@@ -715,8 +715,7 @@ monitor."
              (progn
                (message "Using scale settings for Thinkpad P1 screen per %s"
                         monitor-attributes-alist)
-               (setq font-height 116
-                     frame-width-pixels 2500
+               (setq frame-width-pixels 2500
                      frame-height-pixels 2000)))
             ((and (= monitor-dpi 140)
                   (= monitor-height-pixels 2160))
