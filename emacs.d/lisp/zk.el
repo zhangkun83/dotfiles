@@ -553,7 +553,7 @@ apps are not started from a shell."
            "https?://yaqs.corp.google.com/eng/q/"
            "http://yaqs/" url-start url-end)
           (replace-regexp-in-region
-           "https?://critique.corp.google.com/cl/"
+           "https?://critique.corp.google.com/\\(cl/\\)?"
            "http://cl/" url-start url-end)
           (replace-regexp-in-region
            "https?://goto.google.com/"
