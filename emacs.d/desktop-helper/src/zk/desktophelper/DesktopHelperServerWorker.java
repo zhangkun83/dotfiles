@@ -7,9 +7,6 @@ import java.awt.Image;
 import java.awt.SystemTray;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -18,7 +15,7 @@ import zk.desktophelper.Protocol.Message;
 
 final class DesktopHelperServerWorker extends MessageWorker {
   private static final Logger logger = Logger.getLogger(DesktopHelperServerWorker.class.getName());
-  private final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+  private final ClipboardManager clipboard;
   private final TrayIcon trayIcon;
   private final DesktopHelperHttpServer httpServer;
   private final DesktopHelperHttpServer.Backend httpBackend =
@@ -29,7 +26,7 @@ final class DesktopHelperServerWorker extends MessageWorker {
         }
 
         @Override
-        public void setClipboard(String content) {
+        public void setClipboard(String content) throws Exception {
           DesktopHelperServerWorker.this.setClipboard(content);
         }
 
@@ -46,7 +43,9 @@ final class DesktopHelperServerWorker extends MessageWorker {
   private volatile String cachedUrlToOpen;
 
   DesktopHelperServerWorker(
+      ClipboardManager clipboard,
       boolean useSystemNotifications, int httpPort, boolean httpOpenToNetwork) throws IOException {
+    this.clipboard = clipboard;
     this.httpServer = new DesktopHelperHttpServer(httpPort, httpOpenToNetwork, httpBackend);
 
     TrayIcon trayIcon = null;
@@ -87,12 +86,12 @@ final class DesktopHelperServerWorker extends MessageWorker {
     }
   }
 
-  private void setClipboard(String content) {
-    clipboard.setContents(new StringSelection(content), null);
+  private void setClipboard(String content) throws Exception {
+    clipboard.setClipboard(content);
   }
 
   private String getClipboard() throws Exception {
-    return (String) clipboard.getData(DataFlavor.stringFlavor);
+    return clipboard.getClipboard();
   }
 
   @Override
@@ -101,9 +100,13 @@ final class DesktopHelperServerWorker extends MessageWorker {
       Message msg = stream.readMessage();
       logger.info("Received: " + msg);
       if (msg.header.equals("store-to-clipboard")) {
-        setClipboard(msg.data);
-        stream.writeMessage(
-            RESPONSE_HEADER_OK, "Stored " + msg.data.length() + " chars to clipboard");
+        try {
+          setClipboard(msg.data);
+          stream.writeMessage(
+              RESPONSE_HEADER_OK, "Stored " + msg.data.length() + " chars to clipboard");
+        } catch (Exception e) {
+          stream.writeMessage(RESPONSE_HEADER_ERROR, e.toString());
+        }
       } else if (msg.header.equals("retrieve-from-clipboard")) {
         try {
           String content = getClipboard();

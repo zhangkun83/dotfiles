@@ -92,7 +92,11 @@ final class DesktopHelperHttpServer {
           content = content.replaceAll("\r\n", "\n");
           // The value ends with a newline as part of the http protocol.  Also need to remove it.
           content = content.substring(0, content.length() - 1);
-          backend.setClipboard(content);
+          try {
+            backend.setClipboard(content);
+          } catch (Exception e) {
+            throw new IOException(e);
+          }
           logger.info("Set clipboard from HTTP request (" + content.length() + " chars)");
           t.getResponseHeaders().set("Location", "/viewclip");
           t.sendResponseHeaders(302, 0);
@@ -139,7 +143,7 @@ final class DesktopHelperHttpServer {
   interface Backend {
     // Nullable
     String getClipboard() throws Exception;
-    void setClipboard(String content);
+    void setClipboard(String content) throws Exception;
     // Nullable
     String getUrlToOpen();
     String getName();

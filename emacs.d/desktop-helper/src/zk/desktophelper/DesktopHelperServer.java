@@ -13,10 +13,17 @@ public class DesktopHelperServer {
     boolean httpOpenToNetwork = flags.getBoolean("http_open_to_network", false);
     boolean useSystemNotifications =
         "true".equals(flags.getString("use_system_notifications", "false"));
+    ClipboardManager clipboard;
+    if ("wayland".equals(System.getenv("XDG_SESSION_TYPE"))) {
+      logger.info("Running in Wayland.  Will use wl-clipboard utilities for clipboard operations.");
+      clipboard = new WaylandClipboardManager();
+    } else {
+      clipboard = new AwtClipboardManager();
+    }
     new BlockingServer(
         port,
         new DesktopHelperServerWorker(
-            useSystemNotifications, httpPort, httpOpenToNetwork))
+            clipboard, useSystemNotifications, httpPort, httpOpenToNetwork))
         .runServer();
   }
 }
