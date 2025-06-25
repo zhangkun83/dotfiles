@@ -5,8 +5,8 @@
 "$@"
 return_value="$?"
 if [[ $return_value -eq 0 ]]; then
-    desktop-helper-client.py notify "SUCCESSFUL: \"$*\""
+    dh-client notify "SUCCESSFUL: \"$*\""
 else
-    desktop-helper-client.py notify "FAILED: \"$*\""
+    dh-client notify "FAILED: \"$*\""
 fi
 exit $return_value

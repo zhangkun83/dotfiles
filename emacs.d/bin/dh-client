@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# The client for desktop-helper-server.py
+# The client for dh-server
 # The command string is read from the first argument, while the data string is
 # either the rest of the arguments if given, or read from stdin.
 
@@ -22,7 +22,7 @@ else:
         data += line
 
 def timeout_handler():
-    sys.stderr.write("desktop-helper-client timed out\n")
+    sys.stderr.write("dh-client timed out\n")
     os._exit(1)
 
 timeout_timer = threading.Timer(10.0, timeout_handler)
@@ -31,9 +31,9 @@ timeout_timer.start()
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket:
     socket.connect((HOST, PORT))
     if command == 'store-to-clipboard':
-        sys.stderr.write(f"desktop-helper-client: {command} (content redacted); ")
+        sys.stderr.write(f"dh-client: {command} (content redacted); ")
     else:
-        sys.stderr.write(f"desktop-helper-client: {command} {data}; ")
+        sys.stderr.write(f"dh-client: {command} {data}; ")
     net_messaging.write_msg(socket, command)
     net_messaging.write_msg(socket, data)
     status = net_messaging.read_msg(socket)

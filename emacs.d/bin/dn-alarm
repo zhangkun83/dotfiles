@@ -1,7 +1,7 @@
 #!/bin/bash
 if [[ "$#" -lt 1 ]]; then
     echo "Usage: dn-alarm <time>"
-    desktop-helper-client.py notify 'The alarm will show like this.'
+    dh-client notify 'The alarm will show like this.'
     exit 1;
 fi
-at "$1" <<< "desktop-helper-client.py notify 'An alarm set by dn-alarm has expired.'"
+at "$1" <<< "dh-client notify 'An alarm set by dn-alarm has expired.'"

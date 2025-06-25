@@ -7,8 +7,8 @@ On linux it's the same as $HOME. On Windows it's $USERPFOFILE,
 whose value is \"C:\\Users\\foo\" and more preferrable
 than $HOME which is \"c:\\Users\\foo\\AppData\\Roaming\".")
 
-(defconst zk-desktop-helper-client-path
-  (concat (file-name-directory user-init-file) "bin/desktop-helper-client.py"))
+(defconst zk-dh-client-path
+  (concat (file-name-directory user-init-file) "bin/dh-client"))
 
 (defun zk-abbrev-home-dir-from-path (path)
   "If the given path starts with the home directory, replace that
@@ -248,7 +248,7 @@ remote directory suddenly becomes inaccessible."
                         "\"C:/Program Files/Google/Chrome/Application/chrome.exe\"")
                        ((eq system-type 'darwin)
                         "open")
-                       (t (concat zk-desktop-helper-client-path " open-url")))))
+                       (t (concat zk-dh-client-path " open-url")))))
     (shell-command (concat program " "
                          (prin1-to-string url)))))
 
