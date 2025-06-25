@@ -99,7 +99,7 @@ final class DesktopHelperServerWorker extends MessageWorker {
     while (true) {
       Message msg = stream.readMessage();
       logger.info("Received: " + msg);
-      if (msg.header.equals("store-to-clipboard")) {
+      if (msg.header.equals("write-clip")) {
         try {
           setClipboard(msg.data);
           stream.writeMessage(
@@ -107,7 +107,7 @@ final class DesktopHelperServerWorker extends MessageWorker {
         } catch (Exception e) {
           stream.writeMessage(RESPONSE_HEADER_ERROR, e.toString());
         }
-      } else if (msg.header.equals("retrieve-from-clipboard")) {
+      } else if (msg.header.equals("read-clip")) {
         try {
           String content = getClipboard();
           stream.writeMessage(RESPONSE_HEADER_OK, content);

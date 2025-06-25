@@ -20,7 +20,7 @@ buffer."
            begin end
            zk-dh-client-path
            nil temp-buffer nil
-           "store-to-clipboard")))
+           "write-clip")))
       (message (zk-trim-string (buffer-string)))))
   (deactivate-mark))
 
@@ -32,7 +32,7 @@ buffer."
     (call-process
      zk-dh-client-path
      nil (list t temp-file) nil
-     "retrieve-from-clipboard")
+     "read-clip")
     (with-temp-buffer
       (insert-file-contents temp-file)
       (message (zk-trim-string (buffer-string))))

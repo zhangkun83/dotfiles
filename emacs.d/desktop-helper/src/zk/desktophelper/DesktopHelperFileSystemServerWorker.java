@@ -30,7 +30,7 @@ final class DesktopHelperFileSystemServerWorker extends MessageWorker {
     while (true) {
       Message msg = stream.readMessage();
       logger.info("Received: " + msg);
-      if (msg.header.equals("store-to-clipboard")) {
+      if (msg.header.equals("write-clip")) {
         try {
           writeFile(PATH_CLIPBOARD, msg.data);
           writeFile(PATH_CLIPBOARD_HTML, msg.data);
@@ -41,7 +41,7 @@ final class DesktopHelperFileSystemServerWorker extends MessageWorker {
         } catch (IOException e) {
           stream.writeMessage(RESPONSE_HEADER_ERROR, e.toString());
         }
-      } else if (msg.header.equals("retrieve-from-clipboard")) {
+      } else if (msg.header.equals("read-clip")) {
         try {
           byte[] bytes = Files.readAllBytes(PATH_CLIPBOARD);
           stream.writeMessage(RESPONSE_HEADER_OK, new String(bytes, "UTF-8"));

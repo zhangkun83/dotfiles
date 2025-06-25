@@ -158,13 +158,13 @@ final class DesktopHelperProxyWorker extends MessageWorker {
 
   private Message fallbackHandleRequest(Message request) {
     logger.info("Fallback handling " + request.header);
-    if (request.header.equals("store-to-clipboard")) {
+    if (request.header.equals("write-clip")) {
       fallbackClipboard = request.data;
       return new Message(
           RESPONSE_HEADER_OK,
           "Stored " + request.data.length() + " chars in proxy fallback clipboard");
     }
-    if (request.header.equals("retrieve-from-clipboard")) {
+    if (request.header.equals("read-clip")) {
       String clipboardCopy = fallbackClipboard;
       if (clipboardCopy == null) {
         return new Message(RESPONSE_HEADER_ERROR, "Proxy fallback clipboard is not set");

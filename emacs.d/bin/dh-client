@@ -30,7 +30,7 @@ timeout_timer.start()
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket:
     socket.connect((HOST, PORT))
-    if command == 'store-to-clipboard':
+    if command == 'write-clip':
         sys.stderr.write(f"dh-client: {command} (content redacted); ")
     else:
         sys.stderr.write(f"dh-client: {command} {data}; ")
@@ -38,7 +38,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket:
     net_messaging.write_msg(socket, data)
     status = net_messaging.read_msg(socket)
     data = net_messaging.read_msg(socket)
-    if status == "OK" and command == 'retrieve-from-clipboard':
+    if status == "OK" and command == 'read-clip':
         sys.stderr.write("OK: (content retrieved)\n")
         sys.stdout.write(data)
     else:
