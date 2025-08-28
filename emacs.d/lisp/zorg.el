@@ -139,32 +139,45 @@ for scratch.el"
                             link)))
     reference))
 
-(defun zk-org-copy-region-with-backlink ()
+(defun zk-org-copy-region-with-backlink (&optional arg)
   "Copy the content of the current active region, with a
-backlink to the current headline.  The content of the headline
-won't be included, but the first timestamp will be included.
+backlink to the current headline.  By default the content of the
+headline won't be included, but the first timestamp will be included.
+When called with the prefix argument, the heading text is also included.
 
 This is useful for copying contents from a note entry to a task."
-  (interactive)
-  (unless mark-active
-    (user-error "Region not active"))
+  (interactive "P")
   (let* ((link-pair (zk-zorg-set-customid-and-get-headline-link-at-point nil))
          (link (nth 0 link-pair))
          (headline-text (nth 1 link-pair))
-         (backlink (format "([[%s][%s]])"
-                           link
-                           (if (string-match
-                                ;; The "<>" and "[]" have been
-                                ;; converted to "()" by
-                                ;; zk-zorg-set-customid-and-get-headline-link-at-point using
-                                ;; zk-org-neutralize-timestamp
-                                "(\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*\\))"
-                                headline-text)
-                               (match-string 1 headline-text)
-                             "ref"))))
-    (kill-new (concat backlink
-                      "\n"
-                      (buffer-substring (region-beginning) (region-end))))
+         ;; The "<>" and "[]" have been converted to "()" by
+         ;; zk-zorg-set-customid-and-get-headline-link-at-point using
+         ;; zk-org-neutralize-timestamp
+         (timestamp-pos
+          (string-match
+           "(\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*\\))"
+           headline-text))
+         (backlink
+          (format "([[%s][%s]])"
+                  link
+                  (if timestamp-pos
+                      (match-string 1 headline-text)
+                    "ref")))
+         (headline-without-timestamp
+          (concat
+           " "
+           (string-trim
+            (if timestamp-pos
+                (substring headline-text 0 timestamp-pos)
+              headline-text))
+           )))
+    (kill-new (concat
+               backlink
+               (if arg headline-without-timestamp "")
+               "\n"
+               (if mark-active
+                   (buffer-substring (region-beginning) (region-end))
+                 "")))
     (message "Copied region with backlink to this headline.")
     (deactivate-mark)))
 
