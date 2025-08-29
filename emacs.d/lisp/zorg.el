@@ -387,7 +387,7 @@ back to the current entry."
         (backward-char))
       (setq tag-begin (point)))
     (let ((result (completing-read
-                   "Complete tag: "
+                   "-->Complete tag: "
                    (org-global-tags-completion-table)
                    nil
                    nil
