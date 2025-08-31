@@ -178,7 +178,8 @@ This is useful for copying contents from a note entry to a task."
                (if mark-active
                    (buffer-substring (region-beginning) (region-end))
                  "")))
-    (message "Copied region with backlink to this headline.")
+    (message "Copied %sbacklink to this headline."
+             (if mark-active "region with " ""))
     (deactivate-mark)))
 
 (defun zk-org-get-scratch-reference-metadata ()
