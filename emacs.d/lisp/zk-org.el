@@ -65,6 +65,47 @@ backward."
       ;; it just fine.
       (= c ?#)))
 
+(defun zk-org-mark-heading-content ()
+  "Mark the content of the current heading, excluding subtrees.
+The marked region starts after the current heading and ends before the
+next heading of the same or higher level.  The point is at the beginning
+of the region, while the mark is at the end."
+  (org-back-to-heading)
+  (let* ((beg (progn (forward-line) (point)))
+         (end (or (outline-next-heading) (point-max))))
+    (set-mark end)
+    (goto-char beg)))
+
+(defun zk-org-get-current-heading-link ()
+  "Get the link to the current Org heading without affecting org-stored-links.
+
+This function prioritizes link types in the following order:
+1. CUSTOM_ID
+2. ID
+3. Heading title (fuzzy link)
+
+It returns the full link string, including the filename."
+  (when (eq major-mode 'org-mode)
+    (save-excursion
+      (org-back-to-heading)
+      (let* ((element (org-element-at-point))
+             (file (buffer-file-name)))
+        ;; First, ensure we are actually on a headline.
+        (when (and element (eq (org-element-type element) 'headline))
+          (let* (;; Get all relevant properties from the headline element.
+                 (custom-id (org-element-property :CUSTOM_ID element))
+                 (id (org-element-property :ID element))
+                 (title (org-element-property :title element)))
+            (cond
+             ;; 1. If CUSTOM_ID exists, use it. Format is [[file::#custom-id]]
+             (custom-id (format "file:%s::#%s" file custom-id))
+             ;; 2. If ID exists, use it. Format is [[file::#id-uuid]]
+             (id (format "file:%s::#%s" file id))
+             ;; 3. Otherwise, fall back to the heading title. Format is [[file::*Heading Title]]
+             (title (format "file:%s::*%s" file title))
+             ;; 4. Fallback if something is wrong.
+             (t nil))))))))
+
 (advice-add 'org-agenda-switch-to :around #'zk-org-push-mark-ring-advice)
 (advice-add 'org-next-link :around #'zk-push-mark-ring-advice)
 (advice-add 'org-next-visible-heading :around #'zk-push-mark-ring-advice)

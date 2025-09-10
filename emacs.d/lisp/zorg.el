@@ -757,6 +757,73 @@ to close the current sessions."
   (ignore-errors
     (nth 4 (org-heading-components))))
 
+(defun zk-zorg-view-reference-tree ()
+  "Create a buffer to display the reference tree of the current heading
+entry (the starting entry).  A reference tree is a tree of heading
+entries where the children of a node are the entries that contains links
+point back to that node.
+
+If a heading will appear at most once in the reference tree, so that
+there won't be any infinite loops in the resulting tree.
+
+This is useful for exploring all the related entries, directly or
+indirectly linking to the starting entry."
+  (interactive)
+  (let ((output-buffer (zk-recreate-buffer "*zorg ref tree*"))
+        (visited-entry-links-hash-set (make-hash-table :test 'equal)))
+    (with-current-buffer output-buffer
+      (org-mode))
+    (zk-zorg-view-reference-tree--create-subtree-for-current-entry
+     0 visited-entry-links-hash-set output-buffer)
+    (switch-to-buffer output-buffer)))
+
+(defun zk-zorg-view-reference-tree--create-subtree-for-current-entry
+    (level visited-entry-links-hash-set output-buffer)
+  (save-excursion
+    (org-back-to-heading)
+    (let* ((element (or (org-element-at-point)
+                        (user-error "No heading found")))
+           (file (file-name-nondirectory (buffer-file-name)))
+           (title (zk-org-neutralize-timestamp (org-element-property :title element)))
+           (link (zk-zorg-view-reference-tree--get-current-heading-link)))
+      (puthash link t visited-entry-links-hash-set)
+      (with-current-buffer output-buffer
+        (insert (make-string (* 2 level) ?\ ) "- " file ":" title "[[" link "][^]]")
+        (newline)))
+    (let ((id (zk-org-get-customid-at-point)))
+      (when id
+        (org-map-entries
+         (lambda ()
+           (zk-zorg-view-reference-tree--map-current-entry
+            level visited-entry-links-hash-set id output-buffer))
+         t
+         'agenda-with-archives)))))
+
+(defun zk-zorg-view-reference-tree--get-current-heading-link ()
+  (or (zk-org-get-current-heading-link)
+      (error "Failed to get heading link at pos %d of %s"
+                  (point) (buffer-file-name))))
+
+(defun zk-zorg-view-reference-tree--map-current-entry
+    (level visited-entry-links-hash-set id output-buffer)
+  "Called by org-map-entries to process the currently visited entry.
+
+If the given id is linked from this entry, and this entry's link doesn't
+yet exists in visited-entry-links-hash-set, it will write a link in the
+output-buffer, and add the link to visited-entry-links-hash-set."
+  (when (zk-zorg-view-reference-tree--contains-link-to-p id)
+    (let ((link (zk-zorg-view-reference-tree--get-current-heading-link)))
+      (unless (gethash link visited-entry-links-hash-set)
+        ;; Recursively create the subtree for this entry
+        (zk-zorg-view-reference-tree--create-subtree-for-current-entry
+         (+ level 1) visited-entry-links-hash-set output-buffer)))))
+
+(defun zk-zorg-view-reference-tree--contains-link-to-p (id)
+  "Returns t if the current entry (excluding subtrees) contains a link to the given id."
+  (save-mark-and-excursion
+    (zk-org-mark-heading-content)
+    (if (search-forward (concat id "]") (region-end) t) t nil)))
+
 ;; Allow tag completion input (bound to TAB (C-i)) in minibuffers.
 ;; enable-recursive-minibuffers is needed because
 ;; zk-org-insert-tag-completion uses minibuffer
