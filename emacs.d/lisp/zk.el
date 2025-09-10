@@ -646,6 +646,16 @@ hashtable."
   ;; `gethash` returns a list.
   (gethash key multimap))
 
+(defun zk-is-subset-p (list1 list2)
+  "Return t if LIST1 is a subset of LIST2, nil otherwise.
+This function checks if every element in LIST1 is also present
+in LIST2. The order of elements and duplicates do not matter for
+the subset check itself, but the comparison is done with `member`,
+which uses `equal` for comparison."
+  (or (null list1)
+      (and (member (car list1) list2)
+           (zk-is-subset-p (cdr list1) list2))))
+
 (defun zk-push-mark-ring-advice (orig-fun &rest args)
   "Put this advice around any function to push the original
 point to the mark ring if the function changes the point while

@@ -517,6 +517,7 @@ that need to be sorted."
   (local-set-key (kbd "C-c l w") 'zk-org-copy-region-with-backlink)
   (local-set-key (kbd "C-c l b") 'zk-org-log-backlink-at-point)
   (local-set-key (kbd "C-c l f") 'zk-org-find-references-to-current-entry)
+  (local-set-key (kbd "C-c l C-f") 'zk-zorg-create-reference-tree-command)
   (local-set-key (kbd "C-c l s") 'zk-org-locate-in-scratch-task-queue)
   (local-set-key (kbd "C-c l C-s") 'zk-org-fill-scratch-task-queue)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
@@ -760,7 +761,7 @@ to close the current sessions."
 
 ;; Reference tree implementation
 
-(defun zk-zorg-create-reference-tree ()
+(defun zk-zorg-create-reference-tree-command ()
   "Create a buffer to display the reference tree of the current heading
 entry (the starting entry).  A reference tree is a tree of heading
 entries where the children of a node are the entries that contains links
@@ -772,20 +773,60 @@ there won't be any infinite loops in the resulting tree.
 This is useful for exploring all the related entries, directly or
 indirectly linking to the starting entry."
   (interactive)
-  (let ((output-buffer (zk-recreate-buffer "*zorg reference tree*"))
-        (visited-entry-links-hash-set (make-hash-table :test 'equal))
-        (destid-to-srclink-mp
-         (zk-zorg-create-reference-tree--create-destid-to-srclink-multimap)))
+  (let* ((all-tags (mapcar #'car (org-global-tags-completion-table)))
+         (tag (completing-read
+               "Reftree for this heading with (optional) tag: "
+               all-tags
+               nil
+               t
+               nil
+               t)))
+    (zk-zorg-create-reference-tree (when (and tag (> (length tag) 0)) (list tag)))))
+
+(defun zk-zorg-create-reference-tree (&optional required-tags)
+  "Create a buffer to display the reference tree of the current heading
+entry (the starting entry).  A reference tree is a tree of heading
+entries where the children of a node are the entries that contains links
+point back to that node.
+
+If a heading will appear at most once in the reference tree, so that
+there won't be any infinite loops in the resulting tree.
+
+This is useful for exploring all the related entries, directly or
+indirectly linking to the starting entry.
+
+If an list of tags is provided to the optional required-tags argument,
+this function will expand the search from an entry only when the entry
+is tagged with all of the tags."
+  (let* ((entry-alist
+          (zk-zorg-create-reference-tree--create-entry-alist-for-current-entry))
+         (visited-entry-links-hash-set (make-hash-table :test 'equal))
+         (destid-to-srclink-mp
+          (zk-zorg-create-reference-tree--create-destid-to-srclink-multimap))
+         (output-buffer
+          (zk-recreate-buffer
+           (concat "*zorg reftree* "
+                   (alist-get ':title entry-alist)
+                   (if required-tags
+                       (concat " (" (mapconcat 'identity required-tags ":") ")")
+                     "")))))
     (with-current-buffer output-buffer
       (org-mode))
     (zk-zorg-create-reference-tree--create-subtree-for-entry
      0
-     (zk-zorg-create-reference-tree--create-entry-alist-for-current-entry)
-     visited-entry-links-hash-set destid-to-srclink-mp output-buffer)
+     entry-alist
+     required-tags
+     visited-entry-links-hash-set
+     destid-to-srclink-mp output-buffer)
     (switch-to-buffer output-buffer)))
 
 (defun zk-zorg-create-reference-tree--create-subtree-for-entry
-    (level entry-alist visited-entry-links-hash-set destid-to-srclink-mp output-buffer)
+    (level
+     entry-alist
+     required-tags
+     visited-entry-links-hash-set
+     destid-to-srclink-mp
+     output-buffer)
   (let ((todo-keyword (alist-get ':todo-keyword entry-alist))
         (link (alist-get ':link entry-alist))
         (tags (alist-get ':tags entry-alist))
@@ -799,33 +840,37 @@ indirectly linking to the starting entry."
               (if tags (concat " /" (mapconcat 'identity tags ":") "/") "")
               " [[" link "][^]]")
       (newline))
-    (when custom-id
+    (when (and custom-id
+               (zk-is-subset-p required-tags tags))
       (dolist (src-entry-alist (zk-multimap-get destid-to-srclink-mp custom-id))
         (unless (gethash (alist-get ':link src-entry-alist) visited-entry-links-hash-set)
           ;; Recursively create the subtree for this entry
           (zk-zorg-create-reference-tree--create-subtree-for-entry
            (+ level 1)
            src-entry-alist
+           required-tags
            visited-entry-links-hash-set
            destid-to-srclink-mp
            output-buffer))))))
 
 (defun zk-zorg-create-reference-tree--create-entry-alist-for-current-entry ()
   "Create an alist for the current heading, which contains keys (:link :todo-keyword :title :file :tags :custom-id)."
-  (let* ((element (or (org-element-at-point)
-                      (error "No heading found")))
-         (heading-link (zk-zorg-create-reference-tree--get-current-heading-link))
-         (custom-id (zk-org-get-customid-at-point))
-         (file (file-name-nondirectory (buffer-file-name)))
-         (todo-keyword (org-element-property :todo-keyword element))
-         (tags (org-element-property :tags element))
-         (title (zk-org-neutralize-timestamp (org-element-property :title element))))
-    (list (cons ':link heading-link)
-          (cons ':todo-keyword todo-keyword)
-          (cons ':title title)
-          (cons ':file file)
-          (cons ':tags tags)
-          (cons ':custom-id custom-id))))
+  (save-excursion
+    (org-back-to-heading)
+    (let* ((element (or (org-element-at-point)
+                        (error "No heading found")))
+           (heading-link (zk-zorg-create-reference-tree--get-current-heading-link))
+           (custom-id (zk-org-get-customid-at-point))
+           (file (file-name-nondirectory (buffer-file-name)))
+           (todo-keyword (org-element-property :todo-keyword element))
+           (tags (org-element-property :tags element))
+           (title (zk-org-neutralize-timestamp (org-element-property :title element))))
+      (list (cons ':link heading-link)
+            (cons ':todo-keyword todo-keyword)
+            (cons ':title title)
+            (cons ':file file)
+            (cons ':tags tags)
+            (cons ':custom-id custom-id)))))
 
 (defun zk-zorg-create-reference-tree--create-destid-to-srclink-multimap ()
   "Create a multimap maps, where the key are entry IDs (CUSTOM_ID), and the
