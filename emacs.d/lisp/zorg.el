@@ -196,7 +196,7 @@ and the second element is the reference ID."
 server."
   (interactive)
   (save-excursion
-    (zk-org-move-to-current-heading)
+    (org-back-to-heading)
     (let ((id (zk-org-get-customid-at-point)))
       (unless id
         (error "Entry doesn't have CUSTOM_ID"))
@@ -266,7 +266,7 @@ Returns the CUSTOM_ID."
   (unless (eq major-mode 'org-mode)
     (user-error "Not in org-mode"))
   (save-excursion
-    (zk-org-move-to-current-heading)
+    (org-back-to-heading)
     (let* ((headline (org-element-at-point))
            (headline-text (substring-no-properties (org-get-heading t t t t)))
            (custom-id (or
@@ -298,7 +298,7 @@ zk-zorg-profile-name so that it can be used for scratch.el"
     (unless (eq major-mode 'org-mode)
         (user-error "Not in org-mode"))
     (save-excursion
-      (zk-org-move-to-current-heading)
+      (org-back-to-heading)
       (let* ((headline (org-element-at-point))
              (headline-text (substring-no-properties (org-get-heading t t t t)))
              (custom-id (zk-zorg-set-customid-at-point))
@@ -310,7 +310,7 @@ zk-zorg-profile-name so that it can be used for scratch.el"
   "Returns the CUSTOM_ID of the current org entry.  nil if CUSTOM_ID
 is not there."
   (save-excursion
-    (zk-org-move-to-current-heading)
+    (org-back-to-heading)
     (org-element-property :CUSTOM_ID (org-element-at-point))))
 
 (defun zk-org-find-references-to-current-entry ()
@@ -366,15 +366,6 @@ back to the current entry."
       (org-open-at-point)
       (zk-org-add-note-to-logbook
        (concat "Referenced in: " back-ref) t))))
-
-(defun zk-org-move-to-current-heading ()
-  "Move to the current heading if not already at a heading."
-  (interactive)
-  ;; Don't use org-previous-visible-heading because it will push the
-  ;; mark thanks to zk-push-mark-ring-advice
-  (while (not (eq 'headline (org-element-type (org-element-at-point))))
-    (previous-line))
-  (org-beginning-of-line))
 
 (defun zk-org-insert-tag-completion ()
   "Insert a tag to the current buffer with completion"
