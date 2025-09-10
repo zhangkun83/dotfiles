@@ -71,8 +71,14 @@ The marked region starts after the current heading and ends before the
 next heading of the same or higher level.  The point is at the beginning
 of the region, while the mark is at the end."
   (org-back-to-heading)
-  (let* ((beg (progn (forward-line) (point)))
-         (end (or (outline-next-heading) (point-max))))
+  (forward-line)
+  (let* ((beg (point))
+         (end (if (org-at-heading-p)
+                   ;; A corner case where the heading has no content,
+                   ;; thus forward-line just moved the point to the
+                   ;; next heading.
+                   (point)
+                (or (outline-next-heading) (point-max)))))
     (set-mark end)
     (goto-char beg)))
 
