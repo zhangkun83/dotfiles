@@ -636,6 +636,16 @@ redraw the buffer after appending the message."
   ;; Allow the buffer to redraw
   (sit-for .1))
 
+(defun zk-multimap-add (multimap key value)
+  "Add a VALUE to KEY in the multimap, which is a hashtable."
+  (push value (gethash key multimap)))
+
+(defun zk-multimap-get (multimap key)
+  "Get the list of values associated with KEY in the multimap, which is a
+hashtable."
+  ;; `gethash` returns a list.
+  (gethash key multimap))
+
 (defun zk-push-mark-ring-advice (orig-fun &rest args)
   "Put this advice around any function to push the original
 point to the mark ring if the function changes the point while
