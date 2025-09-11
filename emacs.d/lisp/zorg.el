@@ -816,6 +816,7 @@ is tagged with all of the tags."
             "pointing to the parent entry.")
     (org-fill-paragraph)
     (goto-char 0)
+    (set-buffer-modified-p nil)
     (read-only-mode t)))
 
 (defun zk-zorg-create-reference-tree--bfs-filter-destid-to-srclink-map
