@@ -9,6 +9,7 @@
 (require 'org-element)
 (require 'org-tempo)
 (require 'dash)
+(require 'queue)
 
 (defvar zk-zorg-rsync-backup-dir
   nil "The remote path used by rsync for backing up org files")
@@ -791,7 +792,6 @@ this function will expand the search from an entry only when the entry
 is tagged with all of the tags."
   (let* ((entry-alist
           (zk-zorg-create-reference-tree--create-entry-alist-for-current-entry))
-         (visited-entry-links-hash-set (make-hash-table :test 'equal))
          (destid-to-srclink-mp
           (zk-zorg-create-reference-tree--create-destid-to-srclink-multimap))
          (output-buffer
@@ -800,29 +800,59 @@ is tagged with all of the tags."
                    (alist-get ':title entry-alist)
                    (if required-tags
                        (concat " (" (mapconcat 'identity required-tags ":") ")")
-                     "")))))
+                     ""))))
+         (bfs-filtered-destid-to-srclink-mp
+          (zk-zorg-create-reference-tree--bfs-filter-destid-to-srclink-map
+           entry-alist required-tags destid-to-srclink-mp)))
     (with-current-buffer output-buffer
       (org-mode))
     (zk-zorg-create-reference-tree--create-subtree-for-entry
      0
      entry-alist
+     bfs-filtered-destid-to-srclink-mp
+     output-buffer)
+    (switch-to-buffer output-buffer)
+    (read-only-mode t)))
+
+(defun zk-zorg-create-reference-tree--bfs-filter-destid-to-srclink-map
+    (start-entry-alist
      required-tags
-     visited-entry-links-hash-set
-     destid-to-srclink-mp output-buffer)
-    (switch-to-buffer output-buffer)))
+     destid-to-srclink-mp)
+  "Using the given destid-to-srclink-mp multimap created by
+zk-zorg-create-reference-tree--create-destid-to-srclink-multimap, do a
+BFS traverse from the given start-entry-alist, until all entry links are
+visited.  Record the used destid-to-srclink edges during the traverse in
+a new multimap and return it."
+  (let ((bfs-queue (make-queue))
+        (visited-entry-links-hash-set (make-hash-table :test 'equal))
+        (filtered-mp (make-hash-table :test 'equal)))
+    (queue-enqueue bfs-queue start-entry-alist)
+    (while (not (queue-empty bfs-queue))
+      (let* ((entry-alist (queue-dequeue bfs-queue))
+             (link (alist-get ':link entry-alist))
+             (tags (alist-get ':tags entry-alist))
+             (custom-id (alist-get ':custom-id entry-alist)))
+        ;; Although we record srclink to visited-entry-links-hash-set below,
+        ;; this is necessary for the very first entry-alist.
+        (puthash link t visited-entry-links-hash-set)
+        (when (and custom-id (zk-is-subset-p required-tags tags))
+          (dolist (src-entry-alist (zk-multimap-get destid-to-srclink-mp custom-id))
+            (let ((srclink (alist-get ':link src-entry-alist)))
+              (unless (gethash srclink visited-entry-links-hash-set)
+                (puthash srclink t visited-entry-links-hash-set)
+                (zk-multimap-add filtered-mp custom-id src-entry-alist)
+                (queue-enqueue bfs-queue src-entry-alist)))))))
+    filtered-mp))
 
 (defun zk-zorg-create-reference-tree--create-subtree-for-entry
     (level
      entry-alist
-     required-tags
-     visited-entry-links-hash-set
      destid-to-srclink-mp
      output-buffer)
   (let ((todo-keyword (alist-get ':todo-keyword entry-alist))
         (link (alist-get ':link entry-alist))
         (tags (alist-get ':tags entry-alist))
         (custom-id (alist-get ':custom-id entry-alist)))
-    (puthash link t visited-entry-links-hash-set)
     (with-current-buffer output-buffer
       (insert (make-string (* 2 level) ?\ ) "- "
               (if todo-keyword (concat "*" todo-keyword "* ") "")
@@ -831,18 +861,14 @@ is tagged with all of the tags."
               (if tags (concat " /" (mapconcat 'identity tags ":") "/") "")
               " [[" link "][^]]")
       (newline))
-    (when (and custom-id
-               (zk-is-subset-p required-tags tags))
+    (when custom-id
       (dolist (src-entry-alist (zk-multimap-get destid-to-srclink-mp custom-id))
-        (unless (gethash (alist-get ':link src-entry-alist) visited-entry-links-hash-set)
-          ;; Recursively create the subtree for this entry
-          (zk-zorg-create-reference-tree--create-subtree-for-entry
-           (+ level 1)
-           src-entry-alist
-           required-tags
-           visited-entry-links-hash-set
-           destid-to-srclink-mp
-           output-buffer))))))
+        ;; Recursively create the subtree for this entry
+        (zk-zorg-create-reference-tree--create-subtree-for-entry
+         (+ level 1)
+         src-entry-alist
+         destid-to-srclink-mp
+         output-buffer)))))
 
 (defun zk-zorg-create-reference-tree--create-entry-alist-for-current-entry ()
   "Create an alist for the current heading, which contains keys (:link :todo-keyword :title :file :tags :custom-id)."
