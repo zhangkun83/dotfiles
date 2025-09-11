@@ -314,15 +314,6 @@ is not there."
     (org-back-to-heading)
     (org-element-property :CUSTOM_ID (org-element-at-point))))
 
-(defun zk-org-find-references-to-current-entry ()
-  "Search for references to the current entry using the
- CUSTOM_ID."
-  (interactive)
-  (let ((custom-id (zk-org-get-customid-at-point)))
-    (unless custom-id
-      (user-error "This entry doesn't have a CUSTOM_ID, thus it won't have any reference."))
-    (org-search-view nil custom-id)))
-
 (defun zk-org-neutralize-timestamp (text)
   "Convert org timestemps like \"[2023-07-27 Thu 14:58]\" or
 \"<2023-07-27 Thu 14:58>\" to a format that is not parsed by
@@ -508,7 +499,7 @@ that need to be sorted."
   (local-set-key (kbd "C-c l r") 'zk-org-copy-external-reference)
   (local-set-key (kbd "C-c l w") 'zk-org-copy-region-with-backlink)
   (local-set-key (kbd "C-c l b") 'zk-org-log-backlink-at-point)
-  (local-set-key (kbd "C-c l f") 'zk-org-find-references-to-current-entry)
+  (local-set-key (kbd "C-c l f") 'zk-zorg-create-reference-tree-command-1level)
   (local-set-key (kbd "C-c l C-f") 'zk-zorg-create-reference-tree-command)
   (local-set-key (kbd "C-c l s") 'zk-org-locate-in-scratch-task-queue)
   (local-set-key (kbd "C-c l C-s") 'zk-org-fill-scratch-task-queue)
@@ -753,6 +744,10 @@ to close the current sessions."
 
 ;; Reference tree implementation
 
+(defun zk-zorg-create-reference-tree-command-1level ()
+  (interactive)
+  (zk-zorg-create-reference-tree 1))
+
 (defun zk-zorg-create-reference-tree-command ()
   "Create a buffer to display the reference tree of the current heading
 entry (the starting entry).  A reference tree is a tree of heading
@@ -773,9 +768,10 @@ indirectly linking to the starting entry."
                t
                nil
                t)))
-    (zk-zorg-create-reference-tree (when (and tag (> (length tag) 0)) (list tag)))))
+    (zk-zorg-create-reference-tree
+     nil (when (and tag (> (length tag) 0)) (list tag)))))
 
-(defun zk-zorg-create-reference-tree (&optional required-tags)
+(defun zk-zorg-create-reference-tree (&optional max-level required-tags)
   "Create a buffer to display the reference tree of the current heading
 entry (the starting entry).  A reference tree is a tree of heading
 entries where the children of a node are the entries that contains links
@@ -797,6 +793,7 @@ is tagged with all of the tags."
          (output-buffer
           (zk-recreate-buffer
            (concat "*zorg reftree* "
+                   (if max-level (format "(max-level:%d) " max-level) "")
                    (alist-get ':title entry-alist)
                    (if required-tags
                        (concat " (" (mapconcat 'identity required-tags ":") ")")
@@ -808,10 +805,17 @@ is tagged with all of the tags."
       (org-mode))
     (zk-zorg-create-reference-tree--create-subtree-for-entry
      0
+     max-level
      entry-alist
      bfs-filtered-destid-to-srclink-mp
      output-buffer)
     (switch-to-buffer output-buffer)
+    (newline)
+    (insert "Note: this is a back-reference tree, "
+            "where children entries contain links "
+            "pointing to the parent entry.")
+    (org-fill-paragraph)
+    (goto-char 0)
     (read-only-mode t)))
 
 (defun zk-zorg-create-reference-tree--bfs-filter-destid-to-srclink-map
@@ -846,6 +850,7 @@ a new multimap and return it."
 
 (defun zk-zorg-create-reference-tree--create-subtree-for-entry
     (level
+     max-level
      entry-alist
      destid-to-srclink-mp
      output-buffer)
@@ -861,11 +866,13 @@ a new multimap and return it."
               (if tags (concat " /" (mapconcat 'identity tags ":") "/") "")
               " [[" link "][^]]")
       (newline))
-    (when custom-id
+    (when (and custom-id
+               (not (and max-level (>= level max-level))))
       (dolist (src-entry-alist (zk-multimap-get destid-to-srclink-mp custom-id))
         ;; Recursively create the subtree for this entry
         (zk-zorg-create-reference-tree--create-subtree-for-entry
          (+ level 1)
+         max-level
          src-entry-alist
          destid-to-srclink-mp
          output-buffer)))))
