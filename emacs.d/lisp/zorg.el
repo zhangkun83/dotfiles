@@ -788,8 +788,11 @@ this function will expand the search from an entry only when the entry
 is tagged with all of the tags."
   (let* ((entry-alist
           (zk-zorg-create-reference-tree--create-entry-alist-for-current-entry))
+         (pr (make-progress-reporter "Reference tree"))
          (destid-to-srclink-mp
-          (zk-zorg-create-reference-tree--create-destid-to-srclink-multimap))
+          (progn
+            (progress-reporter-force-update pr "creating index")
+            (zk-zorg-create-reference-tree--create-destid-to-srclink-multimap)))
          (output-buffer
           (zk-recreate-buffer
            (concat "*zorg reftree* "
@@ -799,10 +802,13 @@ is tagged with all of the tags."
                        (concat " (" (mapconcat 'identity required-tags ":") ")")
                      ""))))
          (bfs-filtered-destid-to-srclink-mp
-          (zk-zorg-create-reference-tree--bfs-filter-destid-to-srclink-map
-           entry-alist required-tags destid-to-srclink-mp)))
+          (progn
+            (progress-reporter-force-update pr "searching related entries")
+            (zk-zorg-create-reference-tree--bfs-filter-destid-to-srclink-map
+             entry-alist required-tags destid-to-srclink-mp))))
     (with-current-buffer output-buffer
       (org-mode))
+    (progress-reporter-force-update pr "generating output")
     (zk-zorg-create-reference-tree--create-subtree-for-entry
      0
      max-level
@@ -817,6 +823,7 @@ is tagged with all of the tags."
     (org-fill-paragraph)
     (goto-char 0)
     (set-buffer-modified-p nil)
+    (progress-reporter-done pr)
     (read-only-mode t)))
 
 (defun zk-zorg-create-reference-tree--bfs-filter-destid-to-srclink-map
