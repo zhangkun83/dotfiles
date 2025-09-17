@@ -826,7 +826,8 @@ refer to any other entries."
            max-level
            root-entry
            bfs-filtered-destid-to-srclink-mp
-           output-buffer)
+           output-buffer
+           (make-hash-table :test 'equal))
           (with-current-buffer output-buffer
             (newline)))))
     (switch-to-buffer output-buffer)
@@ -883,7 +884,8 @@ is tagged with all of the tags."
      max-level
      entry-alist
      bfs-filtered-destid-to-srclink-mp
-     output-buffer)
+     output-buffer
+     (make-hash-table :test 'equal))
     (switch-to-buffer output-buffer)
     (newline)
     (insert "(Back-reference tree, where children entries contain links "
@@ -929,29 +931,33 @@ a new multimap and return it."
      max-level
      entry-alist
      destid-to-srclink-mp
-     output-buffer)
+     output-buffer
+     visited-entry-links-hash-set)
   (let ((todo-keyword (alist-get ':todo-keyword entry-alist))
         (link (alist-get ':link entry-alist))
         (tags (alist-get ':tags entry-alist))
         (custom-id (alist-get ':custom-id entry-alist)))
-    (with-current-buffer output-buffer
-      (insert (make-string (* 2 level) ?\ ) (if (= 0 level) "+ " "- ")
-              (if todo-keyword (concat "*" todo-keyword "* ") "")
-              (alist-get ':title entry-alist)
-              " (" (alist-get ':file entry-alist) ")"
-              (if tags (concat " /" (mapconcat 'identity tags ":") "/") "")
-              " [[" link "][^]]")
-      (newline))
-    (when (and custom-id
-               (not (and max-level (>= level max-level))))
-      (dolist (src-entry-alist (zk-multimap-get destid-to-srclink-mp custom-id))
-        ;; Recursively create the subtree for this entry
-        (zk-zorg-create-reference-tree--create-subtree-for-entry
-         (+ level 1)
-         max-level
-         src-entry-alist
-         destid-to-srclink-mp
-         output-buffer)))))
+    (unless (gethash link visited-entry-links-hash-set)
+      (puthash link t visited-entry-links-hash-set)
+      (with-current-buffer output-buffer
+        (insert (make-string (* 2 level) ?\ ) (if (= 0 level) "+ " "- ")
+                (if todo-keyword (concat "*" todo-keyword "* ") "")
+                (alist-get ':title entry-alist)
+                " (" (alist-get ':file entry-alist) ")"
+                (if tags (concat " /" (mapconcat 'identity tags ":") "/") "")
+                " [[" link "][^]]")
+        (newline))
+      (when (and custom-id
+                 (not (and max-level (>= level max-level))))
+        (dolist (src-entry-alist (zk-multimap-get destid-to-srclink-mp custom-id))
+          ;; Recursively create the subtree for this entry
+          (zk-zorg-create-reference-tree--create-subtree-for-entry
+           (+ level 1)
+           max-level
+           src-entry-alist
+           destid-to-srclink-mp
+           output-buffer
+           visited-entry-links-hash-set))))))
 
 (defun zk-zorg-create-reference-tree--create-entry-alist-for-current-entry ()
   "Create an alist for the current heading, which contains keys (:link :todo-keyword :title :file :tags :custom-id)."
