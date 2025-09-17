@@ -501,6 +501,7 @@ that need to be sorted."
   (local-set-key (kbd "C-c l b") 'zk-org-log-backlink-at-point)
   (local-set-key (kbd "C-c l f") 'zk-zorg-create-reference-tree-command-1level)
   (local-set-key (kbd "C-c l C-f") 'zk-zorg-create-reference-tree-command)
+  (local-set-key (kbd "C-c l C-t") 'zk-zorg-create-reference-trees-for-tags-command)
   (local-set-key (kbd "C-c l s") 'zk-org-locate-in-scratch-task-queue)
   (local-set-key (kbd "C-c l C-s") 'zk-org-fill-scratch-task-queue)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
@@ -771,6 +772,73 @@ indirectly linking to the starting entry."
     (zk-zorg-create-reference-tree
      nil (when (and tag (> (length tag) 0)) (list tag)))))
 
+(defun zk-zorg-create-reference-trees-for-tags-command ()
+  "Create a buffer to display the reference trees of all root entries
+that match the given root-tags.  A root entry is an entry that doesn't back
+refer to any other entries."
+  (interactive)
+  (let* ((all-tags (mapcar #'car (org-global-tags-completion-table)))
+         (tag (completing-read
+               "Reftrees for all root entries with this tag: "
+               all-tags
+               nil
+               t
+               nil
+               t)))
+    (when (equal "" tag) (user-error "No tag entered."))
+    (zk-zorg-create-reference-trees-for-tags (list tag) nil (list tag))))
+
+(defun zk-zorg-create-reference-trees-for-tags (root-tags &optional max-level required-tags)
+  "Create a buffer to display the reference trees of all root entries that
+match the given root-tags.  A root entry is an entry that doesn't back
+refer to any other entries."
+  (let* ((pr (make-progress-reporter "Reference trees for tags"))
+         (destid-to-srclink-mp-alist
+          (progn
+            (progress-reporter-force-update pr "creating index")
+            (zk-zorg-create-reference-tree--create-destid-to-srclink-multimap)))
+         (destid-to-srclink-mp
+          (alist-get ':destid-to-srclink-mp destid-to-srclink-mp-alist))
+         (root-entry-list
+          (alist-get ':root-entry-list destid-to-srclink-mp-alist))
+         (output-buffer
+          (zk-recreate-buffer
+           (concat "*zorg tag reftrees* "
+                   (if max-level (format "(max-level:%d) " max-level) "")
+                   (concat " for (tags: " (mapconcat 'identity root-tags ":") ")")
+                   (if required-tags
+                       (concat " (required tags: " (mapconcat 'identity required-tags ":") ")")
+                     "")))))
+    (with-current-buffer output-buffer
+      (org-mode))
+    (dolist (root-entry root-entry-list)
+      (when (zk-is-subset-p root-tags (alist-get ':tags root-entry))
+        (let ((bfs-filtered-destid-to-srclink-mp
+               (progn
+                 (progress-reporter-force-update
+                  pr (concat "searching related entries for " (alist-get ':title root-entry)))
+                 (zk-zorg-create-reference-tree--bfs-filter-destid-to-srclink-map
+                  root-entry required-tags destid-to-srclink-mp))))
+          (progress-reporter-force-update
+           pr (concat "generating output for " (alist-get ':title root-entry)))
+          (zk-zorg-create-reference-tree--create-subtree-for-entry
+           0
+           max-level
+           root-entry
+           bfs-filtered-destid-to-srclink-mp
+           output-buffer)
+          (with-current-buffer output-buffer
+            (newline)))))
+    (switch-to-buffer output-buffer)
+    (newline)
+    (insert "(Back-reference trees, where children entries contain links "
+            "pointing to the parent entry.")
+    (org-fill-paragraph)
+    (goto-char 0)
+    (set-buffer-modified-p nil)
+    (progress-reporter-done pr)
+    (read-only-mode t)))
+
 (defun zk-zorg-create-reference-tree (&optional max-level required-tags)
   "Create a buffer to display the reference tree of the current heading
 entry (the starting entry).  A reference tree is a tree of heading
@@ -792,7 +860,8 @@ is tagged with all of the tags."
          (destid-to-srclink-mp
           (progn
             (progress-reporter-force-update pr "creating index")
-            (zk-zorg-create-reference-tree--create-destid-to-srclink-multimap)))
+            (alist-get ':destid-to-srclink-mp
+                       (zk-zorg-create-reference-tree--create-destid-to-srclink-multimap))))
          (output-buffer
           (zk-recreate-buffer
            (concat "*zorg reftree* "
@@ -817,9 +886,8 @@ is tagged with all of the tags."
      output-buffer)
     (switch-to-buffer output-buffer)
     (newline)
-    (insert "Note: this is a back-reference tree, "
-            "where children entries contain links "
-            "pointing to the parent entry.")
+    (insert "(Back-reference tree, where children entries contain links "
+            "pointing to the parent entry.)")
     (org-fill-paragraph)
     (goto-char 0)
     (set-buffer-modified-p nil)
@@ -867,7 +935,7 @@ a new multimap and return it."
         (tags (alist-get ':tags entry-alist))
         (custom-id (alist-get ':custom-id entry-alist)))
     (with-current-buffer output-buffer
-      (insert (make-string (* 2 level) ?\ ) "- "
+      (insert (make-string (* 2 level) ?\ ) (if (= 0 level) "+ " "- ")
               (if todo-keyword (concat "*" todo-keyword "* ") "")
               (alist-get ':title entry-alist)
               " (" (alist-get ':file entry-alist) ")"
@@ -907,28 +975,44 @@ a new multimap and return it."
 (defun zk-zorg-create-reference-tree--create-destid-to-srclink-multimap ()
   "Create a multimap maps, where the key are entry IDs (CUSTOM_ID), and the
 values are alists (:link :todo-keyword :title :file :tags) of the heading
-entries that contain references to the key ID."
-  (let ((id-to-link-multimap (make-hash-table :test 'equal)))
+entries that contain references to the key ID.
+
+Also creates a list that contains the alists of entries that don't
+contain any references.  Those are considered as root entries.
+
+The return value is an alist (:destid-to-srclink-mp :root-entry-list).
+"
+  (let ((id-to-link-multimap (make-hash-table :test 'equal))
+        (root-entry-list nil))
     (org-map-entries
      (lambda ()
-       (let* ((entry-alist
-               (zk-zorg-create-reference-tree--create-entry-alist-for-current-entry)))
+       (let ((entry-alist
+              (zk-zorg-create-reference-tree--create-entry-alist-for-current-entry))
+             (is-root-entry-p t))
          (save-mark-and-excursion
            (zk-org-mark-heading-content)
            ;; Search for CUSTOM_ID references, in the format
            ;; "[[file:notes2024q1.org::#ramp_up_on_mitigation_engine_work][link]]"
            ;; where "ramp_up_on_mitigation_engine_work" is the ID to be extracted
-           (while (re-search-forward "\\([^][:#]*\\)\\]\\["
+           (while (re-search-forward "\\[\\[file:[^][:#]*::#\\([^][:#]*\\)\\]\\[\\([^][:#]*\\)\\]"
                                      (region-end)
                                      t)
-             (zk-multimap-add id-to-link-multimap
-                              ;; Destination custom ID
-                              (match-string-no-properties 1)
-                              ;; Alist of the source entry
-                              entry-alist)))))
+             (let ((dest-id (match-string-no-properties 1))
+                   (link-text (match-string-no-properties 2)))
+               ;; Ignore forward-reference links created by
+               ;; zk-org-copy-region-with-backlink
+               (unless (string-match "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].*" link-text)
+                 (setq is-root-entry-p nil)
+                 (zk-multimap-add id-to-link-multimap
+                                  dest-id
+                                  ;; Alist of the source entry
+                                  entry-alist)))))
+         (when is-root-entry-p
+           (push entry-alist root-entry-list))))
      t
      'agenda-with-archives)
-    id-to-link-multimap))
+    (list (cons ':destid-to-srclink-mp id-to-link-multimap)
+          (cons ':root-entry-list root-entry-list))))
 
 (defun zk-zorg-create-reference-tree--get-current-heading-link ()
   (or (zk-org-get-current-heading-link)
