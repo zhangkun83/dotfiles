@@ -778,14 +778,14 @@ refer to any other entries."
 match the given root-tags.  A root entry is an entry that doesn't back
 refer to any other entries."
   (let* ((pr (make-progress-reporter "Reference trees for tags"))
-         (destid-to-srclink-mp-alist
+         (destid-to-src-entry-mp-alist
           (progn
             (progress-reporter-force-update pr "creating index")
-            (zk-zorg-create-reference-tree--create-destid-to-srclink-multimap)))
-         (destid-to-srclink-mp
-          (alist-get ':destid-to-srclink-mp destid-to-srclink-mp-alist))
+            (zk-zorg-create-reference-tree--create-destid-to-src-entry-multimap)))
+         (destid-to-src-entry-mp
+          (alist-get ':destid-to-src-entry-mp destid-to-src-entry-mp-alist))
          (root-entry-list
-          (alist-get ':root-entry-list destid-to-srclink-mp-alist))
+          (alist-get ':root-entry-list destid-to-src-entry-mp-alist))
          (output-buffer
           (zk-recreate-buffer
            (concat "*zorg tag reftrees* "
@@ -798,19 +798,19 @@ refer to any other entries."
       (org-mode))
     (dolist (root-entry root-entry-list)
       (when (zk-is-subset-p root-tags (alist-get ':tags root-entry))
-        (let ((bfs-filtered-destid-to-srclink-mp
+        (let ((bfs-filtered-destid-to-src-entry-mp
                (progn
                  (progress-reporter-force-update
                   pr (concat "searching related entries for " (alist-get ':title root-entry)))
-                 (zk-zorg-create-reference-tree--bfs-filter-destid-to-srclink-map
-                  root-entry required-tags destid-to-srclink-mp))))
+                 (zk-zorg-create-reference-tree--bfs-filter-destid-to-src-entry-map
+                  root-entry required-tags destid-to-src-entry-mp))))
           (progress-reporter-force-update
            pr (concat "generating output for " (alist-get ':title root-entry)))
           (zk-zorg-create-reference-tree--create-subtree-for-entry
            0
            max-level
            root-entry
-           bfs-filtered-destid-to-srclink-mp
+           bfs-filtered-destid-to-src-entry-mp
            output-buffer
            (make-hash-table :test 'equal))
           (with-current-buffer output-buffer
@@ -843,11 +843,11 @@ is tagged with all of the tags."
   (let* ((entry-alist
           (zk-zorg-create-reference-tree--create-entry-alist-for-current-entry))
          (pr (make-progress-reporter "Reference tree"))
-         (destid-to-srclink-mp
+         (destid-to-src-entry-mp
           (progn
             (progress-reporter-force-update pr "creating index")
-            (alist-get ':destid-to-srclink-mp
-                       (zk-zorg-create-reference-tree--create-destid-to-srclink-multimap))))
+            (alist-get ':destid-to-src-entry-mp
+                       (zk-zorg-create-reference-tree--create-destid-to-src-entry-multimap))))
          (output-buffer
           (zk-recreate-buffer
            (concat "*zorg reftree* "
@@ -856,11 +856,11 @@ is tagged with all of the tags."
                    (if required-tags
                        (concat " (" (mapconcat 'identity required-tags ":") ")")
                      ""))))
-         (bfs-filtered-destid-to-srclink-mp
+         (bfs-filtered-destid-to-src-entry-mp
           (progn
             (progress-reporter-force-update pr "searching related entries")
-            (zk-zorg-create-reference-tree--bfs-filter-destid-to-srclink-map
-             entry-alist required-tags destid-to-srclink-mp))))
+            (zk-zorg-create-reference-tree--bfs-filter-destid-to-src-entry-map
+             entry-alist required-tags destid-to-src-entry-mp))))
     (with-current-buffer output-buffer
       (org-mode))
     (progress-reporter-force-update pr "generating output")
@@ -868,7 +868,7 @@ is tagged with all of the tags."
      0
      max-level
      entry-alist
-     bfs-filtered-destid-to-srclink-mp
+     bfs-filtered-destid-to-src-entry-mp
      output-buffer
      (make-hash-table :test 'equal))
     (switch-to-buffer output-buffer)
@@ -881,14 +881,14 @@ is tagged with all of the tags."
     (progress-reporter-done pr)
     (read-only-mode t)))
 
-(defun zk-zorg-create-reference-tree--bfs-filter-destid-to-srclink-map
+(defun zk-zorg-create-reference-tree--bfs-filter-destid-to-src-entry-map
     (start-entry-alist
      required-tags
-     destid-to-srclink-mp)
-  "Using the given destid-to-srclink-mp multimap created by
-zk-zorg-create-reference-tree--create-destid-to-srclink-multimap, do a
+     destid-to-src-entry-mp)
+  "Using the given destid-to-src-entry-mp multimap created by
+zk-zorg-create-reference-tree--create-destid-to-src-entry-multimap, do a
 BFS traverse from the given start-entry-alist, until all entry links are
-visited.  Record the used destid-to-srclink edges during the traverse in
+visited.  Record the used destid-to-src-entry edges during the traverse in
 a new multimap and return it."
   (let ((bfs-queue (make-queue))
         (visited-entry-links-hash-set (make-hash-table :test 'equal))
@@ -903,7 +903,7 @@ a new multimap and return it."
         ;; this is necessary for the very first entry-alist.
         (puthash link t visited-entry-links-hash-set)
         (when (and custom-id (zk-is-subset-p required-tags tags))
-          (dolist (src-entry-alist (zk-multimap-get destid-to-srclink-mp custom-id))
+          (dolist (src-entry-alist (zk-multimap-get destid-to-src-entry-mp custom-id))
             (let ((srclink (alist-get ':link src-entry-alist)))
               (unless (gethash srclink visited-entry-links-hash-set)
                 (puthash srclink t visited-entry-links-hash-set)
@@ -915,7 +915,7 @@ a new multimap and return it."
     (level
      max-level
      entry-alist
-     destid-to-srclink-mp
+     destid-to-src-entry-mp
      output-buffer
      visited-entry-links-hash-set)
   (let ((todo-keyword (alist-get ':todo-keyword entry-alist))
@@ -934,13 +934,13 @@ a new multimap and return it."
         (newline))
       (when (and custom-id
                  (not (and max-level (>= level max-level))))
-        (dolist (src-entry-alist (zk-multimap-get destid-to-srclink-mp custom-id))
+        (dolist (src-entry-alist (zk-multimap-get destid-to-src-entry-mp custom-id))
           ;; Recursively create the subtree for this entry
           (zk-zorg-create-reference-tree--create-subtree-for-entry
            (+ level 1)
            max-level
            src-entry-alist
-           destid-to-srclink-mp
+           destid-to-src-entry-mp
            output-buffer
            visited-entry-links-hash-set))))))
 
@@ -963,7 +963,7 @@ a new multimap and return it."
             (cons ':tags tags)
             (cons ':custom-id custom-id)))))
 
-(defun zk-zorg-create-reference-tree--create-destid-to-srclink-multimap ()
+(defun zk-zorg-create-reference-tree--create-destid-to-src-entry-multimap ()
   "Create a multimap maps, where the key are entry IDs (CUSTOM_ID), and the
 values are alists (:link :todo-keyword :title :file :tags) of the heading
 entries that contain references to the key ID.
@@ -971,7 +971,7 @@ entries that contain references to the key ID.
 Also creates a list that contains the alists of entries that don't
 contain any references.  Those are considered as root entries.
 
-The return value is an alist (:destid-to-srclink-mp :root-entry-list).
+The return value is an alist (:destid-to-src-entry-mp :root-entry-list).
 "
   (let ((id-to-link-multimap (make-hash-table :test 'equal))
         (root-entry-list nil))
@@ -1002,7 +1002,7 @@ The return value is an alist (:destid-to-srclink-mp :root-entry-list).
            (push entry-alist root-entry-list))))
      t
      'agenda-with-archives)
-    (list (cons ':destid-to-srclink-mp id-to-link-multimap)
+    (list (cons ':destid-to-src-entry-mp id-to-link-multimap)
           (cons ':root-entry-list root-entry-list))))
 
 (defun zk-zorg-create-reference-tree--get-current-heading-link ()
