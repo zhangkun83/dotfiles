@@ -1016,7 +1016,7 @@ The return value is an alist (:destid-to-src-entry-mp :root-entry-list).
      t
      'agenda-with-archives)
     (list (cons ':destid-to-src-entry-mp id-to-link-multimap)
-          (cons ':root-entry-list root-entry-list))))
+          (cons ':root-entry-list (reverse root-entry-list)))))
 
 (defun zk-zorg-create-reference-tree--get-current-heading-link ()
   (or (zk-org-get-current-heading-link)
