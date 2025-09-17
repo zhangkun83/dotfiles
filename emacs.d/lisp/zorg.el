@@ -345,20 +345,6 @@ If show is non-nil, will make the new note visible"
     (when link-prop
       (nth 1 link-prop))))
 
-(defun zk-org-log-backlink-at-point ()
-  "If the point is on a link, record a log in the linked entry
-back to the current entry."
-  (interactive)
-  (let ((link (zk-org-get-link-at-point)))
-    ;; Only works on a org entry link, in the format of
-    ;; "(file:filename.org::)?#nodeid"
-    (unless (and link (string-match-p "^\\(file:[^:]+::\\)?#[^#]+$" link))
-      (user-error "Not a link to an org entry: %s" link))
-    (let ((back-ref (zk-org-get-external-reference)))
-      (org-open-at-point)
-      (zk-org-add-note-to-logbook
-       (concat "Referenced in: " back-ref) t))))
-
 (defun zk-org-insert-tag-completion ()
   "Insert a tag to the current buffer with completion"
   (interactive)
@@ -498,7 +484,6 @@ that need to be sorted."
   (local-set-key (kbd "C-c l l") 'zk-org-copy-external-link)
   (local-set-key (kbd "C-c l r") 'zk-org-copy-external-reference)
   (local-set-key (kbd "C-c l w") 'zk-org-copy-region-with-backlink)
-  (local-set-key (kbd "C-c l b") 'zk-org-log-backlink-at-point)
   (local-set-key (kbd "C-c l f") 'zk-zorg-create-reference-tree-command-1level)
   (local-set-key (kbd "C-c l C-f") 'zk-zorg-create-reference-tree-command)
   (local-set-key (kbd "C-c l C-t") 'zk-zorg-create-reference-trees-for-tags-command)
