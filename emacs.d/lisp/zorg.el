@@ -163,7 +163,7 @@ This is useful for copying contents from a note entry to a task."
                   link
                   (if timestamp-pos
                       (match-string 1 headline-text)
-                    "ref")))
+                    (user-error "The heading doesn't contain a timestamp"))))
          (headline-without-timestamp
           (concat
            " "
