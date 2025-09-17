@@ -760,7 +760,7 @@ indirectly linking to the starting entry."
 (defun zk-zorg-create-reference-trees-for-tags-command ()
   "Create a buffer to display the reference trees of all root entries
 that match the given root-tags.  A root entry is an entry that doesn't back
-refer to any other entries."
+refer (with \"RE:\") to any other entries."
   (interactive)
   (let* ((all-tags (mapcar #'car (org-global-tags-completion-table)))
          (tag (completing-read
@@ -776,12 +776,12 @@ refer to any other entries."
 (defun zk-zorg-create-reference-trees-for-tags (root-tags &optional max-level required-tags)
   "Create a buffer to display the reference trees of all root entries that
 match the given root-tags.  A root entry is an entry that doesn't back
-refer to any other entries."
+refer (with \"RE:\") to any other entries."
   (let* ((pr (make-progress-reporter "Reference trees for tags"))
          (destid-to-src-entry-mp-alist
           (progn
             (progress-reporter-force-update pr "creating index")
-            (zk-zorg-create-reference-tree--create-destid-to-src-entry-multimap)))
+            (zk-zorg-create-reference-tree--create-index)))
          (destid-to-src-entry-mp
           (alist-get ':destid-to-src-entry-mp destid-to-src-entry-mp-alist))
          (root-entry-list
@@ -847,7 +847,7 @@ is tagged with all of the tags."
           (progn
             (progress-reporter-force-update pr "creating index")
             (alist-get ':destid-to-src-entry-mp
-                       (zk-zorg-create-reference-tree--create-destid-to-src-entry-multimap))))
+                       (zk-zorg-create-reference-tree--create-index))))
          (output-buffer
           (zk-recreate-buffer
            (concat "*zorg reftree* "
@@ -886,7 +886,7 @@ is tagged with all of the tags."
      required-tags
      destid-to-src-entry-mp)
   "Using the given destid-to-src-entry-mp multimap created by
-zk-zorg-create-reference-tree--create-destid-to-src-entry-multimap, do a
+zk-zorg-create-reference-tree--create-index, do a
 BFS traverse from the given start-entry-alist, until all entry links are
 visited.  Record the used destid-to-src-entry edges during the traverse in
 a new multimap and return it."
@@ -963,13 +963,15 @@ a new multimap and return it."
             (cons ':tags tags)
             (cons ':custom-id custom-id)))))
 
-(defun zk-zorg-create-reference-tree--create-destid-to-src-entry-multimap ()
-  "Create a multimap maps, where the key are entry IDs (CUSTOM_ID), and the
-values are alists (:link :todo-keyword :title :file :tags) of the heading
-entries that contain references to the key ID.
+(defun zk-zorg-create-reference-tree--create-index ()
+  "Scan the whole repo and create the index for creating reference trees.
 
-Also creates a list that contains the alists of entries that don't
-contain any references.  Those are considered as root entries.
+It contains a multimap where the key are entry IDs (CUSTOM_ID), and the
+values are alists (:link :todo-keyword :title :file :tags) of the
+heading entries that contain references to the key ID.
+
+It also contains a list that contains the alists of entries that don't
+contain any back references (with \"RE:\").  Those are considered as root entries.
 
 The return value is an alist (:destid-to-src-entry-mp :root-entry-list).
 "
