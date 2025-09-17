@@ -140,11 +140,11 @@ for scratch.el"
                             link)))
     reference))
 
-(defun zk-org-copy-region-with-backlink (&optional arg)
+(defun zk-zorg-copy-region-with-link-to-heading (&optional arg)
   "Copy the content of the current active region, with a
-backlink to the current headline.  By default the content of the
-headline won't be included, but the first timestamp will be included.
-When called with the prefix argument, the heading text is also included.
+link to the current headline.  By default the content of the headline
+won't be included, but the first timestamp will be included.  When
+called with the prefix argument, the heading text is also included.
 
 This is useful for copying contents from a note entry to a task."
   (interactive "P")
@@ -483,7 +483,7 @@ that need to be sorted."
   (local-set-key (kbd "C-c l a") 'zk-zorg-populate-agenda-command)
   (local-set-key (kbd "C-c l l") 'zk-org-copy-external-link)
   (local-set-key (kbd "C-c l r") 'zk-org-copy-external-reference)
-  (local-set-key (kbd "C-c l w") 'zk-org-copy-region-with-backlink)
+  (local-set-key (kbd "C-c l w") 'zk-zorg-copy-region-with-link-to-heading)
   (local-set-key (kbd "C-c l f") 'zk-zorg-create-reference-tree-command-1level)
   (local-set-key (kbd "C-c l C-f") 'zk-zorg-create-reference-tree-command)
   (local-set-key (kbd "C-c l C-t") 'zk-zorg-create-reference-trees-for-tags-command)
@@ -991,7 +991,7 @@ The return value is an alist (:destid-to-srclink-mp :root-entry-list).
              (let ((dest-id (match-string-no-properties 1))
                    (link-text (match-string-no-properties 2)))
                ;; Ignore forward-reference links created by
-               ;; zk-org-copy-region-with-backlink
+               ;; zk-zorg-copy-region-with-link-to-heading
                (unless (string-match "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].*" link-text)
                  (setq is-root-entry-p nil)
                  (zk-multimap-add id-to-link-multimap
