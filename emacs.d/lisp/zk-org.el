@@ -34,7 +34,7 @@ element.  If there is no SCHEDULED timestamp, return nil."
           (type (org-element-type context)))
      (eq type 'link)))
 
-(defun zk-org-open-next-link (arg)
+(defun zk-org-open-next-link (&optional arg)
   "If the point is on a link, open it.  Otherwise, move point to the
 next link and open it.  If the prefix arg is non-nil, move
 backward."

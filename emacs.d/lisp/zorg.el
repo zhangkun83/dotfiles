@@ -732,7 +732,8 @@ to close the current sessions."
 
 (defun zk-zorg-create-reference-tree-command-1level ()
   (interactive)
-  (zk-zorg-create-reference-tree 1))
+  (zk-zorg-create-reference-tree
+   (zk-zorg-create-reference-tree--create-entry-alist-for-current-entry) 1))
 
 (defun zk-zorg-create-reference-tree-command ()
   "Create a buffer to display the reference tree of the current heading
@@ -755,6 +756,7 @@ indirectly linking to the starting entry."
                nil
                t)))
     (zk-zorg-create-reference-tree
+     (zk-zorg-create-reference-tree--create-entry-alist-for-current-entry)
      nil (when (and tag (> (length tag) 0)) (list tag)))))
 
 (defun zk-zorg-create-reference-trees-for-tags-command ()
@@ -816,6 +818,9 @@ refer (with \"RE:\") to any other entries."
           (with-current-buffer output-buffer
             (newline)))))
     (switch-to-buffer output-buffer)
+    (zk-zorg-create-reference-tree--bind-keys
+     (list 'zk-zorg-create-reference-trees-for-tags
+           `(quote ,root-tags) max-level `(quote ,required-tags)))
     (newline)
     (insert "(Back-reference trees, where children entries contain links "
             "pointing to the parent entry.")
@@ -825,8 +830,24 @@ refer (with \"RE:\") to any other entries."
     (progress-reporter-done pr)
     (read-only-mode t)))
 
-(defun zk-zorg-create-reference-tree (&optional max-level required-tags)
-  "Create a buffer to display the reference tree of the current heading
+(defvar-local zk-zorg-create-reference-tree-refresh-form nil
+  "The form to be evaluated to refresh the ref tree buffer")
+
+(defun zk-zorg-create-reference-tree--bind-keys (refresh-form)
+  ;; Copy the key map to prevent from unintentionally modifying the
+  ;; shared org-mode-map
+  (let ((my-local-map (copy-keymap (current-local-map))))
+    (use-local-map my-local-map)
+    (define-key my-local-map (kbd "RET") 'zk-org-open-next-link)
+    (setq zk-zorg-create-reference-tree-refresh-form refresh-form)
+    (define-key my-local-map (kbd "g") 'zk-zorg-create-reference-tree--refresh)))
+
+(defun zk-zorg-create-reference-tree--refresh ()
+  (interactive)
+  (eval zk-zorg-create-reference-tree-refresh-form))
+
+(defun zk-zorg-create-reference-tree (entry-alist &optional max-level required-tags)
+  "Create a buffer to display the reference tree of the given
 entry (the starting entry).  A reference tree is a tree of heading
 entries where the children of a node are the entries that contains links
 point back to that node.
@@ -840,9 +861,7 @@ indirectly linking to the starting entry.
 If an list of tags is provided to the optional required-tags argument,
 this function will expand the search from an entry only when the entry
 is tagged with all of the tags."
-  (let* ((entry-alist
-          (zk-zorg-create-reference-tree--create-entry-alist-for-current-entry))
-         (pr (make-progress-reporter "Reference tree"))
+  (let* ((pr (make-progress-reporter "Reference tree"))
          (destid-to-src-entry-mp
           (progn
             (progress-reporter-force-update pr "creating index")
@@ -872,6 +891,11 @@ is tagged with all of the tags."
      output-buffer
      (make-hash-table :test 'equal))
     (switch-to-buffer output-buffer)
+    (zk-zorg-create-reference-tree--bind-keys
+     (list 'zk-zorg-create-reference-tree
+           `(quote ,entry-alist)
+           max-level
+           `(quote ,required-tags)))
     (newline)
     (insert "(Back-reference tree, where children entries contain links "
             "pointing to the parent entry.)")
