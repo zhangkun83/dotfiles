@@ -838,13 +838,17 @@ refer (with \"RE:\") to any other entries."
   ;; shared org-mode-map
   (let ((my-local-map (copy-keymap (current-local-map))))
     (use-local-map my-local-map)
+    (define-key my-local-map (kbd "n") 'next-line)
+    (define-key my-local-map (kbd "p") 'previous-line)
+    (define-key my-local-map (kbd "q") 'quit-window)
     (define-key my-local-map (kbd "RET") 'zk-org-open-next-link)
     (setq zk-zorg-create-reference-tree-refresh-form refresh-form)
     (define-key my-local-map (kbd "g") 'zk-zorg-create-reference-tree--refresh)))
 
 (defun zk-zorg-create-reference-tree--refresh ()
   (interactive)
-  (eval zk-zorg-create-reference-tree-refresh-form))
+  (when (y-or-n-p "Do you want to refresh the ref tree (it could be slow)?")
+    (eval zk-zorg-create-reference-tree-refresh-form)))
 
 (defun zk-zorg-create-reference-tree (entry-alist &optional max-level required-tags)
   "Create a buffer to display the reference tree of the given
