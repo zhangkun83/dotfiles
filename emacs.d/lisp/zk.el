@@ -757,6 +757,13 @@ monitor."
                         monitor-attributes-alist)
                (setq frame-width-pixels 1600
                      frame-height-pixels 1500)))
+            ((and (= monitor-dpi 92)
+                  (= monitor-height-pixels 1080)
+                  (eq system-type 'darwin))
+             (progn
+               (message "Using scale settings for 1080p monitor with Mac per %s"
+                        monitor-attributes-alist)
+               (setq font-height 200)))
             (t
              (progn
                (message "Using default scale settings per %s" monitor-attributes-alist))))
