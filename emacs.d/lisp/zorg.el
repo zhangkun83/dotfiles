@@ -399,8 +399,11 @@ an empty line is entered."
         (org-toggle-tag new-tag 'on)))))
 
 (defun zk-zorg-populate-agenda-command ()
-  "Find and populate headings that have a `tbdsc' tag (to-be-discussed) and
-also match another tag given by the user."
+  "Find headings that have a `tbdsc' tag (which means to-be-discussed) and
+also match another tag given by the user, popuplate them as agenda
+items.  One agenda item includes a backlink to the topic, which is the
+parent heading of the tbdsc heading, and the content of the tbdsc
+heading that captures the agenda."
   (interactive)
   (let* ((all-tags (mapcar #'car (org-global-tags-completion-table)))
          (tag (completing-read
@@ -410,16 +413,28 @@ also match another tag given by the user."
                t
                nil
                t))
-         (links nil))
+         (items nil)
+         (org-use-tag-inheritance nil))
     (org-map-entries
      (lambda ()
-       (push (zk-org-get-external-reference) links))
+       (let ((topic-link
+              (save-excursion
+                (org-up-element)
+                (zk-org-get-external-reference)))
+             (agenda-content
+              (save-mark-and-excursion
+                (zk-org-mark-heading-content)
+                (string-trim
+                 (buffer-substring-no-properties (region-beginning) (region-end))))))
+         (push (concat "RE: " topic-link "\n"
+                       agenda-content "\n---\n")
+               items)))
      (concat "tbdsc" "+" tag)
      'agenda)
-    (dolist (link links)
-      (insert "RE: " link)
-      (newline 2))
-    (message "Populated %d agenda items" (length links))))
+    (dolist (item items)
+      (insert item)
+      (newline))
+    (message "Populated %d agenda items" (length items))))
 
 
 (defun zk-org-rename-tag-command ()
