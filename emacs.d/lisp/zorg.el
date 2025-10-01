@@ -427,7 +427,7 @@ heading that captures the agenda."
                 (string-trim
                  (buffer-substring-no-properties (region-beginning) (region-end))))))
          (push (concat "RE: " topic-link "\n"
-                       agenda-content "\n---\n")
+                       agenda-content "\n- ---- -\n\n")
                items)))
      (concat "tbdsc" "+" tag)
      'agenda)
