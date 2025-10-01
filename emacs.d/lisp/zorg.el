@@ -261,8 +261,8 @@ subtree"
 
 (defun zk-zorg-set-customid-at-point ()
   "If CUSTOM_ID of the current org headline doesn't exist,
-generate one based on the text of the headline and set it.
-Returns the CUSTOM_ID."
+generate one based on the text of the headline and set it.  Returns the
+CUSTOM_ID.  Ask for confirmation before setting the CUSTOM_ID."
   (interactive)
   (unless (eq major-mode 'org-mode)
     (user-error "Not in org-mode"))
@@ -275,6 +275,14 @@ Returns the CUSTOM_ID."
                        (let ((new-id
                               (zk-org-generate-custom-id-from-text headline-text)))
                          (barf-if-buffer-read-only)
+                         (unwind-protect
+                             (progn
+                               (display-buffer (current-buffer))
+                               (unless (y-or-n-p (format
+                                                  "Do you want to set CUSTOM_ID to '%s'?"
+                                                  headline-text))
+                                 (user-error "CUSTOM_ID rejected by user.")))
+                           (bury-buffer))
                          (org-set-property "CUSTOM_ID" new-id)
                          new-id))))
       (when (called-interactively-p 'any)
