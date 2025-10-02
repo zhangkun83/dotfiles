@@ -10,6 +10,7 @@
 (require 'org-tempo)
 (require 'dash)
 (require 'queue)
+(require 'cl-seq)
 
 (defvar zk-zorg-rsync-backup-dir
   nil "The remote path used by rsync for backing up org files")
@@ -67,14 +68,53 @@ files (starting with .). Returns the list file name."
 (defun zk-zorg-goto-latest-note-file ()
   "Go to the latest note org file under the same directory."
   (interactive)
+  (zk-zorg-locate-note-file 'last))
+
+(defun zk-zorg-goto-next-note-file ()
+  "Go to the next note org file under the same directory."
+  (interactive)
+  (zk-zorg-locate-note-file 'next))
+
+(defun zk-zorg-goto-prev-note-file ()
+  "Go to the previous note org file under the same directory."
+  (interactive)
+  (zk-zorg-locate-note-file 'prev))
+
+(defun zk-zorg-locate-note-file (mode)
+  "Go to the next note org file under the same directory.
+
+MODE: `next': go to the next file
+      `prev': go to the previous file
+      `last': go to the last file"
+  ;; directory-files sorts the files alphabeticaly
   (let* ((file-list (directory-files (zk-zorg-directory) nil "notes.*\\.org$"))
-         ;; directory-files sort the files alphabeticaly
-         (latest-file (car (last file-list))))
-    (unless latest-file (user-error "No notes file found"))
-    (let ((path (concat (zk-zorg-directory) "/" latest-file)))
-    (switch-to-buffer
-     (or (find-buffer-visiting path)
-         (find-file-noselect path))))))
+         (current-file-pos (when (buffer-file-name)
+                             (cl-position
+                              (file-name-nondirectory (buffer-file-name))
+                              file-list
+                              :test #'string=)))
+         (num-files (length file-list)))
+    (unless file-list (user-error "No notes file found"))
+    (let ((file
+           (cond ((eq mode 'last)
+                  (car (last file-list)))
+                 ((eq mode 'next)
+                  (unless current-file-pos
+                    (user-error "Current buffer is not a notes file"))
+                  (if (= current-file-pos (- num-files 1))
+                      (user-error "Already the last file.")
+                    (nth (+ current-file-pos 1) file-list)))
+                 ((eq mode 'prev)
+                  (unless current-file-pos
+                    (user-error "Current buffer is not a notes file"))
+                  (if (= current-file-pos 0)
+                      (user-error "Already the first file.")
+                    (nth (- current-file-pos 1) file-list)))
+                 (t (user-error "Invalid mode %s" mode)))))
+      (let ((path (concat (zk-zorg-directory) "/" file)))
+        (switch-to-buffer
+         (or (find-buffer-visiting path)
+             (find-file-noselect path)))))))
 
 (defun zk-org-generate-custom-id-from-text (text)
   "Generate a plain ID that only contains alphanumerics and
@@ -525,6 +565,8 @@ that need to be sorted."
   (local-set-key (kbd "C-c r o") 'zk-zorg-set-outdated)
   (local-set-key (kbd "C-c e h") 'zk-org-export-html-to-clipboard)
   (local-set-key (kbd "C-c o") 'zk-org-open-next-link)
+  (local-set-key (kbd "C-c n n") 'zk-zorg-goto-next-note-file)
+  (local-set-key (kbd "C-c n p") 'zk-zorg-goto-prev-note-file)
   (local-set-key (kbd "C-c c") 'zk-org-clone-narrowed-buffer))
 
 (defun zk-org-set-file-encoding ()
