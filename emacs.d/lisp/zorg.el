@@ -277,7 +277,7 @@ CUSTOM_ID.  Ask for confirmation before setting the CUSTOM_ID."
                          (barf-if-buffer-read-only)
                          (display-buffer (current-buffer))
                          (unless (y-or-n-p (format
-                                            "Do you want to set CUSTOM_ID to '%s'?"
+                                            "Set CUSTOM_ID to '%s'?"
                                             headline-text))
                            (user-error "CUSTOM_ID rejected by user."))
                          (org-set-property "CUSTOM_ID" new-id)
@@ -431,11 +431,16 @@ heading that captures the agenda."
                 (zk-org-mark-heading-content)
                 (string-trim
                  (buffer-substring-no-properties (region-beginning) (region-end))))))
-         (push (concat "RE: " topic-link "\n"
-                       (if (equal "" agenda-content) ""
-                         (concat agenda-content "\n"))
-                       "- ---- -\n\n")
-               items)))
+         (let ((new-item (concat "RE: " topic-link "\n"
+                                 (if (equal "" agenda-content) ""
+                                   (concat agenda-content "\n"))
+                                 "- ---- -\n\n")))
+           ;; When CUSTOM_ID is added during the process, the position
+           ;; of the entry is shifted down, which could cause the
+           ;; entry to be visited again, causing duplicates unless we
+           ;; explicitly check for them.
+           (unless (member new-item items)
+             (push new-item items)))))
      (concat "tbdsc" "+" tag)
      'agenda)
     (dolist (item items)
