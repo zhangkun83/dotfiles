@@ -275,14 +275,11 @@ CUSTOM_ID.  Ask for confirmation before setting the CUSTOM_ID."
                        (let ((new-id
                               (zk-org-generate-custom-id-from-text headline-text)))
                          (barf-if-buffer-read-only)
-                         (unwind-protect
-                             (progn
-                               (display-buffer (current-buffer))
-                               (unless (y-or-n-p (format
-                                                  "Do you want to set CUSTOM_ID to '%s'?"
-                                                  headline-text))
-                                 (user-error "CUSTOM_ID rejected by user.")))
-                           (bury-buffer))
+                         (display-buffer (current-buffer))
+                         (unless (y-or-n-p (format
+                                            "Do you want to set CUSTOM_ID to '%s'?"
+                                            headline-text))
+                           (user-error "CUSTOM_ID rejected by user."))
                          (org-set-property "CUSTOM_ID" new-id)
                          new-id))))
       (when (called-interactively-p 'any)
