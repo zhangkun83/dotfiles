@@ -148,7 +148,10 @@ called with the prefix argument, the heading text is also included.
 
 This is useful for copying contents from a note entry to a task."
   (interactive "P")
-  (let* ((link-pair (zk-zorg-set-customid-and-get-headline-link-at-point nil))
+  (let* ((mark-was-active mark-active)
+         (link-pair (progn
+                      (deactivate-mark)
+                      (zk-zorg-set-customid-and-get-headline-link-at-point nil)))
          (link (nth 0 link-pair))
          (headline-text (nth 1 link-pair))
          ;; The "<>" and "[]" have been converted to "()" by
@@ -176,12 +179,11 @@ This is useful for copying contents from a note entry to a task."
                backlink
                (if arg headline-without-timestamp "")
                "\n"
-               (if mark-active
+               (if mark-was-active
                    (buffer-substring (region-beginning) (region-end))
                  "")))
     (message "Copied %sbacklink to this headline."
-             (if mark-active "region with " ""))
-    (deactivate-mark)))
+             (if mark-active "region with " ""))))
 
 (defun zk-org-get-scratch-reference-metadata ()
   "Returns a list of two elements representing an external reference
