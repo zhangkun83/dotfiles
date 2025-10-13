@@ -1,6 +1,8 @@
 ;; Set up the scratch environment
 
 (when (display-graphic-p)
+  (setq leuven-dark-scale-outline-headlines nil
+        leuven-dark-scale-org-agenda-structure nil)
   (load-theme 'leuven-dark t))
 
 (require 'zk)
