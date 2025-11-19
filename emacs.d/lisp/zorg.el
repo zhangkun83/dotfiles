@@ -468,12 +468,15 @@ heading that captures the agenda."
               (save-excursion
                 (org-up-element)
                 (zk-org-get-external-reference)))
+             (agenda-title
+              (org-element-property :title (org-element-at-point)))
              (agenda-content
               (save-mark-and-excursion
                 (zk-org-mark-heading-content)
                 (string-trim
                  (buffer-substring-no-properties (region-beginning) (region-end))))))
          (let ((new-item (concat "RE: " topic-link "\n"
+                                 "- *" agenda-title "*\n"
                                  (if (equal "" agenda-content) ""
                                    (concat agenda-content "\n"))
                                  "- ---- -\n\n")))
