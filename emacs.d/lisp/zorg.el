@@ -802,6 +802,15 @@ to close the current sessions."
     (nth 4 (org-heading-components))))
 
 
+(defun zk-zorg-search-activities-since (start-date &optional tag)
+  "Search for headings that have timestamps after the given start-date, optionally
+filtered by a tag."
+  (let ((start_date (format "<%s>" start-date))
+        (tags_suffix (if tag (concat "&+" tag) "")))
+    (org-tags-view nil
+                   (format "TIMESTAMP_IA>=\"%s\"%s|TIMESTAMP>=\"%s\"%s"
+                           start_date tags_suffix start_date tags_suffix))))
+
 ;; Reference tree implementation
 
 (defun zk-zorg-create-reference-tree-command-1level ()
