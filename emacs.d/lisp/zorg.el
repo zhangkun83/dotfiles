@@ -1148,14 +1148,19 @@ The return value is an alist (:destid-to-src-entry-mp :root-entry-list).
 (defun zk-zorg-ai-use-current-entry-as-input ()
   "Use the entire current entry as the input for AI."
   (interactive)
-  (let ((file (zk-zorg-ai-input-file-path)))
+  (let ((file (zk-zorg-ai-input-file-path))
+        (output-file (zk-zorg-ai-output-file-path)))
     (zk-kill-buffer-visiting file)
     (save-mark-and-excursion
       (org-back-to-heading)
       (org-mark-element)
       (write-region (region-beginning) (region-end) file))
     (find-file-other-window file)
-    (read-only-mode)))
+    (read-only-mode)
+    (when (and (file-exists-p output-file)
+               (y-or-n-p "AI output file exists, delete it?"))
+      (zk-kill-buffer-visiting output-file)
+      (delete-file output-file))))
 
 (defun zk-zorg-ai-view-output ()
   "Display the AI's output buffer."
