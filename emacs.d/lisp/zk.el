@@ -231,6 +231,11 @@ remote directory suddenly becomes inaccessible."
   (ignore-errors (kill-buffer name))
   (get-buffer-create name))
 
+(defun zk-kill-buffer-visiting (file)
+  "Delete the buffer that visits a file, if it exists."
+  (let ((buffer (find-buffer-visiting file)))
+    (when buffer (kill-buffer buffer))))
+
 (defun zk-insert-mean()
   "Take the leading number from the current line and the previous line,
   and insert the mean value of the two as a new line in between.

@@ -570,6 +570,8 @@ that need to be sorted."
   (local-set-key (kbd "C-c o") 'zk-org-open-next-link)
   (local-set-key (kbd "C-c n n") 'zk-zorg-goto-next-note-file)
   (local-set-key (kbd "C-c n p") 'zk-zorg-goto-prev-note-file)
+  (local-set-key (kbd "C-c z i") 'zk-zorg-ai-use-current-entry-as-input)
+  (local-set-key (kbd "C-c z v") 'zk-zorg-ai-view-output)
   (local-set-key (kbd "C-c c") 'zk-org-clone-narrowed-buffer))
 
 (defun zk-org-set-file-encoding ()
@@ -1133,6 +1135,37 @@ The return value is an alist (:destid-to-src-entry-mp :root-entry-list).
   (or (zk-org-get-current-heading-link)
       (error "Failed to get heading link at pos %d of %s"
                   (point) (buffer-file-name))))
+
+
+;; Generative AI (LLM) related
+
+(defun zk-zorg-ai-input-file-path ()
+  (concat (zk-zorg-directory) "/.tmp-ai-input.org"))
+
+(defun zk-zorg-ai-output-file-path ()
+  (concat (zk-zorg-directory) "/.tmp-ai-output.org"))
+
+(defun zk-zorg-ai-use-current-entry-as-input ()
+  "Use the entire current entry as the input for AI."
+  (interactive)
+  (let ((file (zk-zorg-ai-input-file-path)))
+    (zk-kill-buffer-visiting file)
+    (save-mark-and-excursion
+      (org-back-to-heading)
+      (org-mark-element)
+      (write-region (region-beginning) (region-end) file))
+    (find-file-other-window file)
+    (read-only-mode)))
+
+(defun zk-zorg-ai-view-output ()
+  "Display the AI's output buffer."
+  (interactive)
+  (let ((file (zk-zorg-ai-output-file-path)))
+    (zk-kill-buffer-visiting file)
+    (if (equal (buffer-file-name) (zk-zorg-ai-input-file-path))
+        (find-file file)
+      (find-file-other-window file))
+    (read-only-mode)))
 
 ;; Allow tag completion input (bound to TAB (C-i)) in minibuffers.
 ;; enable-recursive-minibuffers is needed because
