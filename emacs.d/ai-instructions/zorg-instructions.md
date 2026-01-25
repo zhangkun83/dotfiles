@@ -60,7 +60,7 @@ meeting notes, and personal reminders.
 
 *  A back reference (or back link) is a line that starts with `RE:`,
    followed by the heading of the linked entry, ended by a single
-   caret (`^`) which holds the link.  For example:
+   caret (`^`, without any parenthesis) which holds the link.  For example:
    ```
    RE: Promise-based HTTP2 (PH2) [[file:notes2025q3.org::#notes2025q3_promise_based_http2_ph2][^]]`.
    ```
@@ -74,15 +74,28 @@ meeting notes, and personal reminders.
 
 ### Sorting meeting notes
 
-Sorting a meeting notes entry includes the following work:
+Sorting a meeting notes entry includes **all** of the following work:
 
-1. Add relevant back references for discussions.
+1. Add relevant back references that this discussion is about
 2. Fix typos and grammar errors.
-3. Identify action items that I need to take, and prepend them using
-   `*AI*`.
-4. Change the heading text to be a summary of the whole notes entry.
+3. Change the heading text to be a summary of the whole notes entry.
+4. Update the tags to reflect the people and projects relevant to this
+   meeting.  Use preexisting tags only.
+5. Add a TL;DR paragraph at the beginning for main take-aways, with
+   the first line being "TL;DR:", followed by bullet points that
+   summarize key conclusions, agreements, consensus, and action items.
+   An action item is prepended with `*AI*`.
 
-### Adding TODO entries for action items
+### Generating TODO entries for action items
 
-When asked to turn action items, find every `*AI*` in the meeting
-notes, create a TODO entry to capture that action item.
+When asked to generate TODO entries for a meeting notes, find every
+`*AI*` in the meeting notes, create a TODO entry to capture that
+action item.  The TODO entry shall:
+
+1. Have a short (less than 80 characters) heading summarizing the action
+2. Have a text body that includes the full text of the original action
+   item.
+3. Be placed after, and at the same level (starting with the same
+   number of asterisks) as the meeting notes entry
+4. Be tagged according to the project and people associated with this
+   TODO entry.
