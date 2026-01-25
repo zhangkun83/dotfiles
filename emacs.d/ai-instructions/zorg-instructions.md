@@ -41,6 +41,9 @@ meeting notes, and personal reminders.
 *  The tag **`managerial`** indicates this entry is about managerial
    work.  It's the parent tag of all `m#...` tags (e.g., `m#grad`).
 
+*  The tag **`okr_planning`** indicates this entry is about planning
+   OKRs.
+
 *  The tag **`tbdsc`** indicates a meeting agenda entry, indicating
    the parent entry will be back referenced in the notes of the
    meeting with the person whose tag is along with the `tbdsc` tag.
@@ -94,7 +97,8 @@ action item.  The TODO entry shall:
 
 1. Have a short (less than 80 characters) heading summarizing the action
 2. Have a text body that includes the full text of the original action
-   item.
+   item, and related context information (on why we need to take this
+   action) from the meeting notes.
 3. Be placed after, and at the same level (starting with the same
    number of asterisks) as the meeting notes entry
 4. Be tagged according to the project and people associated with this
