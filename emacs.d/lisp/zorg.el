@@ -376,17 +376,6 @@ parentheses."
       (aset result (- (match-end 0) 1) ?\)))
     result))
 
-(defun zk-org-add-note-to-logbook (content &optional show)
-  "Add a note to the log book of the current entry.
-
-If show is non-nil, will make the new note visible"
-  (goto-char (org-log-beginning t))
-  (save-excursion
-    (org-insert-time-stamp nil t t "- Note taken on " " \\\\\n")
-    (insert "  " content "\n"))
-  (when show
-    (org-show-context)))
-
 (defun zk-org-get-link-at-point()
   (let ((link-prop (get-text-property (point) 'htmlize-link)))
     (when link-prop
