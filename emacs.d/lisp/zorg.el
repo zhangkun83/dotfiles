@@ -15,17 +15,17 @@
   ;; Customize some faces to use sans-serif font to save screen space
   ;; Using colors from the leuven theme
 
-  ;; Use sans-serif font for all headings in org-mode
-  (let ((heading-font zk-sans-font-family))
-    (dolist (face '(org-level-1
-                    org-level-2
-                    org-level-3
-                    org-level-4
-                    org-level-5
-                    org-level-6
-                    org-level-7
-                    org-level-8))
-      (set-face-attribute face nil :font heading-font :weight 'regular)))
+  ;; Use sans-serif font for all headings, and quote in org-mode
+  (dolist (face '(org-level-1
+                  org-level-2
+                  org-level-3
+                  org-level-4
+                  org-level-5
+                  org-level-6
+                  org-level-7
+                  org-level-8
+                  org-quote))
+    (set-face-attribute face nil :font zk-sans-font-family :weight 'regular))
 
   ;; Default to sans-serif font in org-agenda-mode
   (add-hook 'org-agenda-mode-hook
