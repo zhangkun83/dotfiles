@@ -74,20 +74,40 @@ meeting notes, and personal reminders.
 *  Within an entry, back references may all appear at the beginning,
    or spred out so that each back reference is followed by the
    relevant discussion.
+   
+### Multi-section meeting notes
+
+*  A meeting notes may consist of multiple sections.  Each section is
+   presented by one or more back references grouped as one paragraph,
+   followed by the discussion content.
+
+*  A section is mapped to a topic, e.g., a project, or an ongoing
+   effort.  Multiple sections can be mapped to the same topic.
+
+*  A meeting notes entry may discuss multiple topics unrelated to each
+   other.
 
 ### Sorting meeting notes
 
-Sorting a meeting notes entry includes **all** of the following work:
+Sorting a meeting notes entry includes **all** of the following steps:
 
-1. Add relevant back references that this discussion is about
+1. If a paragraph lacks back reference, add relevant back references
+   when applicable.
 2. Fix typos and grammar errors.
-3. Change the heading text to be a summary of the whole notes entry.
-4. Update the tags to reflect the people and projects relevant to this
-   meeting.  Use preexisting tags only.
-5. Add a TL;DR paragraph at the beginning for main take-aways, with
-   the first line being "TL;DR:", followed by bullet points that
-   summarize key conclusions, agreements, consensus, and action items.
-   An action item is prepended with `*AI*`.
+3. Identify the topic of each section.  When necessary, reorder
+   sections so that sections about the same topic are together.  If
+   the meeting notes entry discusses multiple topics, create a new
+   heading entry for each topic.
+4. For each heading entry:
+    1. Change the heading text to be a summary of the whole entry.
+       Try to include concrete events, updates, ideas, conclusions,
+       instead of generalization in the summary.
+    2. Update the tags to reflect the people and projects relevant to
+       this meeting.  Use preexisting tags only.
+    3. Add a TL;DR paragraph at the beginning for main take-aways,
+       with the first line being "TL;DR:", followed by bullet points
+       that summarize key conclusions, agreements, consensus, and
+       action items.  An action item is prepended with `*AI*`.
 
 ### Generating TODO entries for action items
 
