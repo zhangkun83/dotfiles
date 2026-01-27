@@ -80,6 +80,10 @@ files (starting with .). Returns the list file name."
   (interactive)
   (zk-zorg-locate-note-file 'prev))
 
+(defun zk-zorg-list-note-files ()
+  "Return the list all the note org files under the zorg directory."
+  (directory-files (zk-zorg-directory) nil "notes.*\\.org$"))
+  
 (defun zk-zorg-locate-note-file (mode)
   "Go to the next note org file under the same directory.
 
@@ -87,7 +91,7 @@ MODE: `next': go to the next file
       `prev': go to the previous file
       `last': go to the last file"
   ;; directory-files sorts the files alphabeticaly
-  (let* ((file-list (directory-files (zk-zorg-directory) nil "notes.*\\.org$"))
+  (let* ((file-list (zk-zorg-list-note-files))
          (current-file-pos (when (buffer-file-name)
                              (cl-position
                               (file-name-nondirectory (buffer-file-name))
@@ -560,7 +564,9 @@ that need to be sorted."
   (local-set-key (kbd "C-c n n") 'zk-zorg-goto-next-note-file)
   (local-set-key (kbd "C-c n p") 'zk-zorg-goto-prev-note-file)
   (local-set-key (kbd "C-c z i") 'zk-zorg-ai-use-current-entry-as-input)
+  (local-set-key (kbd "C-c z SPC") 'zk-zorg-ai-goto-original-input-pos)
   (local-set-key (kbd "C-c z o") 'zk-zorg-ai-view-output)
+  (local-set-key (kbd "C-c z p") 'zk-zorg-ai-generate-gemini-cli-prompts)
   (local-set-key (kbd "C-c c") 'zk-org-clone-narrowed-buffer))
 
 (defun zk-org-set-file-encoding ()
@@ -1128,20 +1134,38 @@ The return value is an alist (:destid-to-src-entry-mp :root-entry-list).
 
 ;; Generative AI (LLM) related
 
+(defconst zk-zorg-ai-input-file-name ".tmp-ai-input.org")
+(defconst zk-zorg-ai-output-file-name ".tmp-ai-output.org")
+
 (defun zk-zorg-ai-input-file-path ()
-  (concat (zk-zorg-directory) "/.tmp-ai-input.org"))
+  (concat (zk-zorg-directory) "/" zk-zorg-ai-input-file-name))
 
 (defun zk-zorg-ai-output-file-path ()
-  (concat (zk-zorg-directory) "/.tmp-ai-output.org"))
+  (concat (zk-zorg-directory) "/" zk-zorg-ai-output-file-name))
+
+(defvar zk-zorg-ai-original-input-pos nil
+  "The position as (buffer . pos) of the org entry that was last used by
+`zk-zorg-ai-use-current-entry-as-input'")
+
+(defun zk-zorg-ai-goto-original-input-pos ()
+  "Go to the position indicated by `zk-zorg-ai-original-input-pos'"
+  (interactive)
+  (unless zk-zorg-ai-original-input-pos
+    (user-error "`zk-zorg-ai-original-input-pos was' was not set"))
+  (switch-to-buffer (car zk-zorg-ai-original-input-pos))
+  (goto-char (cdr zk-zorg-ai-original-input-pos)))
 
 (defun zk-zorg-ai-use-current-entry-as-input ()
-  "Use the entire current entry as the input for AI."
+  "Use the entire current entry as the input for AI.  Sets
+`zk-zorg-ai-original-input-pos'"
   (interactive)
   (let ((file (zk-zorg-ai-input-file-path))
         (output-file (zk-zorg-ai-output-file-path)))
     (zk-kill-buffer-visiting file)
     (save-mark-and-excursion
       (org-back-to-heading)
+      (setq zk-zorg-ai-original-input-pos
+            (cons (current-buffer) (point)))
       (org-mark-element)
       (write-region (region-beginning) (region-end) file))
     (find-file-other-window file)
@@ -1156,10 +1180,44 @@ The return value is an alist (:destid-to-src-entry-mp :root-entry-list).
   "Display the AI's output buffer."
   (interactive)
   (let ((file (zk-zorg-ai-output-file-path)))
-    (zk-kill-buffer-visiting file)
-    (if (equal (buffer-file-name) (zk-zorg-ai-input-file-path))
-        (find-file file)
-      (find-file-other-window file))))
+    (cond ((equal (buffer-file-name) file)
+           (revert-buffer nil t))
+          ((equal (buffer-file-name) (zk-zorg-ai-input-file-path))
+           (zk-kill-buffer-visiting file)
+           (find-file file))
+          (t
+           (zk-kill-buffer-visiting file)
+           (find-file-other-window file)))))
+
+(defvar zk-zorg-ai-num-recent-notes-files-for-context 5)
+
+(defun zk-zorg-ai-generate-gemini-cli-prompts (&optional arg)
+  "Generates a gemini-cli prompt for a selected task.  If the prefix arg is
+present, it indicates the number of recent notes files that need to be
+included in the context (default value is defined by
+`zk-zorg-ai-num-recent-notes-files-for-context'"
+  (interactive "P")
+  (let* ((choice (read-char-choice
+                  "Get prompt to: [s] sort notes; [t] generate TODO entries"
+                  '(?s ?t)))
+         (file-list (zk-zorg-list-note-files))
+         (used-num-files (or arg zk-zorg-ai-num-recent-notes-files-for-context))
+         (file-list-in-prompt
+          (mapconcat (lambda (file) (concat "@" file))
+                     (last file-list used-num-files)
+                     " "))
+         (prompt (cond ((eq choice ?s)
+                        (format "Sort the meeting notes entry in @%s, considering %s.  Write the new meeting notes entry to a file named \"%s\". DO NOT modify any input file."
+                                zk-zorg-ai-input-file-name
+                                file-list-in-prompt
+                                zk-zorg-ai-output-file-name))
+                       ((eq choice ?t)
+                        (format "Generate TODO entries for a meeting notes entry in @%s, considering %s.  Write the new entries to a file named \"%s\". DO NOT modify any input file."
+                                zk-zorg-ai-input-file-name
+                                file-list-in-prompt
+                                zk-zorg-ai-output-file-name)))))
+      (kill-new prompt)
+      (message "Copied prompt: %s" prompt)))
 
 ;; Allow tag completion input (bound to TAB (C-i)) in minibuffers.
 ;; enable-recursive-minibuffers is needed because
