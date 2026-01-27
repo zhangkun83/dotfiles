@@ -12,6 +12,14 @@
         leuven-scale-org-agenda-structure nil)
   (load-theme 'leuven t)
 
+  (defface zk-zorg-backref
+    (list (list t ':background "#EEEEEE" ':font zk-sans-font-family))
+    "A custom face for back references that starts with RE:")
+  ;; Use sans-serif for back references
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (hi-lock-face-phrase-buffer "^RE: .*" 'zk-zorg-backref)))
+
   ;; Customize some faces to use sans-serif font to save screen space
   ;; Using colors from the leuven theme
 
@@ -36,9 +44,11 @@
   (set-face-attribute 'org-agenda-calendar-event nil :weight 'regular)
   (set-face-attribute 'org-scheduled-today nil :weight 'regular)
 
-  ;; Keep the TODO keywords on default font
-  (set-face-attribute 'org-todo nil :font zk-font-family)
-  (set-face-attribute 'org-done nil :font zk-font-family))
+  ;; Keep the TODO keywords and code on default (monospace) font
+  (dolist (face '(org-todo
+                  org-done
+                  org-code))
+    (set-face-attribute face nil :font zk-font-family)))
 
 (defvar zk-zorg-rsync-backup-dir
   nil "The remote path used by rsync for backing up org files")
