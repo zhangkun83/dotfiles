@@ -560,7 +560,7 @@ that need to be sorted."
   (local-set-key (kbd "C-c n n") 'zk-zorg-goto-next-note-file)
   (local-set-key (kbd "C-c n p") 'zk-zorg-goto-prev-note-file)
   (local-set-key (kbd "C-c z i") 'zk-zorg-ai-use-current-entry-as-input)
-  (local-set-key (kbd "C-c z v") 'zk-zorg-ai-view-output)
+  (local-set-key (kbd "C-c z o") 'zk-zorg-ai-view-output)
   (local-set-key (kbd "C-c c") 'zk-org-clone-narrowed-buffer))
 
 (defun zk-org-set-file-encoding ()
@@ -1147,9 +1147,10 @@ The return value is an alist (:destid-to-src-entry-mp :root-entry-list).
     (find-file-other-window file)
     (read-only-mode)
     (when (and (file-exists-p output-file)
-               (y-or-n-p "AI output file exists, delete it?"))
+               (yes-or-no-p "AI output file exists, delete it?"))
       (zk-kill-buffer-visiting output-file)
-      (delete-file output-file))))
+      (delete-file output-file)
+      (message "%s was deleted" output-file))))
 
 (defun zk-zorg-ai-view-output ()
   "Display the AI's output buffer."
@@ -1158,8 +1159,7 @@ The return value is an alist (:destid-to-src-entry-mp :root-entry-list).
     (zk-kill-buffer-visiting file)
     (if (equal (buffer-file-name) (zk-zorg-ai-input-file-path))
         (find-file file)
-      (find-file-other-window file))
-    (read-only-mode)))
+      (find-file-other-window file))))
 
 ;; Allow tag completion input (bound to TAB (C-i)) in minibuffers.
 ;; enable-recursive-minibuffers is needed because
