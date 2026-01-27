@@ -1,8 +1,3 @@
-(when (display-graphic-p)
-  (setq leuven-scale-outline-headlines nil
-        leuven-scale-org-agenda-structure nil)
-  (load-theme 'leuven t))
-
 (require 'zk)
 (require 'zk-org)
 (require 'org)
@@ -11,6 +6,39 @@
 (require 'dash)
 (require 'queue)
 (require 'cl-seq)
+
+(when (display-graphic-p)
+  (setq leuven-scale-outline-headlines nil
+        leuven-scale-org-agenda-structure nil)
+  (load-theme 'leuven t)
+
+  ;; Customize some faces to use sans-serif font to save screen space
+  ;; Using colors from the leuven theme
+
+  ;; Use sans-serif font for all headings in org-mode
+  (let ((heading-font zk-sans-font-family))
+    (dolist (face '(org-level-1
+                    org-level-2
+                    org-level-3
+                    org-level-4
+                    org-level-5
+                    org-level-6
+                    org-level-7
+                    org-level-8))
+      (set-face-attribute face nil :font heading-font :weight 'regular)))
+
+  ;; Default to sans-serif font in org-agenda-mode
+  (add-hook 'org-agenda-mode-hook
+            (lambda ()
+              (buffer-face-set (list ':family zk-sans-font-family))))
+  ;; Remove the boldness from several elements because they don't look
+  ;; good with sans fonts.
+  (set-face-attribute 'org-agenda-calendar-event nil :weight 'regular)
+  (set-face-attribute 'org-scheduled-today nil :weight 'regular)
+
+  ;; Keep the TODO keywords on default font
+  (set-face-attribute 'org-todo nil :font zk-font-family)
+  (set-face-attribute 'org-done nil :font zk-font-family))
 
 (defvar zk-zorg-rsync-backup-dir
   nil "The remote path used by rsync for backing up org files")
@@ -898,13 +926,11 @@ refer (with \"RE:\") to any other entries."
           (with-current-buffer output-buffer
             (newline)))))
     (switch-to-buffer output-buffer)
-    (zk-zorg-create-reference-tree--bind-keys
+    (zk-zorg-create-reference-tree--config-buffer
      (list 'zk-zorg-create-reference-trees-for-tags
            `(quote ,root-tags) max-level `(quote ,required-tags)))
     (newline)
-    (insert "(Back-reference trees, where children entries contain links "
-            "pointing to the parent entry.")
-    (org-fill-paragraph)
+    (insert "(Back-reference trees, where children entries contain links pointing to the parent entry.")
     (goto-char 0)
     (set-buffer-modified-p nil)
     (progress-reporter-done pr)
@@ -913,9 +939,11 @@ refer (with \"RE:\") to any other entries."
 (defvar-local zk-zorg-create-reference-tree-refresh-form nil
   "The form to be evaluated to refresh the ref tree buffer")
 
-(defun zk-zorg-create-reference-tree--bind-keys (refresh-form)
+(defun zk-zorg-create-reference-tree--config-buffer (refresh-form)
+  "Configure a newly created rertree buffer."
   ;; Copy the key map to prevent from unintentionally modifying the
   ;; shared org-mode-map
+  (buffer-face-set (list ':family zk-sans-font-family ':overline "#687999"))
   (let ((my-local-map (copy-keymap (current-local-map))))
     (use-local-map my-local-map)
     (define-key my-local-map (kbd "n") 'next-line)
@@ -975,15 +1003,13 @@ is tagged with all of the tags."
      output-buffer
      (make-hash-table :test 'equal))
     (switch-to-buffer output-buffer)
-    (zk-zorg-create-reference-tree--bind-keys
+    (zk-zorg-create-reference-tree--config-buffer
      (list 'zk-zorg-create-reference-tree
            `(quote ,entry-alist)
            max-level
            `(quote ,required-tags)))
     (newline)
-    (insert "(Back-reference tree, where children entries contain links "
-            "pointing to the parent entry.)")
-    (org-fill-paragraph)
+    (insert "(Back-reference tree, where children entries contain links pointing to the parent entry.)")
     (goto-char 0)
     (set-buffer-modified-p nil)
     (progress-reporter-done pr)
@@ -1036,9 +1062,9 @@ a new multimap and return it."
         (insert (make-string (* 2 level) ?\ ) (if (= 0 level) "+ " "- ")
                 (if todo-keyword (concat "*" todo-keyword "* ") "")
                 (alist-get ':title entry-alist)
-                " (" (alist-get ':file entry-alist) ")"
-                (if tags (concat " /" (mapconcat 'identity tags ":") "/") "")
-                " [[" link "][^]]")
+                (if tags (concat "\t\t:" (mapconcat 'identity tags ":") ":") "")
+                " [[" link "][^]]"
+                " (" (alist-get ':file entry-alist) ")")
         (newline))
       (when (and custom-id
                  (not (and max-level (>= level max-level))))
