@@ -104,10 +104,11 @@ Sorting a meeting notes entry includes **all** of the following steps:
        instead of generalization in the summary.
     2. Update the tags to reflect the people and projects relevant to
        this meeting.  Use preexisting tags only.
-    3. Add a TL;DR paragraph at the beginning for main take-aways,
-       with the first line being "TL;DR:", followed by bullet points
-       that summarize key conclusions, agreements, consensus, and
-       action items.  An action item is prepended with `*AI*`.
+    3. If the content of the entry more than 8 lines, add a TL;DR
+       paragraph at the beginning for main take-aways, with the first
+       line being "TL;DR:", followed by bullet points that summarize
+       key conclusions, agreements, consensus, and action items.  An
+       action item is prepended with `*AI*`.
 
 ### Generating TODO entries for action items
 
