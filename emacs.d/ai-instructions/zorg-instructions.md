@@ -10,6 +10,14 @@ using Org mode, a major mode for Emacs, designed for notes, planning,
 and authoring. The files contain detailed work logs, project tracking,
 meeting notes, and personal reminders.
 
+## General formatting conventions
+
+*   Every period (`.`) at the end of a sentence in the middle of a
+    paragraph is followed by two space characters instead of one.
+    
+*   Unnumbered lists in the text body uses `-` or `+` as the bullet
+    character.  `*` is reserved for entry headings only.
+
 ## File naming convention
 
 *   **`notesYYYYqN.org` (e.g., `notes2026q1.org`)**: These files serve
@@ -49,6 +57,8 @@ meeting notes, and personal reminders.
    meeting with the person whose tag is along with the `tbdsc` tag.
    
 *  No space is allowed within a tag.
+
+*  Tags must be at the end of the heading line.
 
 ## Meeting notes
 
