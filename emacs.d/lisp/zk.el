@@ -710,11 +710,23 @@ visible-frame-list."
     (message "SHELL environment is not set, forcing shell-file-name to bash")
     (setq shell-file-name "/bin/bash")))
 
-(defconst zk-font-family "Aporetic Sans Mono"
-  "\"Aporetic Sans Mono\" (https://protesilaos.com/) is a narrow coding
-font built from the Iosevka typeface.")
+(defun zk-find-first-available-font (preferred-font-list)
+  "Find the first available font from `preferred-font-list'.  nil if none
+is available."
+  (seq-find (lambda (font)
+              (when (find-font (font-spec :name font))
+                font))
+            preferred-font-list))
 
-(defconst zk-sans-font-family "Liberation Sans"
+;; "Aporetic Sans Mono" (https://protesilaos.com/) is a narrow coding
+;; font built from the Iosevka typeface.
+(defconst zk-font-family
+  (zk-find-first-available-font
+   '("Aporetic Sans Mono" "Liberation Mono")))
+
+(defconst zk-sans-font-family
+  (zk-find-first-available-font
+   '("Liberation Sans" "Arial"))
   "The preferred font in occurrences where sans-serif font is used.")
 
 (when (display-graphic-p)
