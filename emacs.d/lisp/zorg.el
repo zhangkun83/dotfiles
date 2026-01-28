@@ -11,14 +11,6 @@
   (setq leuven-scale-outline-headlines nil
         leuven-scale-org-agenda-structure nil)
   (load-theme 'leuven t)
-
-  (defface zk-zorg-backref
-    (list (list t ':background "#EEEEEE" ':font zk-proportional-font-family))
-    "A custom face for back references that starts with RE:")
-  (add-hook 'org-mode-hook
-            (lambda ()
-              ;; Highlight back references
-              (hi-lock-face-phrase-buffer "^RE: .*" 'zk-zorg-backref)))
   (zk-org-init-fonts))
 
 (defvar zk-zorg-rsync-backup-dir
