@@ -37,6 +37,7 @@
                     org-meta-line
                     org-drawer
                     org-special-keyword
+                    org-property-value
                     org-date
                     org-table
                     org-checkbox))
