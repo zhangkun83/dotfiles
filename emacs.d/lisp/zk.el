@@ -729,7 +729,10 @@ is available."
    '("Liberation Sans" "Arial"))
   "The preferred font in occurrences where proportional font is used.")
 
-(defvar zk-buffer-font-family nil)
+(message "Default font: %s; default proportional font: %s"
+         zk-font-family zk-proportional-font-family)
+
+(defvar zk-buffer-font-family)
 
 (defun zk-use-proportional-font-for-current-buffer ()
   (setq cursor-type '(bar . 3))
