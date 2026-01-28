@@ -13,17 +13,19 @@
   (load-theme 'leuven t)
 
   (defface zk-zorg-backref
-    (list (list t ':background "#EEEEEE" ':font zk-sans-font-family))
+    (list (list t ':background "#EEEEEE" ':font zk-proportional-font-family))
     "A custom face for back references that starts with RE:")
-  ;; Use sans-serif for back references
   (add-hook 'org-mode-hook
             (lambda ()
+              ;; Use proportional font for org buffer
+              (buffer-face-set (list ':family zk-proportional-font-family))
+              ;; Highlight back references
               (hi-lock-face-phrase-buffer "^RE: .*" 'zk-zorg-backref)))
 
-  ;; Customize some faces to use sans-serif font to save screen space
+  ;; Customize some faces to use proportional font to save screen space
   ;; Using colors from the leuven theme
 
-  ;; Use sans-serif font for all headings, and quote in org-mode
+  ;; Use proportional font for all headings, and quote in org-mode
   (dolist (face '(org-level-1
                   org-level-2
                   org-level-3
@@ -33,21 +35,29 @@
                   org-level-7
                   org-level-8
                   org-quote))
-    (set-face-attribute face nil :font zk-sans-font-family :weight 'regular))
+    (set-face-attribute face nil :font zk-proportional-font-family :weight 'regular))
 
-  ;; Default to sans-serif font in org-agenda-mode
+  ;; Default to proportional font in org-agenda-mode
   (add-hook 'org-agenda-mode-hook
             (lambda ()
-              (buffer-face-set (list ':family zk-sans-font-family))))
+              (buffer-face-set (list ':family zk-proportional-font-family))))
   ;; Remove the boldness from several elements because they don't look
-  ;; good with sans fonts.
+  ;; good with proportional fonts.
   (set-face-attribute 'org-agenda-calendar-event nil :weight 'regular)
   (set-face-attribute 'org-scheduled-today nil :weight 'regular)
 
-  ;; Keep the TODO keywords and code on default (monospace) font
+  ;; Keep keywords and code on default (monospace) font
   (dolist (face '(org-todo
                   org-done
-                  org-code))
+                  org-code
+                  org-block
+                  org-block-begin-line
+                  org-block-end-line
+                  org-meta-line
+                  org-drawer
+                  org-special-keyword
+                  org-date
+                  org-table))
     (set-face-attribute face nil :font zk-font-family)))
 
 (defvar zk-zorg-rsync-backup-dir

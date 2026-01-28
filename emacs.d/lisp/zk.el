@@ -724,10 +724,10 @@ is available."
   (zk-find-first-available-font
    '("Aporetic Sans Mono" "Liberation Mono")))
 
-(defconst zk-sans-font-family
+(defconst zk-proportional-font-family
   (zk-find-first-available-font
    '("Liberation Sans" "Arial"))
-  "The preferred font in occurrences where sans-serif font is used.")
+  "The preferred font in occurrences where proportional font is used.")
 
 (when (display-graphic-p)
   ;; Set font
