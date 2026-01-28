@@ -1,14 +1,14 @@
 (require 'org)
 (require 'zk-clipboard)
+(require 'zk)
 
 (require 'ox)  ; defines org-export-with-drawers
 
 (defun zk-org-init-fonts ()
   (when (display-graphic-p)
-    (add-hook 'org-mode-hook
-              (lambda ()
-                ;; Use proportional font for org buffer
-                (buffer-face-set (list ':family zk-proportional-font-family))))
+    ;; Default to proportional font in org-mode and org-agenda-mode
+    (add-hook 'org-mode-hook 'zk-use-proportional-font-for-current-buffer)
+    (add-hook 'org-agenda-mode-hook 'zk-use-proportional-font-for-current-buffer)
 
     ;; Use proportional font for all headings, and quote in org-mode
     (dolist (face '(org-level-1
@@ -22,10 +22,6 @@
                     org-quote))
       (set-face-attribute face nil :font zk-proportional-font-family :weight 'regular))
 
-    ;; Default to proportional font in org-agenda-mode
-    (add-hook 'org-agenda-mode-hook
-              (lambda ()
-                (buffer-face-set (list ':family zk-proportional-font-family))))
     ;; Remove the boldness from several elements because they don't look
     ;; good with proportional fonts.
     (set-face-attribute 'org-agenda-calendar-event nil :weight 'regular)

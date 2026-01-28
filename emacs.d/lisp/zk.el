@@ -729,6 +729,11 @@ is available."
    '("Liberation Sans" "Arial"))
   "The preferred font in occurrences where proportional font is used.")
 
+(defun zk-use-proportional-font-for-current-buffer ()
+  (setq cursor-type '(bar . 3))
+  (set-cursor-color (face-attribute 'default :foreground))
+  (buffer-face-set (list ':family zk-proportional-font-family)))
+
 (when (display-graphic-p)
   ;; Set font
   (defun zk-get-monitor-attributes-alist ()
