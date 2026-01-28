@@ -57,7 +57,8 @@
                   org-drawer
                   org-special-keyword
                   org-date
-                  org-table))
+                  org-table
+                  org-checkbox))
     (set-face-attribute face nil :font zk-font-family)))
 
 (defvar zk-zorg-rsync-backup-dir
