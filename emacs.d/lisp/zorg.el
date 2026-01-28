@@ -924,7 +924,7 @@ refer (with \"RE:\") to any other entries."
   "Configure a newly created rertree buffer."
   ;; Copy the key map to prevent from unintentionally modifying the
   ;; shared org-mode-map
-  (buffer-face-set (list ':family zk-sans-font-family ':overline "#687999"))
+  (buffer-face-set `(:family ,zk-proportional-font-family :overline "#687999"))
   (let ((my-local-map (copy-keymap (current-local-map))))
     (use-local-map my-local-map)
     (define-key my-local-map (kbd "n") 'next-line)
