@@ -1,14 +1,15 @@
 ;; Set up the scratch environment
+(require 'zk-org)
 
 (when (display-graphic-p)
   (setq leuven-dark-scale-outline-headlines nil
         leuven-dark-scale-org-agenda-structure nil)
-  (load-theme 'leuven-dark t))
+  (load-theme 'leuven-dark t)
+  (zk-org-init-fonts))
 
 (require 'zk)
 (zk-start-server-or-create-frame "scratch")
 
-(require 'zk-org)
 
 (setq zk-frame-title-base-name "scratch")
 (setq confirm-kill-emacs 'yes-or-no-p)
