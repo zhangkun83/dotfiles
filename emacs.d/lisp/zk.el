@@ -729,10 +729,22 @@ is available."
    '("Liberation Sans" "Arial"))
   "The preferred font in occurrences where proportional font is used.")
 
+(defvar zk-buffer-font-family nil)
+
 (defun zk-use-proportional-font-for-current-buffer ()
   (setq cursor-type '(bar . 3))
   (set-cursor-color (face-attribute 'default :foreground))
-  (buffer-face-set (list ':family zk-proportional-font-family)))
+  (setq-local zk-buffer-font-family zk-proportional-font-family)
+  (buffer-face-set (list ':family zk-buffer-font-family)))
+
+(defun zk-echo-current-line ()
+  "Echo the current line in the echo area, preserving the face.  Useful for
+revealing long lines."
+  (interactive)
+  (let ((line (string-trim (thing-at-point 'line))))
+    (add-face-text-property
+     0 (length line) `(:family ,zk-buffer-font-family) t line)
+    (message "%s" line)))
 
 (when (display-graphic-p)
   ;; Set font

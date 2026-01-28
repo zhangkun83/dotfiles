@@ -10,24 +10,13 @@
     (add-hook 'org-mode-hook 'zk-use-proportional-font-for-current-buffer)
     (add-hook 'org-agenda-mode-hook 'zk-use-proportional-font-for-current-buffer)
 
-    ;; Use proportional font for all headings, and quote in org-mode
-    (dolist (face '(org-level-1
-                    org-level-2
-                    org-level-3
-                    org-level-4
-                    org-level-5
-                    org-level-6
-                    org-level-7
-                    org-level-8
-                    org-quote))
-      (set-face-attribute face nil :font zk-proportional-font-family :weight 'regular))
-
     ;; Remove the boldness from several elements because they don't look
     ;; good with proportional fonts.
     (set-face-attribute 'org-agenda-calendar-event nil :weight 'regular)
     (set-face-attribute 'org-scheduled-today nil :weight 'regular)
 
-    ;; Keep keywords and code on default (monospace) font
+    ;; Keep keywords and code on default (monospace) font, with 90% size
+    ;; to better fit in with the proportional font.
     (dolist (face '(org-todo
                     org-done
                     org-code
@@ -41,7 +30,9 @@
                     org-date
                     org-table
                     org-checkbox))
-      (set-face-attribute face nil :font zk-font-family))))
+      (set-face-attribute face nil :font zk-font-family :height 0.9))))
+
+(setq org-fontify-done-headline nil)
 
 (defun zk-org-export-html-to-clipboard (arg)
   "Export the whole file or the active region as HTML to the
