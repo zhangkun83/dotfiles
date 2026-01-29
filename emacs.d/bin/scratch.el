@@ -129,11 +129,11 @@ server to open it.  The link format must be like
 
 ;; Highlight the #orglife and #orgwork tags
 (defface zk-hl-orglife
-  `((t :background "Blue" :height 0.9 :family ,zk-font-family))
+  `((t :background "Blue" :height 0.75 :family ,zk-font-family))
   "A custom face for tagging #orglife")
 
 (defface zk-hl-orgwork
-  `((t :height 0.9 :family ,zk-font-family))
+  `((t :height 0.75 :family ,zk-font-family))
   "A custom face for tagging #orgwork")
 
 (add-hook 'org-mode-hook
