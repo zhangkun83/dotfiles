@@ -15,6 +15,7 @@
 (setq confirm-kill-emacs 'yes-or-no-p)
 
 (defconst zk-scratch-dir (concat zk-user-home-dir "/scratch"))
+(defconst zk-kanban-file (concat zk-scratch-dir "/kanban.org"))
 
 (defun zk-scratch-get-link-at-point()
   (let ((link-prop (get-text-property (point) 'htmlize-link)))
@@ -124,17 +125,32 @@ server to open it.  The link format must be like
 
 (global-set-key (kbd "<f5>") 'zk-scratch-init)
 (global-set-key (kbd "<f6>") 'zk-scratch-open-lisp-window)
+
+
+;; Highlight the #orglife and #orgwork tags
+(defface zk-hl-orglife
+  `((t :background "Blue" :height 0.9 :family ,zk-font-family))
+  "A custom face for tagging #orglife")
+
+(defface zk-hl-orgwork
+  `((t :height 0.9 :family ,zk-font-family))
+  "A custom face for tagging #orgwork")
+
 (add-hook 'org-mode-hook
           (lambda ()
             (local-set-key (kbd "C-c o") 'zk-org-open-next-link)
-            (local-set-key (kbd "C-c e h") 'zk-org-export-html-to-clipboard)))
+            (local-set-key (kbd "C-c e h") 'zk-org-export-html-to-clipboard)
+            (when (equal buffer-file-name zk-kanban-file)
+              (font-lock-add-keywords
+               nil
+               '(("#orglife\\b" . 'zk-hl-orglife)
+                 ("#orgwork\\b" . 'zk-hl-orgwork))))))
 
 (setq create-lockfiles nil)
 (kill-buffer "*scratch*")
 
 (defun zk-scratch-open-kanban-file()
-  (find-file (concat zk-scratch-dir "/kanban.org"))
-  (unhighlight-regexp t) (hi-lock-face-phrase-buffer "#orglife" 'hi-blue))
+  (find-file zk-kanban-file))
 
 (defun zk-scratch-init ()
   (interactive)
