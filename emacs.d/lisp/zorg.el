@@ -912,11 +912,35 @@ refer (with \"RE:\") to any other entries."
 (defvar-local zk-zorg-create-reference-tree-refresh-form nil
   "The form to be evaluated to refresh the ref tree buffer")
 
+(defface zk-zorg-backref-neutralized-timestamp
+  `((t :height 0.9 :family ,zk-font-family :background "#EEEEEE"))
+  "The face for neutralized timestamp (e.g., `(2025-01-23)') in backref buffer")
+
+(defface zk-zorg-backref-tags
+  `((t :height 0.9 :family ,zk-font-family :foreground "#9A9FA4"))
+  "The face for tags in backref buffer")
+
+(defface zk-zorg-backref-todo
+  `((t :height 0.9 :family ,zk-font-family :background "#EEEEEE"))
+  "The face for TODO keywords in backref buffer")
+
 (defun zk-zorg-create-reference-tree--config-buffer (refresh-form)
   "Configure a newly created rertree buffer."
+
+  ;; Format different components of the content for better
+  ;; readability.  This has to be done via font-lock, instead of
+  ;; propertizing the output directly, because the propertization
+  ;; would be overridden by org-mode font-lock anyway.
+  (font-lock-add-keywords
+   nil
+   '(("\\[[A-Z]+\\]"
+      . 'zk-zorg-backref-todo)
+     (":[a-zA-Z0-9_@#:]*:"
+      . 'org-tag)
+     ("([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*)"
+      . 'zk-zorg-backref-neutralized-timestamp)))
   ;; Copy the key map to prevent from unintentionally modifying the
   ;; shared org-mode-map
-  (buffer-face-set `(:family ,zk-proportional-font-family :overline "#687999"))
   (let ((my-local-map (copy-keymap (current-local-map))))
     (use-local-map my-local-map)
     (define-key my-local-map (kbd "n") 'next-line)
@@ -1033,9 +1057,9 @@ a new multimap and return it."
       (puthash link t visited-entry-links-hash-set)
       (with-current-buffer output-buffer
         (insert (make-string (* 2 level) ?\ ) (if (= 0 level) "+ " "- ")
-                (if todo-keyword (concat "*" todo-keyword "* ") "")
+                (if todo-keyword (concat "[" todo-keyword "] ") "")
                 (alist-get ':title entry-alist)
-                (if tags (concat "\t\t:" (mapconcat 'identity tags ":") ":") "")
+                (if tags (concat " \t:" (mapconcat 'identity tags ":") ":") "")
                 " [[" link "][^]]"
                 " (" (alist-get ':file entry-alist) ")")
         (newline))
