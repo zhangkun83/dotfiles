@@ -109,9 +109,9 @@ Sorting a meeting notes entry includes **all** of the following steps:
    the meeting notes entry discusses multiple topics, create a new
    heading entry for each topic.
 4. For each heading entry:
-    1. Change the heading text to be a summary of the whole entry.
-       Try to include concrete events, updates, ideas, conclusions,
-       instead of generalization in the summary.
+    1. The heading text should be a summary of the whole entry, up to
+       90 characters.  Try to include concrete events, updates, ideas,
+       conclusions, instead of generalization in the summary.
     2. Update the tags to reflect the people and projects relevant to
        this meeting.  Use preexisting tags only.
     3. If the content of the entry more than 8 lines, add a TL;DR
@@ -126,7 +126,7 @@ When asked to generate TODO entries for a meeting notes, find every
 `*AI*` in the meeting notes, create a TODO entry to capture that
 action item.  The TODO entry shall:
 
-1. Have a short (less than 80 characters) heading summarizing the action
+1. Have a heading (up to 90 characters) summarizing the action
 2. Have a text body that includes the full text of the original action
    item, and related context information (on why we need to take this
    action) from the meeting notes.
