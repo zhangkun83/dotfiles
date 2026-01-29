@@ -15,8 +15,7 @@
     (set-face-attribute 'org-agenda-calendar-event nil :weight 'regular)
     (set-face-attribute 'org-scheduled-today nil :weight 'regular)
 
-    ;; Keep keywords and code on default (monospace) font, with 90% size
-    ;; to better fit in with the proportional font.
+    ;; Keep keywords and code on default (monospace) font
     (dolist (face '(org-todo
                     org-done
                     org-code
@@ -30,7 +29,7 @@
                     org-date
                     org-table
                     org-checkbox))
-      (set-face-attribute face nil :font zk-font-family :height 0.9))))
+      (set-face-attribute face nil :font zk-font-family))))
 
 (setq org-fontify-done-headline nil)
 
