@@ -225,6 +225,7 @@
  ;; If there is more than one, they won't work right.
  '(c-echo-syntactic-information-p t)
  '(compilation-scroll-output t)
+ '(cursor-type '(bar . 3))
  '(custom-safe-themes
    '("c4cecd97a6b30d129971302fd8298c2ff56189db0a94570e7238bc95f9389cfb" default))
  '(dabbrev-case-replace nil)

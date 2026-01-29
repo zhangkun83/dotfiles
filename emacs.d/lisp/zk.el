@@ -735,10 +735,10 @@ is available."
 (defvar zk-buffer-font-family)
 
 (defun zk-use-proportional-font-for-current-buffer ()
-  (setq cursor-type '(bar . 3))
   (set-cursor-color (face-attribute 'default :foreground))
   (setq-local zk-buffer-font-family zk-proportional-font-family)
-  (buffer-face-set (list ':family zk-buffer-font-family)))
+  (buffer-face-set (list ':family zk-buffer-font-family))
+  (setq line-spacing 0.12))
 
 (defun zk-echo-current-line ()
   "Echo the current line in the echo area, preserving the face.  Useful for
