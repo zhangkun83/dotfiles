@@ -6,6 +6,8 @@
 
 (defun zk-org-init-fonts ()
   (when (display-graphic-p)
+    (setq org-hide-emphasis-markers t)
+
     ;; Default to proportional font in org-mode and org-agenda-mode
     (add-hook 'org-mode-hook 'zk-use-proportional-font-for-current-buffer)
     (add-hook 'org-agenda-mode-hook 'zk-use-proportional-font-for-current-buffer)
