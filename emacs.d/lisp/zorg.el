@@ -411,15 +411,23 @@ parentheses."
   "org-tags-view will always ask for the tags before switching to
 an existing view buffer if available, but it doesn't use the
 entered tags anyway if org-agenda-sticky is turned
-on. zk-org-tags-view will always create a new buffer for the query."
+on. zk-org-tags-view will always create a new buffer for the query.
+
+If the user doesn't enter any tags, will let the user to select one of
+the preexisting tag search buffers in MRU (most recently used) order,
+which is convenient for going back to the previous search"
   (interactive "P")
-  (org-tags-view arg (read-string "View for tags: " nil 'org-tags-history nil t)))
+  (let ((tags (read-string "View for tags: " nil 'org-tags-history nil t)))
+    (if (> (length tags) 0) (org-tags-view arg tags)
+      (zk-switch-to-buffer-from-filtered-list "\\*Org Agenda(m:[^)]+)\\*"))))
 
 (defun zk-org-search-view (arg)
   "Like org-search-view but always create a new buffer for the
 query."
   (interactive "P")
-  (org-search-view arg (read-string "View for search term: " nil 'org-agenda-search-history nil t)))
+  (let ((search (read-string "View for search term: " nil 'org-agenda-search-history nil t)))
+    (if (> (length search) 0) (org-search-view arg search)
+      (zk-switch-to-buffer-from-filtered-list "\\*Org Agenda(s:[^)]+)\\*"))))
 
 (defun zk-org-set-tags-command ()
   "Set tags to the current entry. It's better than
