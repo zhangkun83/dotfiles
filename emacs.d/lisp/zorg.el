@@ -7,6 +7,7 @@
 (require 'queue)
 (require 'cl-seq)
 (require 'cl-lib)
+(require 'pulse)
 
 (when (display-graphic-p)
   (setq leuven-scale-outline-headlines nil
@@ -1042,10 +1043,15 @@ refer (with \"RE:\") to any other entries.")
       (if other-window
           (let ((buffer (find-file-noselect file-path)))
             (cl-assert buffer t)
-            (set-window-point (display-buffer buffer 'display-buffer-below-selected) pos))
+            (let ((window (display-buffer buffer 'display-buffer-below-selected)))
+              (set-window-point window pos)
+              (save-window-excursion
+                (select-window window)
+                (pulse-momentary-highlight-one-line))))
         (org-mark-ring-push)
         (find-file file-path)
-        (goto-char pos)))))
+        (goto-char pos)
+        (pulse-momentary-highlight-one-line)))))
 
 (defun zk-zorg-reference-tree--open-link-other-window ()
   (interactive)
