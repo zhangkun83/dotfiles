@@ -936,14 +936,17 @@ It sets the results to the buffer-local variables
           (zk-multimap-get zk-zorg-reference-tree-destid-to-src-entry-mp
                            custom-id))
          (src-entry-alist-count (length src-entry-alists))
-         (line-start-pos (point)))
+         (line-start-pos (point))
+         (expansion-state 'unexpandable))
+    (when (and (> src-entry-alist-count 0)
+               ;; If this entry already appears in the ancestor list,
+               ;; we don't make it expandable.
+               (not (member link ancestor-links)))
+      (if print-src-entries-p
+          (setq expansion-state 'expanded)
+        (setq expansion-state 'expandable)))
     (insert (make-string (* 2 level) ?\ ))
-    (insert (if (and
-                 (not print-src-entries-p)
-                 (> src-entry-alist-count 0)
-                 ;; If this entry already appears in the ancestor list,
-                 ;; we don't make it expandable.
-                 (not (member link ancestor-links)))
+    (insert (if (eq expansion-state 'expandable)
                 "+ "
               "- "))
     (insert
@@ -959,7 +962,9 @@ It sets the results to the buffer-local variables
      `(zk-zorg-reference-tree-entry-alist
        ,entry-alist
        zk-zorg-reference-tree-entry-ancestor-links
-       ,ancestor-links))
+       ,ancestor-links
+       zk-zorg-reference-tree-entry-expansion-state
+       ,expansion-state))
     (newline)
     (when (and print-src-entries-p custom-id)
       (dolist (src-entry-alist src-entry-alists)
@@ -1143,22 +1148,39 @@ previous search"
   (let ((original-pos (point)))
     (unwind-protect
         (progn
-          (back-to-indentation)
-          (let ((bullet-char (following-char)))
-            (unless (equal bullet-char ?+)
-              (user-error "This entry is not expandable"))
-            (let ((entry-alist
-                   (get-text-property (point) 'zk-zorg-reference-tree-entry-alist))
-                  (entry-ancestor-links
-                   (get-text-property (point) 'zk-zorg-reference-tree-entry-ancestor-links))
-                  (inhibit-read-only t))
-              (cl-assert entry-alist t)
-              ;; Delete the original line, since it will be reinserted when
-              ;; expanding
-              (beginning-of-line)
-              (delete-region (point) (progn (forward-line 1) (point)))
-              (zk-zorg-reference-tree--print-entry
-               entry-ancestor-links entry-alist t))))
+          (let* ((entry-alist
+                  (get-text-property (point) 'zk-zorg-reference-tree-entry-alist))
+                 (entry-ancestor-links
+                  (get-text-property (point) 'zk-zorg-reference-tree-entry-ancestor-links))
+                 (level (length entry-ancestor-links))
+                 (inhibit-read-only t)
+                 (entry-expansion-state
+                  (get-text-property (point) 'zk-zorg-reference-tree-entry-expansion-state)))
+            (cl-assert entry-alist t)
+            (cond
+             ((eq entry-expansion-state 'expandable)
+              (progn
+                ;; Delete the original line, since it will be
+                ;; reinserted when expanding
+                (beginning-of-line)
+                (delete-region (point) (progn (forward-line 1) (point)))
+                (zk-zorg-reference-tree--print-entry
+                 entry-ancestor-links entry-alist t)))
+             ((eq entry-expansion-state 'expanded)
+              (progn
+                ;; Delete this line and all the items below it
+                (beginning-of-line)
+                (delete-region (point) (progn (forward-line 1) (point)))
+                (while (>
+                        (length (get-text-property
+                                 (point)
+                                 'zk-zorg-reference-tree-entry-ancestor-links))
+                        level)
+                  (delete-region (point) (progn (forward-line 1) (point))))
+                ;; Re-insert the line in its unexpanded state
+                (zk-zorg-reference-tree--print-entry
+                 entry-ancestor-links entry-alist nil)))
+             (t (user-error "This line is not expandable.")))))
       ;; save-excursion won't help if the original line was deleted
       ;; and re-inserted
       (goto-char original-pos))))
