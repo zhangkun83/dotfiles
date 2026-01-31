@@ -903,8 +903,12 @@ It sets the results to the buffer-local variables
                      (link-text (match-string-no-properties 2)))
                  (zk-multimap-add id-to-link-multimap
                                   dest-id
-                                  ;; Alist of the source entry
-                                  entry-alist))))
+                                  ;; Alist of the source entry, with
+                                  ;; the pos pointing to the link in
+                                  ;; the body instead of the heading
+                                  (save-excursion
+                                    (back-to-indentation)
+                                    (cl-acons ':pos (point) entry-alist))))))
            (save-mark-and-excursion
              ;; Search for any back reference
              (when (re-search-forward backref-link-regex (region-end) t)
