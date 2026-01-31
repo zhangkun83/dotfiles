@@ -852,7 +852,7 @@ filtered by a tag."
            (file-path (buffer-file-name))
            (file (file-name-nondirectory file-path))
            (todo-keyword (org-element-property :todo-keyword element))
-           (tags (org-element-property :tags element))
+           (tags (org-get-tags))  ; Use org-get-tags to include inherited tags
            (title (zk-org-neutralize-timestamp (org-element-property :title element))))
       (list (cons ':link heading-link)
             (cons ':todo-keyword todo-keyword)
