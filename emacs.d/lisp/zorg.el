@@ -1014,11 +1014,12 @@ refer (with \"RE:\") to any other entries.")
     (define-key my-local-map (kbd "p") 'previous-line)
     (define-key my-local-map (kbd "q") 'quit-window)
     (define-key my-local-map (kbd "RET") 'zk-zorg-reference-tree--open-link)
+    (define-key my-local-map (kbd "SPC") 'zk-zorg-reference-tree--open-link-other-window)
     (define-key my-local-map (kbd "TAB") 'zk-zorg-reference-tree--expand-at-point)
     (setq zk-zorg-reference-tree-refresh-form refresh-form)
     (define-key my-local-map (kbd "g") 'zk-zorg-reference-tree--refresh)))
 
-(defun zk-zorg-reference-tree--open-link ()
+(defun zk-zorg-reference-tree--open-link (&optional other-window)
   (interactive)
   (let ((entry-alist
          (get-text-property (point) 'zk-zorg-reference-tree-entry-alist)))
@@ -1027,12 +1028,20 @@ refer (with \"RE:\") to any other entries.")
     (let ((file-path (alist-get ':file-path entry-alist))
           (pos (alist-get ':pos entry-alist)))
       (cl-assert file-path t)
-      (cl-assert pos)
+      (cl-assert pos t)
       ;; org-link-open-from-string doesn't work reliably, thus we save
       ;; the absolute positions.
-      (org-mark-ring-push)
-      (find-file file-path)
-      (goto-char pos))))
+      (if other-window
+          (let ((buffer (find-file-noselect file-path)))
+            (cl-assert buffer t)
+            (set-window-point (display-buffer buffer 'display-buffer-below-selected) pos))
+        (org-mark-ring-push)
+        (find-file file-path)
+        (goto-char pos)))))
+
+(defun zk-zorg-reference-tree--open-link-other-window ()
+  (interactive)
+  (zk-zorg-reference-tree--open-link t))
 
 (defun zk-zorg-reference-tree (entry-alist)
   (let* ((output-buffer
