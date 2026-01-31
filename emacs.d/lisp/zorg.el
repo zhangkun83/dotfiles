@@ -920,7 +920,7 @@ It sets the results to the buffer-local variables
     (setq zk-zorg-reference-tree-destid-to-src-entry-mp
           id-to-link-multimap
           zk-zorg-reference-tree-root-entry-alists
-          (reverse root-entry-list))))
+          root-entry-list)))
 
 (defun zk-zorg-reference-tree--print-entry
     (level
