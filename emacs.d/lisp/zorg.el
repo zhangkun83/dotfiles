@@ -412,23 +412,35 @@ parentheses."
   "org-tags-view will always ask for the tags before switching to
 an existing view buffer if available, but it doesn't use the
 entered tags anyway if org-agenda-sticky is turned
-on. zk-org-tags-view will always create a new buffer for the query.
-
-If the user doesn't enter any tags, will let the user to select one of
-the preexisting tag search buffers in MRU (most recently used) order,
-which is convenient for going back to the previous search"
+on. zk-org-tags-view will always create a new buffer for the query."
   (interactive "P")
   (let ((tags (read-string "View for tags: " nil 'org-tags-history nil t)))
-    (if (> (length tags) 0) (org-tags-view arg tags)
-      (zk-switch-to-buffer-from-filtered-list "\\*Org Agenda(m:[^)]+)\\*"))))
+    (unless (> (length tags) 0)
+      (user-error "No tag entered."))
+    (org-tags-view arg tags)))
+
+(defun zk-org-switch-to-tags-view-buffer ()
+  "Let the user to select one of the preexisting tag search buffers in
+MRU (most recently used) order,which is convenient for going back to the
+previous search"
+  (interactive)
+  (zk-switch-to-buffer-from-filtered-list "^\\*Org Agenda(m:[^)]+)\\*"))
 
 (defun zk-org-search-view (arg)
   "Like org-search-view but always create a new buffer for the
 query."
   (interactive "P")
   (let ((search (read-string "View for search term: " nil 'org-agenda-search-history nil t)))
-    (if (> (length search) 0) (org-search-view arg search)
-      (zk-switch-to-buffer-from-filtered-list "\\*Org Agenda(s:[^)]+)\\*"))))
+    (unless (> (length search) 0)
+      (user-error "No tag string entered."))
+    (org-search-view arg search)))
+
+(defun zk-org-switch-to-search-view-buffer ()
+  "Let the user to select one of the preexisting search view buffers in
+MRU (most recently used) order,which is convenient for going back to the
+previous search"
+  (interactive)
+  (zk-switch-to-buffer-from-filtered-list "^\\*Org Agenda(s:[^)]+)\\*"))
 
 (defun zk-org-set-tags-command ()
   "Set tags to the current entry. It's better than
@@ -552,7 +564,9 @@ that need to be sorted."
   (local-set-key (kbd "C-c t") 'org-todo-list)
   (local-set-key (kbd "C-c M-t") 'zk-zorg-open-tbs-agenda)
   (local-set-key (kbd "C-c m") 'zk-org-tags-view)
+  (local-set-key (kbd "C-c M-m") 'zk-org-switch-to-tags-view-buffer)
   (local-set-key (kbd "C-c s") 'zk-org-search-view)
+  (local-set-key (kbd "C-c M-s") 'zk-org-switch-to-search-view-buffer)
   (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
   (local-set-key (kbd "C-c l i") 'zk-zorg-set-customid-at-point)
   (local-set-key (kbd "C-c l a") 'zk-zorg-populate-agenda-command)
@@ -561,6 +575,7 @@ that need to be sorted."
   (local-set-key (kbd "C-c l w") 'zk-zorg-copy-region-with-link-to-heading)
   (local-set-key (kbd "C-c l f") 'zk-zorg-reference-tree-command)
   (local-set-key (kbd "C-c l C-f") 'zk-zorg-reference-trees-for-tags-command)
+  (local-set-key (kbd "C-c l M-f") 'zk-zorg-reference-trees-switch-to-buffer)
   (local-set-key (kbd "C-c l s") 'zk-org-locate-in-scratch-task-queue)
   (local-set-key (kbd "C-c l C-s") 'zk-org-fill-scratch-task-queue)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
@@ -1063,6 +1078,13 @@ refer (with \"RE:\") to any other entries."
               "Build reference trees for tag: "
               (org-global-tags-completion-table))))
     (zk-zorg-reference-trees-for-tags (list tag))))
+
+(defun zk-zorg-reference-trees-switch-to-buffer ()
+  "Let the user to select one of the preexisting back reference buffers in
+MRU (most recently used) order,which is convenient for going back to the
+previous search"
+  (interactive)
+  (zk-switch-to-buffer-from-filtered-list "^\\*zorg reftree\\* "))
 
 (defun zk-zorg-reference-tree--expand-at-point ()
   "Expand the entry at point in back ref buffer."
