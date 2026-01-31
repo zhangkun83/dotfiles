@@ -923,10 +923,11 @@ It sets the results to the buffer-local variables
           root-entry-list)))
 
 (defun zk-zorg-reference-tree--print-entry
-    (level
+    (ancestor-links
      entry-alist
      print-src-entries-p)
-  (let* ((todo-keyword (alist-get ':todo-keyword entry-alist))
+  (let* ((level (length ancestor-links))
+         (todo-keyword (alist-get ':todo-keyword entry-alist))
          (link (alist-get ':link entry-alist))
          (tags (alist-get ':tags entry-alist))
          (custom-id (alist-get ':custom-id entry-alist))
@@ -936,26 +937,33 @@ It sets the results to the buffer-local variables
          (src-entry-alist-count (length src-entry-alists))
          (line-start-pos (point)))
     (insert (make-string (* 2 level) ?\ ))
-    (insert (if (and (not print-src-entries-p) (> src-entry-alist-count 0)) "+ " "- "))
+    (insert (if (and
+                 (not print-src-entries-p)
+                 (> src-entry-alist-count 0)
+                 ;; If this entry already appears in the ancestor list,
+                 ;; we don't make it expandable.
+                 (not (member link ancestor-links)))
+                "+ "
+              "- "))
     (insert
      (if todo-keyword (concat "[" todo-keyword "] ") "")
      (alist-get ':title entry-alist)
      (if tags (concat " \t:" (mapconcat 'identity tags ":") ":") "")
      " (" (alist-get ':file entry-alist) ")")
-    ;; Attach entry-alist and level to the whole line, to be
+    ;; Attach entry-alist and ancestor-links to the whole line, to be
     ;; used by zk-zorg-reference-tree--expand-at-point
     (add-text-properties
      line-start-pos
      (point)
      `(zk-zorg-reference-tree-entry-alist
        ,entry-alist
-       zk-zorg-reference-tree-entry-level
-       ,level))
+       zk-zorg-reference-tree-entry-ancestor-links
+       ,ancestor-links))
     (newline)
     (when (and print-src-entries-p custom-id)
       (dolist (src-entry-alist src-entry-alists)
         (zk-zorg-reference-tree--print-entry
-         (+ level 1)
+         (cons link ancestor-links)
          src-entry-alist
          (not print-src-entries-p))))))
 
@@ -1051,7 +1059,7 @@ refer (with \"RE:\") to any other entries.")
       (org-mode)
       (zk-zorg-reference-tree--create-index)
       (zk-zorg-reference-tree--print-entry
-       0 entry-alist t)
+       nil entry-alist t)
       (zk-zorg-reference-tree--config-buffer
        (list 'zk-zorg-reference-tree
              `(quote ,entry-alist)))
@@ -1099,7 +1107,7 @@ other entries."
                              zk-zorg-reference-tree-destid-to-src-entry-mp
                              custom-id))))
             (zk-zorg-reference-tree--print-entry
-             0 entry-alist nil))
+             nil entry-alist nil))
           (cl-incf counter)
           (progress-reporter-update progress-reporter counter))
         (progress-reporter-done progress-reporter))
@@ -1135,19 +1143,16 @@ previous search"
               (user-error "This entry is not expandable"))
             (let ((entry-alist
                    (get-text-property (point) 'zk-zorg-reference-tree-entry-alist))
-                  (entry-level
-                   (get-text-property (point) 'zk-zorg-reference-tree-entry-level))
+                  (entry-ancestor-links
+                   (get-text-property (point) 'zk-zorg-reference-tree-entry-ancestor-links))
                   (inhibit-read-only t))
-              (unless entry-alist
-                (error "Can't retrieve entry-alist"))
-              (unless entry-level
-                (error "Can't retrieve entry-level"))
+              (cl-assert entry-alist t)
               ;; Delete the original line, since it will be reinserted when
               ;; expanding
               (beginning-of-line)
               (delete-region (point) (progn (forward-line 1) (point)))
               (zk-zorg-reference-tree--print-entry
-               entry-level entry-alist t))))
+               entry-ancestor-links entry-alist t))))
       ;; save-excursion won't help if the original line was deleted
       ;; and re-inserted
       (goto-char original-pos))))
