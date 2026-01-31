@@ -6,6 +6,7 @@
 (require 'dash)
 (require 'queue)
 (require 'cl-seq)
+(require 'cl-lib)
 
 (when (display-graphic-p)
   (setq leuven-scale-outline-headlines nil
@@ -559,6 +560,7 @@ that need to be sorted."
   (local-set-key (kbd "C-c l r") 'zk-org-copy-external-reference)
   (local-set-key (kbd "C-c l w") 'zk-zorg-copy-region-with-link-to-heading)
   (local-set-key (kbd "C-c l f") 'zk-zorg-create-reference-tree-command)
+  (local-set-key (kbd "C-c l C-f") 'zk-zorg-create-reference-trees-for-tags-command)
   (local-set-key (kbd "C-c l s") 'zk-org-locate-in-scratch-task-queue)
   (local-set-key (kbd "C-c l C-s") 'zk-org-fill-scratch-task-queue)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
@@ -851,7 +853,8 @@ heading entries that contain references to the key ID.
 It also contains a list that contains the alists of entries that don't
 contain any back references (with \"RE:\").  Those are considered root entries.
 
-The return value is an alist (:destid-to-src-entry-mp :root-entry-list).
+It sets the results to the buffer-local variables
+`zk-zorg-create-reference-tree-destid-to-src-entry-mp' and `zk-zorg-create-reference-tree-root-entry-alists'.
 "
   (let ((id-to-link-multimap (make-hash-table :test 'equal))
         (root-entry-list nil))
@@ -893,9 +896,10 @@ The return value is an alist (:destid-to-src-entry-mp :root-entry-list).
            (push entry-alist root-entry-list))))
      t
      'agenda-with-archives)
-    (list (cons ':destid-to-src-entry-mp id-to-link-multimap)
-          (cons ':root-entry-list (reverse root-entry-list)))))
-
+    (setq zk-zorg-create-reference-tree-destid-to-src-entry-mp
+          id-to-link-multimap
+          zk-zorg-create-reference-tree-root-entry-alists
+           (reverse root-entry-list))))
 
 (defun zk-zorg-create-reference-tree--print-entry
     (level
@@ -942,6 +946,10 @@ The return value is an alist (:destid-to-src-entry-mp :root-entry-list).
   "The index of the backref tree.  It's a multimap from destination
 ID (CUSTOM_ID) to the source entry alist.")
 
+(defvar-local zk-zorg-create-reference-tree-root-entry-alists nil
+  "The entry-alists of root entries.  A root entry is an entry that doesn't back
+refer (with \"RE:\") to any other entries.")
+
 (defface zk-zorg-backref-neutralized-timestamp
   `((t :height 0.9 :family ,zk-font-family :background "#EEEEEE"))
   "The face for neutralized timestamp (e.g., `(2025-01-23)') in backref buffer")
@@ -961,6 +969,9 @@ ID (CUSTOM_ID) to the source entry alist.")
 
 (defun zk-zorg-create-reference-tree--config-buffer (refresh-form)
   "Configure a newly created rertree buffer."
+  (goto-char 0)
+  (set-buffer-modified-p nil)
+  (read-only-mode t)
 
   ;; Format different components of the content for better
   ;; readability.  This has to be done via font-lock, instead of
@@ -993,14 +1004,9 @@ ID (CUSTOM_ID) to the source entry alist.")
            (concat "*zorg reftree* " (alist-get ':title entry-alist)))))
     (with-current-buffer output-buffer
       (org-mode)
-      (setq zk-zorg-create-reference-tree-destid-to-src-entry-mp
-            (alist-get ':destid-to-src-entry-mp
-                       (zk-zorg-create-reference-tree--create-index)))
+      (zk-zorg-create-reference-tree--create-index)
       (zk-zorg-create-reference-tree--print-entry
        0 entry-alist t)
-      (goto-char 0)
-      (set-buffer-modified-p nil)
-      (read-only-mode t)
       (zk-zorg-create-reference-tree--config-buffer
        (list 'zk-zorg-create-reference-tree
              `(quote ,entry-alist)))
@@ -1019,29 +1025,59 @@ indirectly linking to the starting entry."
   (zk-zorg-create-reference-tree
    (zk-zorg-create-reference-tree--create-entry-alist-for-current-entry)))
 
+(defun zk-zorg-create-reference-trees-for-tags (root-tags)
+  "Create a buffer to display the reference trees of all root entries that
+match the given root-tags.  A root entry is an entry that doesn't back
+refer (with \"RE:\") to any other entries."
+  (let* ((output-buffer
+          (zk-recreate-buffer
+           (concat "*zorg reftree* (tags) :" (mapconcat 'identity root-tags ":") ":"))))
+    (with-current-buffer output-buffer
+      (org-mode)
+      (let ((inhibit-read-only t))
+        (insert "\n(TODO: tag match is *exact*, and doesn't respect tag hiearchy.)"))
+      (goto-char 0)
+      (zk-zorg-create-reference-tree--create-index)
+      (dolist (entry-alist zk-zorg-create-reference-tree-root-entry-alists)
+        (when (cl-subsetp root-tags (alist-get ':tags entry-alist))
+          (zk-zorg-create-reference-tree--print-entry
+           0 entry-alist nil)))
+      (zk-zorg-create-reference-tree--config-buffer
+       (list 'zk-zorg-create-reference-trees-for-tags
+             `(quote ,root-tags))))
+    (switch-to-buffer output-buffer)))
+
+(defun zk-zorg-create-reference-trees-for-tags-command ()
+  (interactive)
+  (let ((tag (completing-read
+              "Build reference trees for tag: "
+              (org-global-tags-completion-table))))
+    (zk-zorg-create-reference-trees-for-tags (list tag))))
+
 (defun zk-zorg-create-reference-tree--expand-at-point ()
   "Expand the entry at point in back ref buffer."
   (interactive)
   (back-to-indentation)
-  (let ((bullet-char (following-char)))
-    (unless (equal bullet-char ?+)
-      (user-error "This entry is not expandable"))
-    (let ((entry-alist
-           (get-text-property (point) 'zk-zorg-create-reference-tree-entry-alist))
-          (entry-level
-           (get-text-property (point) 'zk-zorg-create-reference-tree-entry-level))
-          (inhibit-read-only t))
-      (unless entry-alist
-        (error "Can't retrieve entry-alist"))
-      (unless entry-level
-        (error "Can't retrieve entry-level"))
-      ;; Delete the original line, since it will be reinserted when
-      ;; expanding
-      (beginning-of-line)
-      (delete-region (point) (progn (forward-line 1) (point)))
-      (zk-zorg-create-reference-tree--print-entry
-       entry-level entry-alist t))))
-         
+  (save-excursion
+    (let ((bullet-char (following-char)))
+      (unless (equal bullet-char ?+)
+        (user-error "This entry is not expandable"))
+      (let ((entry-alist
+             (get-text-property (point) 'zk-zorg-create-reference-tree-entry-alist))
+            (entry-level
+             (get-text-property (point) 'zk-zorg-create-reference-tree-entry-level))
+            (inhibit-read-only t))
+        (unless entry-alist
+          (error "Can't retrieve entry-alist"))
+        (unless entry-level
+          (error "Can't retrieve entry-level"))
+        ;; Delete the original line, since it will be reinserted when
+        ;; expanding
+        (beginning-of-line)
+        (delete-region (point) (progn (forward-line 1) (point)))
+        (zk-zorg-create-reference-tree--print-entry
+         entry-level entry-alist t)))))
+
 ;; Generative AI (LLM) related
 
 (defconst zk-zorg-ai-input-file-name ".tmp-ai-input.org")
