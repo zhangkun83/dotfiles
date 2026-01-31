@@ -779,6 +779,7 @@ to close the current sessions."
   "Like org-link-open-from-string, but will always do it from the
  zorg directory."
   (let ((default-directory (zk-zorg-directory)))
+    (message "Opening %s" link)
     (org-link-open-from-string link)))
 
 (defun zk-zorg-shutdown-confirm (prompt)
@@ -840,21 +841,24 @@ filtered by a tag."
                   (point) (buffer-file-name))))
 
 (defun zk-zorg-reference-tree--create-entry-alist-for-current-entry ()
-  "Create an alist for the current heading, which contains keys (:link :todo-keyword :title :file :tags :custom-id)."
+  "Create an alist for the current heading, which contains keys (:link :todo-keyword :title :file :tags :custom-id :file-path :pos)."
   (save-excursion
     (org-back-to-heading)
     (let* ((element (or (org-element-at-point)
                         (error "No heading found")))
            (heading-link (zk-zorg-reference-tree--get-current-heading-link))
            (custom-id (zk-org-get-customid-at-point))
-           (file (file-name-nondirectory (buffer-file-name)))
+           (file-path (buffer-file-name))
+           (file (file-name-nondirectory file-path))
            (todo-keyword (org-element-property :todo-keyword element))
            (tags (org-element-property :tags element))
            (title (zk-org-neutralize-timestamp (org-element-property :title element))))
       (list (cons ':link heading-link)
             (cons ':todo-keyword todo-keyword)
             (cons ':title title)
+            (cons ':file-path file-path)
             (cons ':file file)
+            (cons ':pos (point))
             (cons ':tags tags)
             (cons ':custom-id custom-id)))))
 
@@ -897,14 +901,12 @@ It sets the results to the buffer-local variables
                (let ((dest-id (match-string-no-properties 1))
                      ;; link-text is not used for now, but may be used in the future
                      (link-text (match-string-no-properties 2)))
-                 ;; Ignore forward-reference links created by
-                 ;; zk-zorg-copy-region-with-link-to-heading
                  (zk-multimap-add id-to-link-multimap
                                   dest-id
                                   ;; Alist of the source entry
                                   entry-alist))))
            (save-mark-and-excursion
-             ;; Search for any ack reference
+             ;; Search for any back reference
              (when (re-search-forward backref-link-regex (region-end) t)
                (setq is-root-entry-p nil))))
          (when is-root-entry-p
@@ -1018,10 +1020,15 @@ refer (with \"RE:\") to any other entries.")
          (get-text-property (point) 'zk-zorg-reference-tree-entry-alist)))
     (unless entry-alist
       (user-error "No entry-alist found at point."))
-    (let ((link (alist-get ':link entry-alist)))
-      (unless link
-        (user-error "No link found in the entry-alist"))
-      (zk-zorg-link-open-from-string link))))
+    (let ((file-path (alist-get ':file-path entry-alist))
+          (pos (alist-get ':pos entry-alist)))
+      (cl-assert file-path t)
+      (cl-assert pos)
+      ;; org-link-open-from-string doesn't work reliably, thus we save
+      ;; the absolute positions.
+      (org-mark-ring-push)
+      (find-file file-path)
+      (goto-char pos))))
 
 (defun zk-zorg-reference-tree (entry-alist)
   (let* ((output-buffer
