@@ -920,7 +920,7 @@ It sets the results to the buffer-local variables
     (setq zk-zorg-reference-tree-destid-to-src-entry-mp
           id-to-link-multimap
           zk-zorg-reference-tree-root-entry-alists
-           (reverse root-entry-list))))
+          (reverse root-entry-list))))
 
 (defun zk-zorg-reference-tree--print-entry
     (level
@@ -1084,7 +1084,7 @@ refer (with \"RE:\") to any other entries."
       (goto-char 0)
       (zk-zorg-reference-tree--create-index)
       (dolist (entry-alist zk-zorg-reference-tree-root-entry-alists)
-        (when (cl-subsetp root-tags (alist-get ':tags entry-alist))
+        (when (cl-subsetp root-tags (alist-get ':tags entry-alist) :test #'equal)
           (zk-zorg-reference-tree--print-entry
            0 entry-alist nil)))
       (zk-zorg-reference-tree--config-buffer
