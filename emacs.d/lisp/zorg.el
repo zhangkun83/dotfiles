@@ -559,8 +559,8 @@ that need to be sorted."
   (local-set-key (kbd "C-c l l") 'zk-org-copy-external-link)
   (local-set-key (kbd "C-c l r") 'zk-org-copy-external-reference)
   (local-set-key (kbd "C-c l w") 'zk-zorg-copy-region-with-link-to-heading)
-  (local-set-key (kbd "C-c l f") 'zk-zorg-create-reference-tree-command)
-  (local-set-key (kbd "C-c l C-f") 'zk-zorg-create-reference-trees-for-tags-command)
+  (local-set-key (kbd "C-c l f") 'zk-zorg-reference-tree-command)
+  (local-set-key (kbd "C-c l C-f") 'zk-zorg-reference-trees-for-tags-command)
   (local-set-key (kbd "C-c l s") 'zk-org-locate-in-scratch-task-queue)
   (local-set-key (kbd "C-c l C-s") 'zk-org-fill-scratch-task-queue)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
@@ -763,8 +763,8 @@ to close the current sessions."
 (defun zk-zorg-link-open-from-string (link)
   "Like org-link-open-from-string, but will always do it from the
  zorg directory."
- (let ((default-directory (zk-zorg-directory)))
-   (org-link-open-from-string link)))
+  (let ((default-directory (zk-zorg-directory)))
+    (org-link-open-from-string link)))
 
 (defun zk-zorg-shutdown-confirm (prompt)
   (if (eq zk-zorg-status 'modified)
@@ -819,18 +819,18 @@ filtered by a tag."
 
 ;; Back reference tree implementation
 
-(defun zk-zorg-create-reference-tree--get-current-heading-link ()
+(defun zk-zorg-reference-tree--get-current-heading-link ()
   (or (zk-org-get-current-heading-link)
       (error "Failed to get heading link at pos %d of %s"
                   (point) (buffer-file-name))))
 
-(defun zk-zorg-create-reference-tree--create-entry-alist-for-current-entry ()
+(defun zk-zorg-reference-tree--create-entry-alist-for-current-entry ()
   "Create an alist for the current heading, which contains keys (:link :todo-keyword :title :file :tags :custom-id)."
   (save-excursion
     (org-back-to-heading)
     (let* ((element (or (org-element-at-point)
                         (error "No heading found")))
-           (heading-link (zk-zorg-create-reference-tree--get-current-heading-link))
+           (heading-link (zk-zorg-reference-tree--get-current-heading-link))
            (custom-id (zk-org-get-customid-at-point))
            (file (file-name-nondirectory (buffer-file-name)))
            (todo-keyword (org-element-property :todo-keyword element))
@@ -843,7 +843,7 @@ filtered by a tag."
             (cons ':tags tags)
             (cons ':custom-id custom-id)))))
 
-(defun zk-zorg-create-reference-tree--create-index ()
+(defun zk-zorg-reference-tree--create-index ()
   "Scan the whole repo and create the index for creating reference trees.
 
 It contains a multimap where the key are entry IDs (CUSTOM_ID), and the
@@ -854,14 +854,14 @@ It also contains a list that contains the alists of entries that don't
 contain any back references (with \"RE:\").  Those are considered root entries.
 
 It sets the results to the buffer-local variables
-`zk-zorg-create-reference-tree-destid-to-src-entry-mp' and `zk-zorg-create-reference-tree-root-entry-alists'.
+`zk-zorg-reference-tree-destid-to-src-entry-mp' and `zk-zorg-reference-tree-root-entry-alists'.
 "
   (let ((id-to-link-multimap (make-hash-table :test 'equal))
         (root-entry-list nil))
     (org-map-entries
      (lambda ()
        (let* ((entry-alist
-               (zk-zorg-create-reference-tree--create-entry-alist-for-current-entry))
+               (zk-zorg-reference-tree--create-entry-alist-for-current-entry))
               ;; The links are in the format
               ;; "[[file:notes2024q1.org::#ramp_up_on_mitigation_engine_work][link]]"
               ;; where "ramp_up_on_mitigation_engine_work" is the ID to
@@ -896,12 +896,12 @@ It sets the results to the buffer-local variables
            (push entry-alist root-entry-list))))
      t
      'agenda-with-archives)
-    (setq zk-zorg-create-reference-tree-destid-to-src-entry-mp
+    (setq zk-zorg-reference-tree-destid-to-src-entry-mp
           id-to-link-multimap
-          zk-zorg-create-reference-tree-root-entry-alists
+          zk-zorg-reference-tree-root-entry-alists
            (reverse root-entry-list))))
 
-(defun zk-zorg-create-reference-tree--print-entry
+(defun zk-zorg-reference-tree--print-entry
     (level
      entry-alist
      print-src-entries-p)
@@ -910,43 +910,43 @@ It sets the results to the buffer-local variables
          (tags (alist-get ':tags entry-alist))
          (custom-id (alist-get ':custom-id entry-alist))
          (src-entry-alists
-          (zk-multimap-get zk-zorg-create-reference-tree-destid-to-src-entry-mp
+          (zk-multimap-get zk-zorg-reference-tree-destid-to-src-entry-mp
                            custom-id))
-         (src-entry-alist-count (length src-entry-alists)))
+         (src-entry-alist-count (length src-entry-alists))
+         (line-start-pos (point)))
     (insert (make-string (* 2 level) ?\ ))
     (insert (if (and (not print-src-entries-p) (> src-entry-alist-count 0)) "+ " "- "))
-    ;; Attach entry-alist and level to the bullet character, to be
-    ;; used by zk-zorg-create-reference-tree--expand-at-point
-    (add-text-properties
-     (- (point) 2)
-     (- (point) 1)
-     `(zk-zorg-create-reference-tree-entry-alist
-       ,entry-alist
-       zk-zorg-create-reference-tree-entry-level
-       ,level))
     (insert
      (if todo-keyword (concat "[" todo-keyword "] ") "")
      (alist-get ':title entry-alist)
      (if tags (concat " \t:" (mapconcat 'identity tags ":") ":") "")
-     " [[" link "][^]]"
      " (" (alist-get ':file entry-alist) ")")
+    ;; Attach entry-alist and level to the whole line, to be
+    ;; used by zk-zorg-reference-tree--expand-at-point
+    (add-text-properties
+     line-start-pos
+     (point)
+     `(zk-zorg-reference-tree-entry-alist
+       ,entry-alist
+       zk-zorg-reference-tree-entry-level
+       ,level))
     (newline)
     (when (and print-src-entries-p custom-id)
       (dolist (src-entry-alist src-entry-alists)
-        (zk-zorg-create-reference-tree--print-entry
+        (zk-zorg-reference-tree--print-entry
          (+ level 1)
          src-entry-alist
          (not print-src-entries-p))))))
 
 
-(defvar-local zk-zorg-create-reference-tree-refresh-form nil
+(defvar-local zk-zorg-reference-tree-refresh-form nil
   "The form to be evaluated to refresh the ref tree buffer")
 
-(defvar-local zk-zorg-create-reference-tree-destid-to-src-entry-mp nil
+(defvar-local zk-zorg-reference-tree-destid-to-src-entry-mp nil
   "The index of the backref tree.  It's a multimap from destination
 ID (CUSTOM_ID) to the source entry alist.")
 
-(defvar-local zk-zorg-create-reference-tree-root-entry-alists nil
+(defvar-local zk-zorg-reference-tree-root-entry-alists nil
   "The entry-alists of root entries.  A root entry is an entry that doesn't back
 refer (with \"RE:\") to any other entries.")
 
@@ -962,12 +962,12 @@ refer (with \"RE:\") to any other entries.")
   `((t :height 0.9 :family ,zk-font-family :weight bold))
   "The face for the bullet character and the TODO keywords in backref buffer")
 
-(defun zk-zorg-create-reference-tree--refresh ()
+(defun zk-zorg-reference-tree--refresh ()
   (interactive)
   (when (yes-or-no-p "Do you want to refresh the ref tree (expansions will be reset)?")
-    (eval zk-zorg-create-reference-tree-refresh-form)))
+    (eval zk-zorg-reference-tree-refresh-form)))
 
-(defun zk-zorg-create-reference-tree--config-buffer (refresh-form)
+(defun zk-zorg-reference-tree--config-buffer (refresh-form)
   "Configure a newly created rertree buffer."
   (goto-char 0)
   (set-buffer-modified-p nil)
@@ -992,28 +992,38 @@ refer (with \"RE:\") to any other entries.")
     (define-key my-local-map (kbd "n") 'next-line)
     (define-key my-local-map (kbd "p") 'previous-line)
     (define-key my-local-map (kbd "q") 'quit-window)
-    (define-key my-local-map (kbd "RET") 'zk-org-open-next-link)
-    (define-key my-local-map (kbd "TAB") 'zk-zorg-create-reference-tree--expand-at-point)
-    (setq zk-zorg-create-reference-tree-refresh-form refresh-form)
-    (define-key my-local-map (kbd "g") 'zk-zorg-create-reference-tree--refresh)))
+    (define-key my-local-map (kbd "RET") 'zk-zorg-reference-tree--open-link)
+    (define-key my-local-map (kbd "TAB") 'zk-zorg-reference-tree--expand-at-point)
+    (setq zk-zorg-reference-tree-refresh-form refresh-form)
+    (define-key my-local-map (kbd "g") 'zk-zorg-reference-tree--refresh)))
 
+(defun zk-zorg-reference-tree--open-link ()
+  (interactive)
+  (let ((entry-alist
+         (get-text-property (point) 'zk-zorg-reference-tree-entry-alist)))
+    (unless entry-alist
+      (user-error "No entry-alist found at point."))
+    (let ((link (alist-get ':link entry-alist)))
+      (unless link
+        (user-error "No link found in the entry-alist"))
+      (zk-zorg-link-open-from-string link))))
 
-(defun zk-zorg-create-reference-tree (entry-alist)
+(defun zk-zorg-reference-tree (entry-alist)
   (let* ((output-buffer
           (zk-recreate-buffer
            (concat "*zorg reftree* " (alist-get ':title entry-alist)))))
     (with-current-buffer output-buffer
       (org-mode)
-      (zk-zorg-create-reference-tree--create-index)
-      (zk-zorg-create-reference-tree--print-entry
+      (zk-zorg-reference-tree--create-index)
+      (zk-zorg-reference-tree--print-entry
        0 entry-alist t)
-      (zk-zorg-create-reference-tree--config-buffer
-       (list 'zk-zorg-create-reference-tree
+      (zk-zorg-reference-tree--config-buffer
+       (list 'zk-zorg-reference-tree
              `(quote ,entry-alist)))
     (switch-to-buffer output-buffer))))
   
 
-(defun zk-zorg-create-reference-tree-command ()
+(defun zk-zorg-reference-tree-command ()
   "Create a buffer to display the reference tree of the current heading
 entry (the starting entry).  A reference tree is a tree of heading
 entries where the children of a node are the entries that contains links
@@ -1022,10 +1032,10 @@ point back to that node.
 This is useful for exploring all the related entries, directly or
 indirectly linking to the starting entry."
   (interactive)
-  (zk-zorg-create-reference-tree
-   (zk-zorg-create-reference-tree--create-entry-alist-for-current-entry)))
+  (zk-zorg-reference-tree
+   (zk-zorg-reference-tree--create-entry-alist-for-current-entry)))
 
-(defun zk-zorg-create-reference-trees-for-tags (root-tags)
+(defun zk-zorg-reference-trees-for-tags (root-tags)
   "Create a buffer to display the reference trees of all root entries that
 match the given root-tags.  A root entry is an entry that doesn't back
 refer (with \"RE:\") to any other entries."
@@ -1037,46 +1047,51 @@ refer (with \"RE:\") to any other entries."
       (let ((inhibit-read-only t))
         (insert "\n(TODO: tag match is *exact*, and doesn't respect tag hiearchy.)"))
       (goto-char 0)
-      (zk-zorg-create-reference-tree--create-index)
-      (dolist (entry-alist zk-zorg-create-reference-tree-root-entry-alists)
+      (zk-zorg-reference-tree--create-index)
+      (dolist (entry-alist zk-zorg-reference-tree-root-entry-alists)
         (when (cl-subsetp root-tags (alist-get ':tags entry-alist))
-          (zk-zorg-create-reference-tree--print-entry
+          (zk-zorg-reference-tree--print-entry
            0 entry-alist nil)))
-      (zk-zorg-create-reference-tree--config-buffer
-       (list 'zk-zorg-create-reference-trees-for-tags
+      (zk-zorg-reference-tree--config-buffer
+       (list 'zk-zorg-reference-trees-for-tags
              `(quote ,root-tags))))
     (switch-to-buffer output-buffer)))
 
-(defun zk-zorg-create-reference-trees-for-tags-command ()
+(defun zk-zorg-reference-trees-for-tags-command ()
   (interactive)
   (let ((tag (completing-read
               "Build reference trees for tag: "
               (org-global-tags-completion-table))))
-    (zk-zorg-create-reference-trees-for-tags (list tag))))
+    (zk-zorg-reference-trees-for-tags (list tag))))
 
-(defun zk-zorg-create-reference-tree--expand-at-point ()
+(defun zk-zorg-reference-tree--expand-at-point ()
   "Expand the entry at point in back ref buffer."
   (interactive)
-  (back-to-indentation)
-  (save-excursion
-    (let ((bullet-char (following-char)))
-      (unless (equal bullet-char ?+)
-        (user-error "This entry is not expandable"))
-      (let ((entry-alist
-             (get-text-property (point) 'zk-zorg-create-reference-tree-entry-alist))
-            (entry-level
-             (get-text-property (point) 'zk-zorg-create-reference-tree-entry-level))
-            (inhibit-read-only t))
-        (unless entry-alist
-          (error "Can't retrieve entry-alist"))
-        (unless entry-level
-          (error "Can't retrieve entry-level"))
-        ;; Delete the original line, since it will be reinserted when
-        ;; expanding
-        (beginning-of-line)
-        (delete-region (point) (progn (forward-line 1) (point)))
-        (zk-zorg-create-reference-tree--print-entry
-         entry-level entry-alist t)))))
+  (let ((original-pos (point)))
+    (unwind-protect
+        (progn
+          (back-to-indentation)
+          (let ((bullet-char (following-char)))
+            (unless (equal bullet-char ?+)
+              (user-error "This entry is not expandable"))
+            (let ((entry-alist
+                   (get-text-property (point) 'zk-zorg-reference-tree-entry-alist))
+                  (entry-level
+                   (get-text-property (point) 'zk-zorg-reference-tree-entry-level))
+                  (inhibit-read-only t))
+              (unless entry-alist
+                (error "Can't retrieve entry-alist"))
+              (unless entry-level
+                (error "Can't retrieve entry-level"))
+              ;; Delete the original line, since it will be reinserted when
+              ;; expanding
+              (beginning-of-line)
+              (delete-region (point) (progn (forward-line 1) (point)))
+              (zk-zorg-reference-tree--print-entry
+               entry-level entry-alist t))))
+      ;; save-excursion won't help if the original line was deleted
+      ;; and re-inserted
+      (goto-char original-pos))))
 
 ;; Generative AI (LLM) related
 
