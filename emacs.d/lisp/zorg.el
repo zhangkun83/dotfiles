@@ -1070,23 +1070,39 @@ indirectly linking to the starting entry."
   (zk-zorg-reference-tree
    (zk-zorg-reference-tree--create-entry-alist-for-current-entry)))
 
+
 (defun zk-zorg-reference-trees-for-tags (root-tags)
   "Create a buffer to display the reference trees of all root entries that
-match the given root-tags.  A root entry is an entry that doesn't back
-refer (with \"RE:\") to any other entries."
+match the given root-tags, and have at least one back references.  A
+root entry is an entry that doesn't back refer (with \"RE:\") to any
+other entries."
   (let* ((output-buffer
           (zk-recreate-buffer
-           (concat "*zorg reftree* (tags) :" (mapconcat 'identity root-tags ":") ":"))))
+           (concat "*zorg reftree* :" (mapconcat 'identity root-tags ":") ":"))))
     (with-current-buffer output-buffer
       (org-mode)
       (let ((inhibit-read-only t))
         (insert "\n(TODO: tag match is *exact*, and doesn't respect tag hiearchy.)"))
       (goto-char 0)
       (zk-zorg-reference-tree--create-index)
-      (dolist (entry-alist zk-zorg-reference-tree-root-entry-alists)
-        (when (cl-subsetp root-tags (alist-get ':tags entry-alist) :test #'equal)
-          (zk-zorg-reference-tree--print-entry
-           0 entry-alist nil)))
+      (let ((progress-reporter
+             (make-progress-reporter
+              "Scanning root entries"
+              0 (length zk-zorg-reference-tree-root-entry-alists)))
+            (counter 0))
+        (dolist (entry-alist zk-zorg-reference-tree-root-entry-alists)
+          (when (and (cl-subsetp root-tags (alist-get ':tags entry-alist) :test #'equal)
+                     ;; Use the root-entry only if it has back references
+                     (let ((custom-id (alist-get ':custom-id entry-alist)))
+                       (and custom-id
+                            (zk-multimap-get
+                             zk-zorg-reference-tree-destid-to-src-entry-mp
+                             custom-id))))
+            (zk-zorg-reference-tree--print-entry
+             0 entry-alist nil))
+          (cl-incf counter)
+          (progress-reporter-update progress-reporter counter))
+        (progress-reporter-done progress-reporter))
       (zk-zorg-reference-tree--config-buffer
        (list 'zk-zorg-reference-trees-for-tags
              `(quote ,root-tags))))
@@ -1096,7 +1112,8 @@ refer (with \"RE:\") to any other entries."
   (interactive)
   (let ((tag (completing-read
               "Build reference trees for tag: "
-              (org-global-tags-completion-table))))
+              (org-global-tags-completion-table) nil t)))
+    (unless (> (length tag) 0) (user-error "No tag entered."))
     (zk-zorg-reference-trees-for-tags (list tag))))
 
 (defun zk-zorg-reference-trees-switch-to-buffer ()
