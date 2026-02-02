@@ -18,20 +18,24 @@
     (set-face-attribute 'org-scheduled-today nil :weight 'regular)
 
     ;; Keep keywords and code on default (monospace) font
-    (dolist (face '(org-todo
-                    org-done
-                    org-code
+    (dolist (face '(org-code
                     org-block
                     org-block-begin-line
                     org-block-end-line
                     org-meta-line
-                    org-drawer
-                    org-special-keyword
                     org-property-value
                     org-date
                     org-table
                     org-checkbox))
-      (set-face-attribute face nil :font zk-font-family))))
+      (set-face-attribute face nil :font zk-font-family))
+    ;; While these faces are already bold, they will mysteriously lose
+    ;; their boldness in new frames.  This will fix them.
+    (dolist (face '(org-todo
+                    org-done
+                    org-drawer
+                    org-special-keyword))
+      (set-face-attribute face nil :font zk-font-family :weight 'bold))))
+
 
 (setq org-fontify-done-headline nil)
 
