@@ -1225,7 +1225,6 @@ previous search"
       (org-mark-element)
       (write-region (region-beginning) (region-end) file))
     (find-file-other-window file)
-    (read-only-mode)
     (when (and (file-exists-p output-file)
                (yes-or-no-p "AI output file exists, delete it?"))
       (zk-kill-buffer-visiting output-file)
