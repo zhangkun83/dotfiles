@@ -323,13 +323,14 @@ CUSTOM_ID.  Ask for confirmation before setting the CUSTOM_ID."
                        (org-element-property :CUSTOM_ID headline)
                        (let ((new-id
                               (zk-org-generate-custom-id-from-text headline-text)))
-                         (barf-if-buffer-read-only)
-                         (display-buffer (current-buffer))
-                         (unless (y-or-n-p (format
-                                            "Set CUSTOM_ID to '%s'?"
-                                            headline-text))
-                           (user-error "CUSTOM_ID rejected by user."))
-                         (org-set-property "CUSTOM_ID" new-id)
+                         (save-window-excursion
+                           (display-buffer (current-buffer))
+                           (barf-if-buffer-read-only)
+                           (unless (y-or-n-p (format
+                                              "Set CUSTOM_ID to '%s'?"
+                                              headline-text))
+                             (user-error "CUSTOM_ID rejected by user."))
+                           (org-set-property "CUSTOM_ID" new-id))
                          new-id))))
       (when (called-interactively-p 'any)
         (message "CUSTOM_ID: %s" custom-id))
@@ -350,16 +351,24 @@ with-profile-name is non-nil, the link will include
 zk-zorg-profile-name so that it can be used for scratch.el"
   (let ((return-value nil)
         (buffer (current-buffer)))
-    (unless (eq major-mode 'org-mode)
-        (user-error "Not in org-mode"))
-    (save-excursion
-      (org-back-to-heading)
-      (let* ((headline (org-element-at-point))
-             (headline-text (substring-no-properties (org-get-heading t t t t)))
-             (custom-id (zk-zorg-set-customid-at-point))
-             (link (zk-org-generate-link custom-id with-profile-name)))
-        (setq return-value (list link (zk-org-neutralize-timestamp headline-text)))))
-    return-value))
+    (cond
+     ((eq major-mode 'org-agenda-mode)
+      (let ((agenda-marker (get-text-property (point) 'org-marker)))
+        (unless agenda-marker (user-error "Not a heading."))
+        (with-current-buffer (marker-buffer agenda-marker)
+          (save-excursion
+            (goto-char agenda-marker)
+            (zk-zorg-set-customid-and-get-headline-link-at-point with-profile-name)))))
+     ((eq major-mode 'org-mode)
+      (save-excursion
+        (org-back-to-heading)
+        (let* ((headline (org-element-at-point))
+               (headline-text (substring-no-properties (org-get-heading t t t t)))
+               (custom-id (zk-zorg-set-customid-at-point))
+               (link (zk-org-generate-link custom-id with-profile-name)))
+          (setq return-value (list link (zk-org-neutralize-timestamp headline-text)))))
+      return-value)
+     (t (user-error "Not in org-mode or org-agenda-mode.")))))
 
 (defun zk-org-get-customid-at-point ()
   "Returns the CUSTOM_ID of the current org entry.  nil if CUSTOM_ID
