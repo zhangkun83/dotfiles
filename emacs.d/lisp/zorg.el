@@ -317,14 +317,16 @@ CUSTOM_ID.  Ask for confirmation before setting the CUSTOM_ID."
     (user-error "Not in org-mode"))
   (save-excursion
     (org-back-to-heading)
-    (let* ((headline (org-element-at-point))
+    (let* ((heading-point (point))
+           (headline (org-element-at-point))
            (headline-text (substring-no-properties (org-get-heading t t t t)))
            (custom-id (or
                        (org-element-property :CUSTOM_ID headline)
                        (let ((new-id
                               (zk-org-generate-custom-id-from-text headline-text)))
                          (save-window-excursion
-                           (display-buffer (current-buffer))
+                           (set-window-point
+                            (display-buffer (current-buffer)) heading-point)
                            (barf-if-buffer-read-only)
                            (unless (y-or-n-p (format
                                               "Set CUSTOM_ID to '%s'?"
