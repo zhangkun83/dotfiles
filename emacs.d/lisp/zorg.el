@@ -349,7 +349,15 @@ org-agenda-mode or any other buffer that list headings, eval the given
 `form' at the actual heading in the referenced org-mode buffer."
   (cond
    ((eq major-mode 'org-mode)
-    (eval form))
+    (if zk-zorg-reference-tree-refresh-form
+        ;; In a reference tree buffer
+        (let ((pos-alist (zk-zorg-reference-tree--get-heading-pos-at-point)))
+          (with-current-buffer (alist-get ':buffer pos-alist)
+            (save-excursion
+              (goto-char (alist-get ':point pos-alist))
+              (eval form))))
+      ;; In plain org-mode buffer
+      (eval form)))
    ((eq major-mode 'org-agenda-mode)
     (let ((agenda-marker (get-text-property (point) 'org-marker)))
       (unless agenda-marker (user-error "Not a heading."))
@@ -1059,30 +1067,38 @@ refer (with \"RE:\") to any other entries.")
     (setq zk-zorg-reference-tree-refresh-form refresh-form)
     (define-key my-local-map (kbd "g") 'zk-zorg-reference-tree--refresh)))
 
-(defun zk-zorg-reference-tree--open-link (&optional other-window)
-  (interactive)
-  (let ((entry-alist
+
+(defun zk-zorg-reference-tree--get-heading-pos-at-point ()
+  "Returns the position of the current heading in the form of alist (:buffer :point)."
+  (let* ((entry-alist
          (get-text-property (point) 'zk-zorg-reference-tree-entry-alist)))
-    (unless entry-alist
-      (user-error "No entry-alist found at point."))
+    (cl-assert entry-alist t)
+    ;; org-link-open-from-string doesn't work reliably, thus we save
+    ;; the absolute positions.
     (let ((file-path (alist-get ':file-path entry-alist))
           (pos (alist-get ':pos entry-alist)))
       (cl-assert file-path t)
       (cl-assert pos t)
-      ;; org-link-open-from-string doesn't work reliably, thus we save
-      ;; the absolute positions.
-      (if other-window
-          (let ((buffer (find-file-noselect file-path)))
-            (cl-assert buffer t)
-            (let ((window (display-buffer buffer 'display-buffer-below-selected)))
-              (set-window-point window pos)
-              (save-window-excursion
-                (select-window window)
-                (pulse-momentary-highlight-one-line))))
-        (org-mark-ring-push)
-        (find-file file-path)
-        (goto-char pos)
-        (pulse-momentary-highlight-one-line)))))
+      (let ((buffer (find-file-noselect file-path)))
+        (cl-assert buffer t)
+        (list (cons ':buffer buffer)
+              (cons ':point pos))))))
+
+(defun zk-zorg-reference-tree--open-link (&optional other-window)
+  (interactive)
+  (let* ((pos-alist (zk-zorg-reference-tree--get-heading-pos-at-point))
+         (buffer (alist-get ':buffer pos-alist))
+         (pos (alist-get ':point pos-alist)))
+    (if other-window
+        (let ((window (display-buffer buffer 'display-buffer-below-selected)))
+          (set-window-point window pos)
+          (save-window-excursion
+            (select-window window)
+            (pulse-momentary-highlight-one-line)))
+      (org-mark-ring-push)
+      (switch-to-buffer buffer)
+      (goto-char pos)
+      (pulse-momentary-highlight-one-line))))
 
 (defun zk-zorg-reference-tree--open-link-other-window ()
   (interactive)
