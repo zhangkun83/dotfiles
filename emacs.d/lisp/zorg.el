@@ -1112,8 +1112,9 @@ point back to that node.
 This is useful for exploring all the related entries, directly or
 indirectly linking to the starting entry."
   (interactive)
-  (zk-zorg-reference-tree
-   (zk-zorg-reference-tree--create-entry-alist-for-current-entry)))
+  (zk-zorg-eval-at-heading-pos
+  `(zk-zorg-reference-tree
+     (zk-zorg-reference-tree--create-entry-alist-for-current-entry))))
 
 
 (defun zk-zorg-reference-trees-for-tags (tag-match)
