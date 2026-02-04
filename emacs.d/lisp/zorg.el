@@ -1120,7 +1120,7 @@ refer (with \"RE:\") to any other entries.")
   (interactive)
   (zk-zorg-reference-tree--open-link t))
 
-(defun zk-zorg-reference-tree (entry-alist)
+(defun zk-zorg-reference-tree (entry-alist &optional other-window)
   "Implementation for `zk-zorg-reference-tree-command'."
   (let* ((output-buffer-name
           (concat "*zorg reftree* " (alist-get ':title entry-alist)))
@@ -1136,22 +1136,33 @@ refer (with \"RE:\") to any other entries.")
         (zk-zorg-reference-tree--config-buffer
          (list 'zk-zorg-reference-tree
                `(quote ,entry-alist)))))
-    (switch-to-buffer output-buffer)))
+    (if other-window
+        (select-window (display-buffer output-buffer 'display-buffer-below-selected))
+      (switch-to-buffer output-buffer))))
   
 
 (defun zk-zorg-reference-tree-for-next-link-other-window-command ()
   "Like `zk-zorg-reference-tree-command', but do it for the heading
-pointed to by the next link instead of the current heading.  Display the
-result in the other window."
+pointed to by the next link instead of the current heading.
+
+Display the result in the other window."
   (interactive)
-  (other-window-prefix)
-  (zk-org-open-next-link)
-  (zk-zorg-reference-tree-command))
+  (let ((current-window (selected-window)))
+    (zk-org-open-next-link)
+    (zk-zorg-reference-tree-command t)
+    (let ((new-window (selected-window)))
+      ;; Go back to the previous window and return to the original
+      ;; position, which was pushed to the org mark ring by
+      ;; zk-org-open-next-link
+      (select-window current-window)
+      (org-mark-ring-goto)
+      ;; Now go to the new window
+      (select-window new-window))))
 
 (defvar zk-zorg-reference-tree-tag-exclude-list
   '("tbs" "tbdsc"))
 
-(defun zk-zorg-reference-tree-command ()
+(defun zk-zorg-reference-tree-command (&optional arg)
   "Create a buffer to display the reference tree of the current heading
 entry (the starting entry).  A reference tree is a tree of heading
 entries where the children of a node are the entries that contains links
@@ -1165,11 +1176,15 @@ ref tree buffer for the same entry, will switch to this buffer without
 refreshing it.
 
 Headings tagged with any tag from `zk-zorg-reference-tree-tag-exclude-list'
-are excluded, meaning we don't use references within those headings."
-  (interactive)
-  (zk-zorg-eval-at-heading-pos
-  `(zk-zorg-reference-tree
-     (zk-zorg-reference-tree--create-entry-alist-for-current-entry))))
+are excluded, meaning we don't use references within those headings.
+
+If ARG is not nil, open the result in another window."
+  (interactive "P")
+  (let ((other-window (when arg t)))
+    (zk-zorg-eval-at-heading-pos
+     `(zk-zorg-reference-tree
+       (zk-zorg-reference-tree--create-entry-alist-for-current-entry)
+       ,other-window))))
 
 
 (defun zk-zorg-reference-trees-for-tags (tag-match)
