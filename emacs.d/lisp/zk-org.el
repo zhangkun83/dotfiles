@@ -78,17 +78,11 @@ backward."
   (interactive "P")
   (if (zk-org-link-at-point-p)
       (org-open-at-point)
-    (let ((buffer (current-buffer))
-          (pos (point)))
-      (org-next-link arg)
-      (let ((orig-org-mark-ring org-mark-ring))
-        (org-open-at-point)
-        (unless (eq orig-org-mark-ring org-mark-ring)
-          ;; If org-open-at-point pushed the mark ring, pop the mark
-          ;; pushed by it, and push the position prior to org-next-link
-          ;; instead.
-          (setq org-mark-ring (cdr org-mark-ring))
-          (org-mark-ring-push pos buffer))))))
+    (let ((link nil))
+      (save-excursion
+        (org-next-link arg)
+        (setq link (org-element-property :raw-link (org-element-context))))
+      (org-open-link-from-string link))))
 
 (defun zk-org-push-mark-ring-advice (orig-fun &rest args)
   "Put this advice around any function to push the original
