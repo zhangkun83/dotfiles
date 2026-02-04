@@ -607,7 +607,7 @@ that need to be sorted."
   (local-set-key (kbd "C-c l f") 'zk-zorg-reference-tree-command)
   (local-set-key (kbd "C-c l C-f") 'zk-zorg-reference-trees-for-tags-command)
   (local-set-key (kbd "C-c l M-f") 'zk-zorg-reference-trees-switch-to-buffer)
-  (local-set-key (kbd "C-c l o") 'zk-zorg-reference-tree-for-next-link-other-window-command)
+  (local-set-key (kbd "C-c l o") 'zk-zorg-reference-tree-for-next-link-command)
   (local-set-key (kbd "C-c l s") 'zk-org-locate-in-scratch-task-queue)
   (local-set-key (kbd "C-c l C-s") 'zk-org-fill-scratch-task-queue)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
@@ -1141,23 +1141,31 @@ refer (with \"RE:\") to any other entries.")
       (switch-to-buffer output-buffer))))
   
 
-(defun zk-zorg-reference-tree-for-next-link-other-window-command ()
+(defun zk-zorg-reference-tree-for-next-link-command (&optional arg)
   "Like `zk-zorg-reference-tree-command', but do it for the heading
 pointed to by the next link instead of the current heading.
 
-Display the result in the other window."
-  (interactive)
-  (let ((current-window (selected-window)))
-    (zk-org-open-next-link)
-    (zk-zorg-reference-tree-command t)
-    (let ((new-window (selected-window)))
-      ;; Go back to the previous window and return to the original
-      ;; position, which was pushed to the org mark ring by
-      ;; zk-org-open-next-link
-      (select-window current-window)
-      (org-mark-ring-goto)
-      ;; Now go to the new window
-      (select-window new-window))))
+If ARG is not nil, display the result in the other window."
+  (interactive "P")
+  (let ((entry-alist nil))
+    (save-excursion
+      (unless (re-search-forward
+               "\\[\\[file:\\([^:.]+\\.org\\)::#\\([a-z0-9_]+\\)\\]\\["
+               (line-end-position)
+               t)
+        (user-error "No usable link found on this line."))
+      (let* ((file (match-string-no-properties 1))
+             (id (match-string-no-properties 2))
+             (entry-buffer (find-file-noselect (concat (zk-zorg-directory) "/" file))))
+        (setq entry-alist
+              (with-current-buffer entry-buffer
+                (save-excursion
+                  (goto-char 0)
+                  (unless (re-search-forward (concat "^:CUSTOM_ID: " id "$") nil t)
+                    (user-error "CUSTOM_ID \"%s\" not found in \"%s\"" id file))
+                  (zk-zorg-reference-tree--create-entry-alist-for-current-entry))))))
+    (cl-assert entry-alist t)
+    (zk-zorg-reference-tree entry-alist arg)))
 
 (defvar zk-zorg-reference-tree-tag-exclude-list
   '("tbs" "tbdsc"))
