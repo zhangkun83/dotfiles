@@ -588,41 +588,48 @@ that need to be sorted."
   (interactive)
   (org-tags-view nil "tbs"))
 
-(defun zk-org-setup-bindings ()
-  "Register my own shortcuts for org mode"
-  (local-set-key (kbd "C-c a") 'org-agenda-list)
-  (local-set-key (kbd "C-c t") 'org-todo-list)
-  (local-set-key (kbd "C-c M-t") 'zk-zorg-open-tbs-agenda)
-  (local-set-key (kbd "C-c m") 'zk-org-tags-view)
-  (local-set-key (kbd "C-c M-m") 'zk-org-switch-to-tags-view-buffer)
-  (local-set-key (kbd "C-c s") 'zk-org-search-view)
-  (local-set-key (kbd "C-c M-s") 'zk-org-switch-to-search-view-buffer)
-  (local-set-key (kbd "C-c q") 'zk-org-set-tags-command)
-  (local-set-key (kbd "C-c l i") 'zk-zorg-set-customid-at-point)
-  (local-set-key (kbd "C-c l a") 'zk-zorg-populate-agenda-command)
-  (local-set-key (kbd "C-c l l") 'zk-org-copy-external-link)
-  (local-set-key (kbd "C-c l r") 'zk-org-copy-external-reference)
-  (local-set-key (kbd "C-c l w") 'zk-zorg-copy-region-with-link-to-heading)
-  (local-set-key (kbd "C-c l f") 'zk-zorg-reference-tree-command)
-  (local-set-key (kbd "C-c l C-f") 'zk-zorg-reference-trees-for-tags-command)
-  (local-set-key (kbd "C-c l M-f") 'zk-zorg-reference-trees-switch-to-buffer)
-  (local-set-key (kbd "C-c l o") 'zk-zorg-reference-tree-for-next-link-command)
-  (local-set-key (kbd "C-c l s") 'zk-org-locate-in-scratch-task-queue)
-  (local-set-key (kbd "C-c l C-s") 'zk-org-fill-scratch-task-queue)
-  (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
-  (local-set-key (kbd "C-c r u") 'zk-zorg-rsync-upload)
-  (local-set-key (kbd "C-c r d") 'zk-zorg-rsync-download)
-  (local-set-key (kbd "C-c r C-d") 'zk-zorg-rsync-diff)
-  (local-set-key (kbd "C-c r o") 'zk-zorg-set-outdated)
-  (local-set-key (kbd "C-c e h") 'zk-org-export-html-to-clipboard)
-  (local-set-key (kbd "C-c o") 'zk-org-open-next-link)
-  (local-set-key (kbd "C-c n n") 'zk-zorg-goto-next-note-file)
-  (local-set-key (kbd "C-c n p") 'zk-zorg-goto-prev-note-file)
-  (local-set-key (kbd "C-c z i") 'zk-zorg-ai-use-current-entry-as-input)
-  (local-set-key (kbd "C-c z SPC") 'zk-zorg-ai-goto-original-input-pos)
-  (local-set-key (kbd "C-c z o") 'zk-zorg-ai-view-output)
-  (local-set-key (kbd "C-c z p") 'zk-zorg-ai-generate-gemini-cli-prompts)
-  (local-set-key (kbd "C-c c") 'zk-org-clone-narrowed-buffer))
+(defvar-keymap zk-zorg-keymap-base
+  "C-c a" 'org-agenda-list
+  "C-c t" 'org-todo-list
+  "C-c M-t" 'zk-zorg-open-tbs-agenda
+  "C-c m" 'zk-org-tags-view
+  "C-c M-m" 'zk-org-switch-to-tags-view-buffer
+  "C-c s" 'zk-org-search-view
+  "C-c M-s" 'zk-org-switch-to-search-view-buffer
+  "C-c q" 'zk-org-set-tags-command
+  "C-c l i" 'zk-zorg-set-customid-at-point
+  "C-c l a" 'zk-zorg-populate-agenda-command
+  "C-c l l" 'zk-org-copy-external-link
+  "C-c l r" 'zk-org-copy-external-reference
+  "C-c l w" 'zk-zorg-copy-region-with-link-to-heading
+  "C-c l f" 'zk-zorg-reference-tree-command
+  "C-c l C-f" 'zk-zorg-reference-trees-for-tags-command
+  "C-c l M-f" 'zk-zorg-reference-trees-switch-to-buffer
+  "C-c l o" 'zk-zorg-reference-tree-for-next-link-command
+  "C-c l s" 'zk-org-locate-in-scratch-task-queue
+  "C-c l C-s" 'zk-org-fill-scratch-task-queue
+  "C-c r s" 'zk-zorg-show-status
+  "C-c r u" 'zk-zorg-rsync-upload
+  "C-c r d" 'zk-zorg-rsync-download
+  "C-c r C-d" 'zk-zorg-rsync-diff
+  "C-c r o" 'zk-zorg-set-outdated
+  "C-c e h" 'zk-org-export-html-to-clipboard
+  "C-c o" 'zk-org-open-next-link
+  "C-c n n" 'zk-zorg-goto-next-note-file
+  "C-c n p" 'zk-zorg-goto-prev-note-file
+  "C-c z i" 'zk-zorg-ai-use-current-entry-as-input
+  "C-c z SPC" 'zk-zorg-ai-goto-original-input-pos
+  "C-c z o" 'zk-zorg-ai-view-output
+  "C-c z p" 'zk-zorg-ai-generate-gemini-cli-prompts
+  "C-c c" 'zk-org-clone-narrowed-buffer)
+
+(defvar-keymap zk-zorg-org-mode-keymap
+  :keymap
+  (make-composed-keymap zk-zorg-keymap-base org-mode-map))
+
+(defvar-keymap zk-zorg-org-agenda-mode-keymap
+  :keymap
+  (make-composed-keymap zk-zorg-keymap-base org-agenda-mode-map))
 
 (defun zk-org-set-file-encoding ()
   ;; Force unix newline format, even on Windows
@@ -1052,13 +1059,14 @@ refer (with \"RE:\") to any other entries.")
       (eval zk-zorg-reference-tree-refresh-form))))
 
 (defvar-keymap zk-zorg-reference-tree-keymap
-    "n" 'next-line
-    "p" 'previous-line
-    "q" 'quit-window
-    "RET" 'zk-zorg-reference-tree--open-link
-    "SPC" 'zk-zorg-reference-tree--open-link-other-window
-    "TAB" 'zk-zorg-reference-tree--expand-at-point
-    "g" 'zk-zorg-reference-tree--refresh)
+  :parent zk-zorg-keymap-base
+  "n" 'next-line
+  "p" 'previous-line
+  "q" 'quit-window
+  "RET" 'zk-zorg-reference-tree--open-link
+  "SPC" 'zk-zorg-reference-tree--open-link-other-window
+  "TAB" 'zk-zorg-reference-tree--expand-at-point
+  "g" 'zk-zorg-reference-tree--refresh)
 
 (defun zk-zorg-reference-tree--config-buffer (refresh-form)
   "Configure a newly created rertree buffer."
@@ -1079,7 +1087,6 @@ refer (with \"RE:\") to any other entries.")
      ("([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*)"
       . 'zk-zorg-backref-neutralized-timestamp)))
   (use-local-map zk-zorg-reference-tree-keymap)
-  (zk-org-setup-bindings)
   (zk-use-proportional-font-for-current-buffer)
   (turn-on-font-lock)
   (setq truncate-lines t)
@@ -1389,8 +1396,12 @@ included in the context (default value is defined by
 
 (global-set-key (kbd "<f5>") 'zk-zorg-goto-latest-note-file)
 
-(add-hook 'org-mode-hook 'zk-org-setup-bindings)
 (add-hook 'org-mode-hook 'zk-org-set-file-encoding)
-(add-hook 'org-agenda-mode-hook 'zk-org-setup-bindings)
+(add-hook 'org-mode-hook
+          (lambda ()
+            (use-local-map zk-zorg-org-mode-keymap)))
+(add-hook 'org-agenda-mode-hook
+          (lambda ()
+            (use-local-map zk-zorg-org-agenda-mode-keymap)))
 
 (provide 'zorg)
