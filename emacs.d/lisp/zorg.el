@@ -442,11 +442,16 @@ parentheses."
   "org-tags-view will always ask for the tags before switching to
 an existing view buffer if available, but it doesn't use the
 entered tags anyway if org-agenda-sticky is turned
-on. zk-org-tags-view will always create a new buffer for the query."
+on. zk-org-tags-view will always create a new buffer for the query.
+
+The tag `tbdsc' is excluded by default, unless it explicitly appears in
+the match string. "
   (interactive "P")
   (let ((tags (read-string "View for tags: " nil 'org-tags-history nil t)))
     (unless (> (length tags) 0)
       (user-error "No tag entered."))
+    (unless (string-match-p "+tbdsc\\b" tags)
+      (setq tags (concat tags "-tbdsc")))
     (org-tags-view arg tags)))
 
 (defun zk-org-switch-to-tags-view-buffer ()
