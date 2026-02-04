@@ -350,16 +350,15 @@ CUSTOM_ID.  Ask for confirmation before setting the CUSTOM_ID."
 org-agenda-mode or any other buffer that list headings, eval the given
 `form' at the actual heading in the referenced org-mode buffer."
   (cond
+   (zk-zorg-reference-tree-refresh-form
+    ;; In a reference tree buffer
+    (let ((pos-alist (zk-zorg-reference-tree--get-heading-pos-at-point)))
+      (with-current-buffer (alist-get ':buffer pos-alist)
+        (save-excursion
+          (goto-char (alist-get ':point pos-alist))
+          (eval form)))))
    ((eq major-mode 'org-mode)
-    (if zk-zorg-reference-tree-refresh-form
-        ;; In a reference tree buffer
-        (let ((pos-alist (zk-zorg-reference-tree--get-heading-pos-at-point)))
-          (with-current-buffer (alist-get ':buffer pos-alist)
-            (save-excursion
-              (goto-char (alist-get ':point pos-alist))
-              (eval form))))
-      ;; In plain org-mode buffer
-      (eval form)))
+      (eval form))
    ((eq major-mode 'org-agenda-mode)
     (let ((agenda-marker (get-text-property (point) 'org-marker)))
       (unless agenda-marker (user-error "Not a heading."))
@@ -1052,6 +1051,15 @@ refer (with \"RE:\") to any other entries.")
     (let ((org-agenda-sticky nil))
       (eval zk-zorg-reference-tree-refresh-form))))
 
+(defvar-keymap zk-zorg-reference-tree-keymap
+    "n" 'next-line
+    "p" 'previous-line
+    "q" 'quit-window
+    "RET" 'zk-zorg-reference-tree--open-link
+    "SPC" 'zk-zorg-reference-tree--open-link-other-window
+    "TAB" 'zk-zorg-reference-tree--expand-at-point
+    "g" 'zk-zorg-reference-tree--refresh)
+
 (defun zk-zorg-reference-tree--config-buffer (refresh-form)
   "Configure a newly created rertree buffer."
   (goto-char 0)
@@ -1070,18 +1078,12 @@ refer (with \"RE:\") to any other entries.")
       . 'org-tag)
      ("([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*)"
       . 'zk-zorg-backref-neutralized-timestamp)))
-  ;; Copy the key map to prevent from unintentionally modifying the
-  ;; shared org-mode-map
-  (let ((my-local-map (copy-keymap (current-local-map))))
-    (use-local-map my-local-map)
-    (define-key my-local-map (kbd "n") 'next-line)
-    (define-key my-local-map (kbd "p") 'previous-line)
-    (define-key my-local-map (kbd "q") 'quit-window)
-    (define-key my-local-map (kbd "RET") 'zk-zorg-reference-tree--open-link)
-    (define-key my-local-map (kbd "SPC") 'zk-zorg-reference-tree--open-link-other-window)
-    (define-key my-local-map (kbd "TAB") 'zk-zorg-reference-tree--expand-at-point)
-    (setq zk-zorg-reference-tree-refresh-form refresh-form)
-    (define-key my-local-map (kbd "g") 'zk-zorg-reference-tree--refresh)))
+  (use-local-map zk-zorg-reference-tree-keymap)
+  (zk-org-setup-bindings)
+  (zk-use-proportional-font-for-current-buffer)
+  (turn-on-font-lock)
+  (setq truncate-lines t)
+  (setq zk-zorg-reference-tree-refresh-form refresh-form))
 
 
 (defun zk-zorg-reference-tree--get-heading-pos-at-point ()
@@ -1129,7 +1131,6 @@ refer (with \"RE:\") to any other entries.")
         (message "Sticky reftree buffer, use ‘g’ to refresh")
       (setq output-buffer (zk-recreate-buffer output-buffer-name))
       (with-current-buffer output-buffer
-        (org-mode)
         (zk-zorg-reference-tree--create-index)
         (zk-zorg-reference-tree--print-entry
          nil entry-alist t)
@@ -1203,7 +1204,6 @@ If ARG is not nil, open the result in another window."
         (message "Sticky reftree buffer, use ‘g’ to refresh")
       (setq output-buffer (zk-recreate-buffer output-buffer-name))
       (with-current-buffer output-buffer
-        (org-mode)
         (zk-zorg-reference-tree--create-index)
         (zk-zorg-reference-trees-for-tags--find-root-entries tag-match)
         (let ((progress-reporter
