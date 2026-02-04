@@ -607,6 +607,7 @@ that need to be sorted."
   (local-set-key (kbd "C-c l f") 'zk-zorg-reference-tree-command)
   (local-set-key (kbd "C-c l C-f") 'zk-zorg-reference-trees-for-tags-command)
   (local-set-key (kbd "C-c l M-f") 'zk-zorg-reference-trees-switch-to-buffer)
+  (local-set-key (kbd "C-c l o") 'zk-zorg-reference-tree-for-next-link-other-window-command)
   (local-set-key (kbd "C-c l s") 'zk-org-locate-in-scratch-task-queue)
   (local-set-key (kbd "C-c l C-s") 'zk-org-fill-scratch-task-queue)
   (local-set-key (kbd "C-c r s") 'zk-zorg-show-status)
@@ -1132,6 +1133,15 @@ refer (with \"RE:\") to any other entries.")
                `(quote ,entry-alist)))))
     (switch-to-buffer output-buffer)))
   
+
+(defun zk-zorg-reference-tree-for-next-link-other-window-command ()
+  "Like `zk-zorg-reference-tree-command', but do it for the heading
+pointed to by the next link instead of the current heading.  Display the
+result in the other window."
+  (interactive)
+  (other-window-prefix)
+  (zk-org-open-next-link)
+  (zk-zorg-reference-tree-command))
 
 (defun zk-zorg-reference-tree-command ()
   "Create a buffer to display the reference tree of the current heading
