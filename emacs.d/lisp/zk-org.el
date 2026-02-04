@@ -71,18 +71,20 @@ element.  If there is no SCHEDULED timestamp, return nil."
           (type (org-element-type context)))
      (eq type 'link)))
 
+(defun zk-org-get-link-at-point ()
+  "Return the link at point."
+  (org-element-property :raw-link (org-element-context)))
+
 (defun zk-org-open-next-link (&optional arg)
   "If the point is on a link, open it.  Otherwise, move point to the
 next link and open it.  If the prefix arg is non-nil, move
 backward."
   (interactive "P")
-  (if (zk-org-link-at-point-p)
-      (org-open-at-point)
-    (let ((link nil))
-      (save-excursion
-        (org-next-link arg)
-        (setq link (org-element-property :raw-link (org-element-context))))
-      (org-open-link-from-string link))))
+  (org-open-link-from-string
+   (if (zk-org-link-at-point-p)
+       (zk-org-get-link-at-point)
+       (org-next-link arg)
+       (zk-org-get-link-at-point))))
 
 (defun zk-org-push-mark-ring-advice (orig-fun &rest args)
   "Put this advice around any function to push the original

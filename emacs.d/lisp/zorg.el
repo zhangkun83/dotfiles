@@ -614,7 +614,7 @@ that need to be sorted."
   "C-c r C-d" 'zk-zorg-rsync-diff
   "C-c r o" 'zk-zorg-set-outdated
   "C-c e h" 'zk-org-export-html-to-clipboard
-  "C-c o" 'zk-org-open-next-link
+  "C-c C-o" 'zk-org-open-next-link
   "C-c n n" 'zk-zorg-goto-next-note-file
   "C-c n p" 'zk-zorg-goto-prev-note-file
   "C-c z i" 'zk-zorg-ai-use-current-entry-as-input

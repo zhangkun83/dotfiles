@@ -92,36 +92,33 @@ inserted, nil if already exists."
         (insert "- % " content)
         t))))
 
-
-(defun zk-scratch-advice-open-link-at-point(orig-open-link-at-point)
-  "Opens the link at point. If it's a local org link, ask the zorg
-server to open it.  The link format must be like
+(defun zk-scratch-advice-open-link-from-string (orig-open-link-from-string
+                                                link &optional arg)
+  "Opens the given link. If it's a local org link, ask the zorg server to
+open it.  The link format must be like
 'file:@orglife:notes2023.org::#node_id'"
-  (interactive)
-  (let ((link (zk-scratch-get-link-at-point)))
-    (when link
-      (if (string-match-p "^file:.*" link)
-          (progn
-            (unless (string-match "^file:@\\([a-z]+\\):\\(.*\\)$" link)
-              (user-error "Link format must be in the form 'file:@zorgprofile:filename.org::#nodeid'"))
-            (let ((zorg-profile (match-string-no-properties 1 link))
-                  (actual-link (concat "file:" (match-string-no-properties 2 link))))
-              ;; Open org file links in zorg
-              (if (server-eval-at
-                   zorg-profile
-                   (list 'ignore-errors
-                         ;; org-link-open-from-string throws an error
-                         ;; if the link cannot be opened.  That will
-                         ;; be turned into a nil by ignore-errors.
-                         (list 'zk-zorg-link-open-from-string actual-link)
-                         '(raise-frame)
-                         t))
-                  (message "Asked %s to open \"%s\"" zorg-profile actual-link)
-                (message "%s failed to open \"%s\"" zorg-profile actual-link))))
-        ;; Open other links normally
-        (funcall orig-open-link-at-point)))))
+  (if (string-match-p "^file:.*" link)
+      (progn
+        (unless (string-match "^file:@\\([a-z]+\\):\\(.*\\)$" link)
+          (user-error "Link format must be in the form 'file:@zorgprofile:filename.org::#nodeid'"))
+        (let ((zorg-profile (match-string-no-properties 1 link))
+              (actual-link (concat "file:" (match-string-no-properties 2 link))))
+          ;; Open org file links in zorg
+          (if (server-eval-at
+               zorg-profile
+               `(ignore-errors
+                  ;; org-link-open-from-string throws an error if the
+                  ;; link cannot be opened.  That will be turned into
+                  ;; a nil by ignore-errors.
+                  (zk-zorg-link-open-from-string ,actual-link)
+                  (raise-frame)
+                  t))
+              (message "Asked %s to open link \"%s\"" zorg-profile actual-link)
+            (message "%s failed to open link \"%s\"" zorg-profile actual-link))))
+    ;; Open other links normally
+    (funcall orig-open-link-from-string link arg)))
 
-(advice-add 'org-open-at-point :around #'zk-scratch-advice-open-link-at-point)
+(advice-add 'org-open-link-from-string :around #'zk-scratch-advice-open-link-from-string)
 
 (global-set-key (kbd "<f5>") 'zk-scratch-init)
 (global-set-key (kbd "<f6>") 'zk-scratch-open-lisp-window)
@@ -138,7 +135,7 @@ server to open it.  The link format must be like
 
 (add-hook 'org-mode-hook
           (lambda ()
-            (local-set-key (kbd "C-c o") 'zk-org-open-next-link)
+            (local-set-key (kbd "C-c C-o") 'zk-org-open-next-link)
             (local-set-key (kbd "C-c e h") 'zk-org-export-html-to-clipboard)
             (when (equal buffer-file-name zk-kanban-file)
               (font-lock-add-keywords
