@@ -172,6 +172,7 @@
 (global-set-key (kbd "C-z C-b") 'zk-goto-base-buffer)
 (define-key minibuffer-local-map (kbd "C-z p") 'zk-minibuffer-insert-current-file-path)
 (define-key minibuffer-local-map (kbd "C-z n") 'zk-minibuffer-insert-current-file-name)
+(define-key isearch-mode-map (kbd "DEL") 'isearch-del-char)
 (global-set-key (kbd "C-z s") 'shell)
 (global-set-key (kbd "C-z d") 'zk-diff-navigate)
 (global-set-key (kbd "C-z y") 'zk-youdao-dict)
