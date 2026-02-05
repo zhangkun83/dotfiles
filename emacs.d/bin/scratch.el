@@ -2,9 +2,7 @@
 (require 'zk-org)
 
 (when (display-graphic-p)
-  (setq leuven-dark-scale-outline-headlines nil
-        leuven-dark-scale-org-agenda-structure nil)
-  (load-theme 'leuven-dark t)
+  (load-theme 'modus-operandi-tinted t)
   (zk-org-init-fonts))
 
 (require 'zk)
@@ -126,7 +124,7 @@ open it.  The link format must be like
 
 ;; Highlight the #orglife and #orgwork tags
 (defface zk-hl-orglife
-  `((t :background "Blue" :height 0.75 :family ,zk-font-family))
+  `((t :background "lavender" :height 0.75 :family ,zk-font-family))
   "A custom face for tagging #orglife")
 
 (defface zk-hl-orgwork
