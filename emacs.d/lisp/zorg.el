@@ -450,7 +450,7 @@ the match string. "
   (let ((tags (read-string "View for tags: " nil 'org-tags-history nil t)))
     (unless (> (length tags) 0)
       (user-error "No tag entered."))
-    (unless (string-match-p "+tbdsc\\b" tags)
+    (unless (string-match-p "+\\|^tbdsc\\b" tags)
       (setq tags (concat tags "-tbdsc")))
     (org-tags-view arg tags)))
 
