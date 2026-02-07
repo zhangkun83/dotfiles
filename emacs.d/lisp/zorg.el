@@ -30,8 +30,8 @@
 (defvar zk-zorg-startup-view-func nil "Called to present the
 initial view once initialization has succeeded")
 
-(defconst zk-zorg-rsync-buffer-name "*zorg rsync*")
-(defconst zk-zorg-rsync-diff-buffer-name "*zorg diff*")
+(defconst zk-zorg-rsync-buffer-name "*zorg/rsync*")
+(defconst zk-zorg-rsync-diff-buffer-name "*zorg/diff*")
 
 (defun zk-zorg-directory ()
   "Returns the absolute directory for local org files"
@@ -58,7 +58,7 @@ files (starting with .). Returns the list file name."
   (let* ((list-file-name ".upload-list")
          (list-file (concat (zk-zorg-directory) "/" list-file-name))
          (file-list (directory-files (zk-zorg-directory))))
-    (with-current-buffer (get-buffer-create "*zorg upload list*")
+    (with-current-buffer (get-buffer-create "*zorg/upload-list*")
       (erase-buffer)
       (dolist (file file-list)
         (when (string-match-p "^[^.#].+\\.\\(org\\)\\|\\(org_archive\\)$" file)
@@ -1177,7 +1177,7 @@ refer (with \"RE:\") to any other entries.")
 (defun zk-zorg-reference-tree (entry-alist &optional other-window)
   "Implementation for `zk-zorg-reference-tree-command'."
   (let* ((output-buffer-name
-          (concat "*zorg reftree* " (alist-get ':title entry-alist)))
+          (concat "*zorg/reftree* " (alist-get ':title entry-alist)))
          (output-buffer (get-buffer output-buffer-name)))
     (if (and output-buffer org-agenda-sticky)
         (message "Sticky reftree buffer, use ‘g’ to refresh")
@@ -1250,7 +1250,7 @@ If ARG is not nil, open the result in another window."
 
 (defun zk-zorg-reference-trees-for-tags (tag-match)
   "Implementation for `zk-zorg-reference-trees-for-tags-command'."
-  (let* ((output-buffer-name (concat "*zorg reftree* m:" tag-match))
+  (let* ((output-buffer-name (concat "*zorg/reftree* m:" tag-match))
          (output-buffer (get-buffer output-buffer-name)))
     (if (and output-buffer org-agenda-sticky)
         (message "Sticky reftree buffer, use ‘g’ to refresh")
@@ -1301,7 +1301,7 @@ without refreshing it."
 MRU (most recently used) order,which is convenient for going back to the
 previous search"
   (interactive)
-  (zk-switch-to-buffer-from-filtered-list "^\\*zorg reftree\\* "))
+  (zk-switch-to-buffer-from-filtered-list "^\\*zorg/reftree\\* "))
 
 (defun zk-zorg-reference-tree--expand-at-point ()
   "Expand the entry at point in back ref buffer."
