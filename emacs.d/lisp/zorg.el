@@ -678,6 +678,7 @@ that need to be sorted."
                (read-only-mode 1)
                (current-buffer)))))
     (with-current-buffer buffer
+      (goto-char (point-max))
       (when (> (point) 1)
         (insert "\n"))
       (let ((header (format "zorg rsync initiated at %s." (current-time-string))))
