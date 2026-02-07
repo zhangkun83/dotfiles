@@ -585,6 +585,8 @@ heading that captures the agenda."
 
 (defun zk-zorg-show-status ()
   (interactive)
+  (let ((rsync-output-buffer (get-buffer zk-zorg-rsync-buffer-name)))
+    (when rsync-output-buffer (switch-to-buffer rsync-output-buffer)))
   (message "%s status: %s" zk-zorg-profile-name zk-zorg-status))
 
 (defun zk-zorg-open-tbs-agenda ()
@@ -660,6 +662,20 @@ that need to be sorted."
   (zk-zorg-rsync-download)
   (zk-zorg-startup-open))
 
+
+(defvar-keymap zk-zorg-plain-viewer-keymap
+  "n" 'next-line
+  "p" 'previous-line
+  "q" 'quit-window)
+
+(defun zk-zorg-rsync-create-log-buffer ()
+  (let ((buffer (zk-recreate-buffer zk-zorg-rsync-buffer-name)))
+    (with-current-buffer buffer
+      (use-local-map zk-zorg-plain-viewer-keymap)
+      (insert (format "zorg rsync initiated at %s.\n" (current-time-string)))
+      (read-only-mode 1))
+    buffer))
+
 (defun zk-zorg-rsync-download ()
   "Download zorg files from remote.  Update the zorg status
  according to the result."
@@ -669,16 +685,17 @@ that need to be sorted."
   (unless (eq zk-zorg-status 'outdated)
     (user-error "Cannot download when status is %s" zk-zorg-status))
   (setq zk-zorg-status 'downloading)
-  (let ((default-directory (zk-zorg-directory)))
-    (switch-to-buffer zk-zorg-rsync-buffer-name)
-    (with-current-buffer zk-zorg-rsync-buffer-name
-      (erase-buffer)
-      (zk-log-to-current-buffer "Downloading %s files ..." zk-zorg-profile-name)
-      (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
-                              "--whole-file"
-                              "-rtuv" (concat zk-zorg-rsync-backup-dir "/") "."))
+  (let ((default-directory (zk-zorg-directory))
+        (output-buffer (zk-zorg-rsync-create-log-buffer)))
+    (switch-to-buffer output-buffer)
+    (zk-log-to-current-buffer "Downloading %s files from source ..." zk-zorg-profile-name)
+    (let* ((inhibit-read-only t)
+           (ret-val (call-process "rsync" nil output-buffer t
+                            "--whole-file"
+                            "-rtuv" (concat zk-zorg-rsync-backup-dir "/") ".")))
+      (if (eq 0 ret-val)
           (progn
-            (zk-log-to-current-buffer "Download successful.")
+            (zk-log-to-current-buffer "Download SUCCESSFUL.")
             (if (zk-zorg-rsync-check-remote-consistency)
                 (progn
                   (remove-hook 'org-mode-hook 'zk-zorg-make-buffer-read-only)
@@ -691,9 +708,7 @@ that need to be sorted."
                   (setq zk-zorg-status 'clean))
               (setq zk-zorg-status 'dirty)))
         (setq zk-zorg-status 'outdated)
-        (zk-log-to-current-buffer "Download failed.")
-        (read-string "Press Enter to continue ...")
-        (kill-buffer)))))
+        (zk-log-to-current-buffer "Download FAILED.")))))
 
 (defun zk-zorg-rsync-upload ()
   (interactive)
@@ -703,25 +718,24 @@ that need to be sorted."
            (eq zk-zorg-status 'clean)
            (eq zk-zorg-status 'modified))
     (user-error "Cannot upload when status is %s" zk-zorg-status))
-  (let ((default-directory (zk-zorg-directory)))
+ (let ((default-directory (zk-zorg-directory))
+        (output-buffer (zk-zorg-rsync-create-log-buffer)))
     (setq zk-zorg-status 'uploading)
-    (switch-to-buffer zk-zorg-rsync-buffer-name)
-    (with-current-buffer zk-zorg-rsync-buffer-name
-      (erase-buffer)
-      (zk-log-to-current-buffer "Uploading local changes ...")
-      (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
-                              "--whole-file"
-                              "-rtuv"
-                              (concat "--files-from=" (zk-zorg-generate-upload-list-file))
-                              "./" zk-zorg-rsync-backup-dir))
+    (switch-to-buffer output-buffer)
+    (zk-log-to-current-buffer "Uploading files to source ...")
+    (let* ((inhibit-read-only t)
+           (ret-val
+            (call-process "rsync" nil output-buffer t
+                          "--whole-file"
+                          "-rtuv"
+                          (concat "--files-from=" (zk-zorg-generate-upload-list-file))
+                          "./" zk-zorg-rsync-backup-dir)))
+      (if (eq 0 ret-val)
           (progn
             (setq zk-zorg-status 'clean)
-            (zk-log-to-current-buffer "Upload successful.")
-            (read-string "Press Enter to continue ..."))
+            (zk-log-to-current-buffer "Upload SUCCESSFUL."))
         (setq zk-zorg-status 'modified)
-        (zk-log-to-current-buffer "Upload failed.")
-        (read-string "Press Enter to continue ..."))
-      (kill-buffer))))
+        (zk-log-to-current-buffer "Upload FAILED.")))))
 
 (defun zk-zorg-rsync-diff ()
   "Display the diff of the local files against the remote files."
@@ -755,25 +769,22 @@ files, nil if check failed."
         (consistent-p nil))
     (while do-it-p
       (switch-to-buffer zk-zorg-rsync-buffer-name)
-      (with-current-buffer zk-zorg-rsync-buffer-name
-        (zk-log-to-current-buffer "Checking consistency ...")
-        (let ((original-lines (count-lines (point-min) (point-max))))
-          (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
-                                  "--whole-file"
-                                  "-ncrti"
-                                  (concat "--files-from=" (zk-zorg-generate-upload-list-file))
-                                  "./" zk-zorg-rsync-backup-dir))
-              (progn
-                (setq do-it-p nil)
-                (if (> (count-lines (point-min) (point-max)) original-lines)
-                    (zk-log-to-current-buffer "WARNING: local files differ from remote.  Please check.")
-                  (zk-log-to-current-buffer "Local files are consistent with remote.")
-                  (read-string "Press Enter to continue ...")
-                  (kill-buffer)
-                  (setq consistent-p t)))
-            (zk-log-to-current-buffer "Failed to check remote consistency.")
-            (unless (y-or-n-p "Retry? ")
-              (setq do-it-p nil))))))
+      (zk-log-to-current-buffer "Checking consistency of files ...")
+      (let ((original-lines (count-lines (point-min) (point-max))))
+        (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
+                                "--whole-file"
+                                "-ncrti"
+                                (concat "--files-from=" (zk-zorg-generate-upload-list-file))
+                                "./" zk-zorg-rsync-backup-dir))
+            (progn
+              (setq do-it-p nil)
+              (if (> (count-lines (point-min) (point-max)) original-lines)
+                  (zk-log-to-current-buffer "WARNING: local files differ from source.  Please check.")
+                (zk-log-to-current-buffer "Local files are consistent with source.")
+                (setq consistent-p t)))
+          (zk-log-to-current-buffer "FAILED to check consistency with source.")
+          (unless (y-or-n-p "Retry? ")
+            (setq do-it-p nil)))))
     consistent-p))
 
 (defun zk-zorg-org-file-p ()

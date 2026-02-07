@@ -662,7 +662,8 @@ you saved the register."
 newline, and also display it in the echo area.  It tries to
 redraw the buffer after appending the message."
   (goto-char (point-max))
-  (insert (apply #'message format-string args) "\n")
+  (let ((inhibit-read-only t))
+    (insert (apply #'message format-string args) "\n"))
   ;; Allow the buffer to redraw
   (sit-for .1))
 
