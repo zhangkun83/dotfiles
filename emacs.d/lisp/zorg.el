@@ -960,6 +960,17 @@ resulting list is set to the buffer-local variable
     (setq zk-zorg-reference-tree-root-entry-alists
           root-entry-list)))
 
+(defun zk-zorg-buffer-change-hook (beg end len)
+  (when (zk-zorg-org-file-p)
+    (setq zk-zorg-reference-tree-destid-to-src-entry-mp-up-to-date-p nil)))
+
+(add-hook 'after-change-functions #'zk-zorg-buffer-change-hook)
+
+(defun zk-zorg-reference-tree--refresh-index ()
+  "Call `zk-zorg-reference-tree--create-index' when necessary."
+  (unless zk-zorg-reference-tree-destid-to-src-entry-mp-up-to-date-p
+    (zk-zorg-reference-tree--create-index)))
+
 (defun zk-zorg-reference-tree--create-index ()
   "Scan the whole repo and create the index for creating reference trees.
 It creates a multimap where the key are entry IDs (CUSTOM_ID), and the
@@ -1003,7 +1014,9 @@ Entries that are tagged with any tag from
        t
        'agenda-with-archives)
     (setq zk-zorg-reference-tree-destid-to-src-entry-mp
-          id-to-link-multimap)))
+          id-to-link-multimap
+          zk-zorg-reference-tree-destid-to-src-entry-mp-up-to-date-p
+          t)))
 
 (defun zk-zorg-reference-tree--print-entry
     (ancestor-links
@@ -1059,7 +1072,12 @@ Entries that are tagged with any tag from
 (defvar-local zk-zorg-reference-tree-refresh-form nil
   "The form to be evaluated to refresh the ref tree buffer")
 
-(defvar-local zk-zorg-reference-tree-destid-to-src-entry-mp nil
+(defvar zk-zorg-reference-tree-destid-to-src-entry-mp-up-to-date-p nil
+  "t if `zk-zorg-reference-tree-destid-to-src-entry-mp' is still
+up-to-date, meaning that no org file buffers have been modified since it
+was last created.  Modifying any org file buffer will set this to nil.")
+
+(defvar zk-zorg-reference-tree-destid-to-src-entry-mp nil
   "The index of the backref tree.  It's a multimap from destination
 ID (CUSTOM_ID) to the source entry alist.")
 
@@ -1165,7 +1183,7 @@ refer (with \"RE:\") to any other entries.")
         (message "Sticky reftree buffer, use ‘g’ to refresh")
       (setq output-buffer (zk-recreate-buffer output-buffer-name))
       (with-current-buffer output-buffer
-        (zk-zorg-reference-tree--create-index)
+        (zk-zorg-reference-tree--refresh-index)
         (zk-zorg-reference-tree--print-entry
          nil entry-alist t)
         (zk-zorg-reference-tree--config-buffer
@@ -1238,7 +1256,7 @@ If ARG is not nil, open the result in another window."
         (message "Sticky reftree buffer, use ‘g’ to refresh")
       (setq output-buffer (zk-recreate-buffer output-buffer-name))
       (with-current-buffer output-buffer
-        (zk-zorg-reference-tree--create-index)
+        (zk-zorg-reference-tree--refresh-index)
         (zk-zorg-reference-trees-for-tags--find-root-entries tag-match)
         (let ((progress-reporter
                (make-progress-reporter
