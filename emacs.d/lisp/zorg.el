@@ -696,6 +696,7 @@ that need to be sorted."
   (unless (eq zk-zorg-status 'outdated)
     (user-error "Cannot download when status is %s" zk-zorg-status))
   (setq zk-zorg-status 'downloading)
+  (setq zk-zorg-reference-tree-destid-to-src-entry-mp-up-to-date-p nil)
   (let ((default-directory (zk-zorg-directory))
         (output-buffer (zk-zorg-rsync-create-log-buffer)))
     (switch-to-buffer output-buffer)
