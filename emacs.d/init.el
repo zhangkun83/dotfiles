@@ -158,6 +158,7 @@
 (global-set-key (kbd "C-x r C-SPC") 'zk-buffer-to-register)
 (global-set-key (kbd "C-x r C-@") 'zk-buffer-to-register)
 (global-set-key (kbd "C-x C-b") 'zk-switch-to-other-buffer)
+(global-set-key (kbd "C-x M-b") 'list-buffers)
 (global-set-key (kbd "C-x C-l") 'zk-recenter-top-bottom-other-window)
 (require 'transpose-frame)
 (global-set-key (kbd "C-x 9") 'transpose-frame)
