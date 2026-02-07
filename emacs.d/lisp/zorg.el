@@ -664,16 +664,26 @@ that need to be sorted."
 
 
 (defvar-keymap zk-zorg-plain-viewer-keymap
+  :parent zk-zorg-keymap-base
   "n" 'next-line
   "p" 'previous-line
   "q" 'quit-window)
 
 (defun zk-zorg-rsync-create-log-buffer ()
-  (let ((buffer (zk-recreate-buffer zk-zorg-rsync-buffer-name)))
+  (let ((inhibit-read-only t)
+        (buffer
+         (or (get-buffer zk-zorg-rsync-buffer-name)
+             (with-current-buffer (zk-recreate-buffer zk-zorg-rsync-buffer-name)
+               (use-local-map zk-zorg-plain-viewer-keymap)
+               (read-only-mode 1)
+               (current-buffer)))))
     (with-current-buffer buffer
-      (use-local-map zk-zorg-plain-viewer-keymap)
-      (insert (format "zorg rsync initiated at %s.\n" (current-time-string)))
-      (read-only-mode 1))
+      (when (> (point) 1)
+        (insert "\n"))
+      (let ((header (format "zorg rsync initiated at %s." (current-time-string))))
+        (insert (make-string (length header) ?=) "\n")
+        (zk-log-to-current-buffer header)
+        (insert (make-string (length header) ?=) "\n")))
     buffer))
 
 (defun zk-zorg-rsync-download ()
