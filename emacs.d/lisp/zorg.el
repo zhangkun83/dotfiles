@@ -681,7 +681,7 @@ that need to be sorted."
       (goto-char (point-max))
       (when (> (point) 1)
         (insert "\n"))
-      (let ((header (format "zorg rsync initiated at %s." (current-time-string))))
+      (let ((header (format "rsync initiated at %s." (current-time-string))))
         (insert (make-string (length header) ?=) "\n")
         (zk-log-to-current-buffer header)
         (insert (make-string (length header) ?=) "\n")))
