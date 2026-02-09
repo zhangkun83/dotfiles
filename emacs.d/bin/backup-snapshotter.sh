@@ -3,7 +3,7 @@
 # Checks the backup directory hourly and create a snapshot zip file
 # daily.
 BACKUP_DIRNAME=backup
-SNAPSHOT_DIR=~/backup-snaphots
+SNAPSHOT_DIR=~/backup-snapshots
 SNAPSHOTS_LIMIT=90
 mkdir -p $SNAPSHOT_DIR
 while true; do
