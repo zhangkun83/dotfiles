@@ -37,8 +37,16 @@ initial view once initialization has succeeded")
   "Returns the absolute directory for local org files"
   (concat zk-user-home-dir "/" zk-zorg-profile-name))
 
-;; Possible values: init, outdated, downloading, uploading, clean, modified, dirty
-(setq zk-zorg-status 'init)
+(defun zk-zorg-set-status (status)
+  (let ((log-buffer (zk-zorg-rsync-create-log-buffer)))
+    (with-current-buffer log-buffer
+      (setq zk-zorg-status status)
+      (zk-log-to-current-buffer
+       "%s status is now `%s'" zk-zorg-profile-name status))))
+
+(defvar zk-zorg-status 'init
+  "Possible values: `init', `outdated', `downloading', `uploading', `clean',
+ `modified', `dirty'")
 
 ;; Most values are copied from the default mode-line-format. I added
 ;; zk-zorg-status.
@@ -586,7 +594,9 @@ heading that captures the agenda."
 (defun zk-zorg-show-status ()
   (interactive)
   (let ((rsync-output-buffer (get-buffer zk-zorg-rsync-buffer-name)))
-    (when rsync-output-buffer (switch-to-buffer rsync-output-buffer)))
+    (when rsync-output-buffer
+      (switch-to-buffer rsync-output-buffer)
+      (goto-char (point-max))))
   (message "%s status: %s" zk-zorg-profile-name zk-zorg-status))
 
 (defun zk-zorg-open-tbs-agenda ()
@@ -678,13 +688,7 @@ that need to be sorted."
                (read-only-mode 1)
                (current-buffer)))))
     (with-current-buffer buffer
-      (goto-char (point-max))
-      (when (> (point) 1)
-        (insert "\n"))
-      (let ((header (format "rsync initiated at %s." (current-time-string))))
-        (insert (make-string (length header) ?=) "\n")
-        (zk-log-to-current-buffer header)
-        (insert (make-string (length header) ?=) "\n")))
+      (goto-char (point-max)))
     buffer))
 
 (defun zk-zorg-rsync-download ()
@@ -695,7 +699,7 @@ that need to be sorted."
     (user-error "There are unsaved files."))
   (unless (eq zk-zorg-status 'outdated)
     (user-error "Cannot download when status is %s" zk-zorg-status))
-  (setq zk-zorg-status 'downloading)
+  (zk-zorg-set-status 'downloading)
   (setq zk-zorg-reference-tree-destid-to-src-entry-mp-up-to-date-p nil)
   (let ((default-directory (zk-zorg-directory))
         (output-buffer (zk-zorg-rsync-create-log-buffer)))
@@ -717,9 +721,9 @@ that need to be sorted."
                                            (read-only-mode -1)
                                            (revert-buffer t t)))))
                         (buffer-list))
-                  (setq zk-zorg-status 'clean))
-              (setq zk-zorg-status 'dirty)))
-        (setq zk-zorg-status 'outdated)
+                  (zk-zorg-set-status 'clean))
+              (zk-zorg-set-status 'dirty)))
+        (zk-zorg-set-status 'outdated)
         (zk-log-to-current-buffer "FAILURE: Could not download from repo.")))))
 
 (defun zk-zorg-rsync-upload ()
@@ -732,7 +736,7 @@ that need to be sorted."
     (user-error "Cannot upload when status is %s" zk-zorg-status))
  (let ((default-directory (zk-zorg-directory))
         (output-buffer (zk-zorg-rsync-create-log-buffer)))
-    (setq zk-zorg-status 'uploading)
+    (zk-zorg-set-status 'uploading)
     (switch-to-buffer output-buffer)
     (zk-log-to-current-buffer "Uploading %s files to repo ..." zk-zorg-profile-name)
     (let* ((inhibit-read-only t)
@@ -744,9 +748,9 @@ that need to be sorted."
                           "./" zk-zorg-rsync-backup-dir)))
       (if (eq 0 ret-val)
           (progn
-            (setq zk-zorg-status 'clean)
+            (zk-zorg-set-status 'clean)
             (zk-log-to-current-buffer "SUCCESS: Upload completed."))
-        (setq zk-zorg-status 'modified)
+        (zk-zorg-set-status 'modified)
         (zk-log-to-current-buffer "FAILURE: Could not upload to repo.")))))
 
 (defun zk-zorg-rsync-diff ()
@@ -824,7 +828,7 @@ to close the current sessions."
               (eq zk-zorg-status 'clean))
     (user-error "Cannot transit from %s to outdated"
                 zk-zorg-status))
-  (setq zk-zorg-status 'outdated)
+  (zk-zorg-set-status 'outdated)
   (add-hook 'org-mode-hook 'zk-zorg-make-buffer-read-only)
   (mapc (function
          (lambda (buf) (with-current-buffer buf
@@ -881,7 +885,7 @@ to close the current sessions."
           (lambda ()
             (if (and (eq zk-zorg-status 'clean)
                      (zk-zorg-current-buffer-is-zorg-file-p))
-                (setq zk-zorg-status 'modified))))
+                (zk-zorg-set-status 'modified))))
 
 (defun zk-org-get-heading-string ()
   "Returns the current org heading string.  nil if not under an

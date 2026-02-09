@@ -658,12 +658,14 @@ you saved the register."
     (set-register register (cons 'buffer (buffer-name)))))
 
 (defun zk-log-to-current-buffer (format-string &rest args)
-  "Append the given message to the current buffer, followed by a
-newline, and also display it in the echo area.  It tries to
-redraw the buffer after appending the message."
+  "Append the given message to the current buffer, prefixed
+by a timestamp, followed by a newline, and also display it in the
+echo area.  It tries to redraw the buffer after appending the
+message."
   (goto-char (point-max))
   (let ((inhibit-read-only t))
-    (insert (apply #'message format-string args) "\n"))
+    (insert (format-time-string "[%Y-%m-%d %T] ")
+            (apply #'message format-string args) "\n"))
   ;; Allow the buffer to redraw
   (sit-for .1))
 
