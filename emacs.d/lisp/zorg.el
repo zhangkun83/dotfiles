@@ -707,7 +707,6 @@ that need to be sorted."
     (zk-log-to-current-buffer "Downloading %s files from repo ..." zk-zorg-profile-name)
     (let* ((inhibit-read-only t)
            (ret-val (call-process "rsync" nil output-buffer t
-                            "--whole-file"
                             "-rtuv" (concat zk-zorg-rsync-backup-dir "/") ".")))
       (if (eq 0 ret-val)
           (progn
@@ -742,7 +741,6 @@ that need to be sorted."
     (let* ((inhibit-read-only t)
            (ret-val
             (call-process "rsync" nil output-buffer t
-                          "--whole-file"
                           "-rtuv"
                           (concat "--files-from=" (zk-zorg-generate-upload-list-file))
                           "./" zk-zorg-rsync-backup-dir)))
@@ -767,7 +765,6 @@ that need to be sorted."
       (switch-to-buffer output-buffer)
       (insert "#### Downloading remote files ...\n")
       (unless (eq 0 (call-process "rsync" nil output-buffer t
-                                  "--whole-file"
                                   "-crti" "--delete" (concat zk-zorg-rsync-backup-dir "/") "."))
         (error "Failed to download remote files"))
       (insert "\n#### Generating diff ...\n"))
@@ -788,7 +785,6 @@ files, nil if check failed."
       (zk-log-to-current-buffer "Checking consistency with repo ...")
       (let ((original-lines (count-lines (point-min) (point-max))))
         (if (eq 0 (call-process "rsync" nil zk-zorg-rsync-buffer-name t
-                                "--whole-file"
                                 "-ncrti"
                                 (concat "--files-from=" (zk-zorg-generate-upload-list-file))
                                 "./" zk-zorg-rsync-backup-dir))

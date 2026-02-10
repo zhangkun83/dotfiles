@@ -83,8 +83,8 @@ backward."
   (org-open-link-from-string
    (if (zk-org-link-at-point-p)
        (zk-org-get-link-at-point)
-       (org-next-link arg)
-       (zk-org-get-link-at-point))))
+     (org-next-link arg)
+     (zk-org-get-link-at-point))))
 
 (defun zk-org-push-mark-ring-advice (orig-fun &rest args)
   "Put this advice around any function to push the original
