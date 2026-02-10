@@ -21,7 +21,7 @@ than $HOME which is \"c:\\Users\\foo\\AppData\\Roaming\".")
     path))
 
 (defface zk-face-highlight-momentarily
-  '((t :foreground "black" :background "cyan"))
+  '((t :foreground "black" :background "cyan" :extend t))
   "The face for higlighting momentarily")
 
 (defun zk-highlight-current-line-momentarily (&rest args)
