@@ -20,6 +20,13 @@ than $HOME which is \"c:\\Users\\foo\\AppData\\Roaming\".")
       (concat "~" (substring path (length zk-user-home-dir)))
     path))
 
+(defface zk-face-highlight-momentarily
+  '((t :foreground "black" :background "cyan"))
+  "The face for higlighting momentarily")
+
+(defun zk-highlight-current-line-momentarily (&rest args)
+  (pulse-momentary-highlight-one-line nil 'zk-face-highlight-momentarily))
+
 (defun zk-trim-string (string)
   "Remove white spaces in beginning and ending of STRING.
 White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."

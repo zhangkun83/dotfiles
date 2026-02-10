@@ -150,6 +150,9 @@
   (interactive)
   (other-frame -1))
 
+;; Make it easier to locate the cursor after C-l
+(advice-add 'recenter-top-bottom :after #'zk-highlight-current-line-momentarily)
+
 (global-set-key (kbd "<f7>") 'other-window)
 (global-set-key (kbd "M-<f7>") 'zk-prev-window)
 (global-set-key (kbd "<f8>") 'other-frame)
