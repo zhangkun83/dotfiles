@@ -24,13 +24,14 @@ while true; do
     SNAPSHOT_FILE="$SNAPSHOT_DIR/$BACKUP_DIRNAME-$(date +%Y%m%d-%H).zip"
     if [[ ! -f "$SNAPSHOT_FILE" ]]; then
         LATEST_FILE=$(find "$SNAPSHOT_DIR/" -type f | sort | tail -1)
+        echo "$(date): Time to create $SNAPSHOT_FILE"
         if check_consistency "$LATEST_FILE"; then
-	    echo "$(date): Checked: no change since last snapshot $SNAPSHOT_FILE"
+	    echo "$(date): No change since last snapshot $LATEST_FILE"
         else
             while true; do
 	        echo "$(date): Making snapshot $SNAPSHOT_FILE"
 	        cd
-	        zip -r "$SNAPSHOT_FILE" "$BACKUP_DIRNAME" &&\
+	        zip -rq "$SNAPSHOT_FILE" "$BACKUP_DIRNAME" &&\
                     echo "$(date): Done.  Waiting for integrity check."
                 # Wait for a minute, unzip the archive and check for
                 # integrity.  This is to detect race condition where the
@@ -52,7 +53,7 @@ while true; do
 	    done
         fi
     else
-	echo "$(date): Checked: $SNAPSHOT_FILE already exists"
+	echo "$(date): $SNAPSHOT_FILE already exists"
     fi
     echo "$(date): Waiting for next scheduled snapshot."
     sleep 1800
