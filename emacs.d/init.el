@@ -180,6 +180,7 @@
 (global-set-key (kbd "C-z d") 'zk-diff-navigate)
 (global-set-key (kbd "C-z y") 'zk-youdao-dict)
 (global-set-key (kbd "C-z h") 'hl-line-mode)
+(global-set-key (kbd "C-z t") 'display-time-mode)
 (global-set-key (kbd "C-z j") 'zk-remove-line-breaks-within-paragraphs)
 (global-set-key (kbd "C-z c") 'zk-copy-region-to-temp-buffer)
 (global-set-key (kbd "C-z C-l") 'zk-echo-current-line)
@@ -234,6 +235,8 @@
    '("c4cecd97a6b30d129971302fd8298c2ff56189db0a94570e7238bc95f9389cfb" default))
  '(dabbrev-case-replace nil)
  '(dired-listing-switches "-alo")
+ '(display-time-default-load-average nil)
+ '(display-time-format "[%R]")
  '(explicit-bash-args
    '("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i"))
  '(fci-rule-character 9474)
