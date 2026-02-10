@@ -1,4 +1,5 @@
 (require 'cl-lib)
+(require 'pulse)
 
 (defconst zk-user-home-dir
   (if (eq system-type 'windows-nt)
@@ -24,8 +25,24 @@ than $HOME which is \"c:\\Users\\foo\\AppData\\Roaming\".")
   '((t :foreground "black" :background "cyan" :extend t))
   "The face for higlighting momentarily")
 
-(defun zk-highlight-current-line-momentarily (&rest args)
+(defun zk-highlight-current-line-momentarily ()
   (pulse-momentary-highlight-one-line nil 'zk-face-highlight-momentarily))
+
+(defun zk-highlight-momentarily-or-recenter-top-bottom (&optional arg)
+  "Highlight the current line momentarily.  If executed repeatedly, also
+call `recenter-top-bottom'."
+  (interactive "P")
+  (when (eq this-command last-command)
+    (recenter-top-bottom arg))
+  (zk-highlight-current-line-momentarily))
+
+
+(defun zk-highlight-momentarily-or-recenter-top-bottom-other-window (&optional arg)
+  "Call `zk-highlight-momentarily-or-recenter-top-bottom' in the other window."
+  (interactive "P")
+  (with-selected-window (next-window)
+    (zk-highlight-momentarily-or-recenter-top-bottom arg)))
+
 
 (defun zk-trim-string (string)
   "Remove white spaces in beginning and ending of STRING.
@@ -184,12 +201,6 @@ file name at point."
   (interactive)
   (setq c-syntactic-indentation (not c-syntactic-indentation))
   (message "Syntactic indentation: %s" (if c-syntactic-indentation "on" "off")))
-
-(defun zk-recenter-top-bottom-other-window ()
-  "Call recenter-top-bottom in the other window."
-  (interactive)
-  (with-selected-window (next-window)
-    (recenter-top-bottom)))
 
 (defun zk-save-buffer-as-copy (filename)
   "Save the current buffer to a file as a copy (without visiting the new file)"
@@ -759,11 +770,11 @@ is available."
 (message "Default font: %s; default proportional font: %s"
          zk-font-family zk-proportional-font-family)
 
-(defvar zk-buffer-font-family)
+(defvar-local zk-buffer-font-family nil)
 
 (defun zk-use-proportional-font-for-current-buffer ()
   (set-cursor-color (face-attribute 'default :foreground))
-  (setq-local zk-buffer-font-family zk-proportional-font-family)
+  (setq zk-buffer-font-family zk-proportional-font-family)
   (buffer-face-set (list ':family zk-buffer-font-family))
   (setq line-spacing 0.12))
 

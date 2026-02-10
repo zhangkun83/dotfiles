@@ -150,9 +150,6 @@
   (interactive)
   (other-frame -1))
 
-;; Make it easier to locate the cursor after C-l
-(advice-add 'recenter-top-bottom :after #'zk-highlight-current-line-momentarily)
-
 (global-set-key (kbd "<f7>") 'other-window)
 (global-set-key (kbd "M-<f7>") 'zk-prev-window)
 (global-set-key (kbd "<f8>") 'other-frame)
@@ -162,7 +159,9 @@
 (global-set-key (kbd "C-x r C-@") 'zk-buffer-to-register)
 (global-set-key (kbd "C-x C-b") 'zk-switch-to-other-buffer)
 (global-set-key (kbd "C-x M-b") 'list-buffers)
-(global-set-key (kbd "C-x C-l") 'zk-recenter-top-bottom-other-window)
+(global-set-key (kbd "C-l") 'zk-highlight-momentarily-or-recenter-top-bottom)
+(global-set-key (kbd "C-x C-l")
+                'zk-highlight-momentarily-or-recenter-top-bottom-other-window)
 (require 'transpose-frame)
 (global-set-key (kbd "C-x 9") 'transpose-frame)
 (global-set-key (kbd "C-x 5 3") 'zk-popup-window-to-new-frame)
