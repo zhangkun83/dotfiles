@@ -25,6 +25,12 @@ than $HOME which is \"c:\\Users\\foo\\AppData\\Roaming\".")
   '((t :foreground "black" :background "cyan" :extend t))
   "The face for higlighting momentarily")
 
+(defun zk-echo-active-modes ()
+  "Display the currently active modes (as would be displayed in the mode
+line) in the echo area."
+  (interactive)
+  (message "Mode: %s" (format-mode-line mode-line-modes)))
+
 (defun zk-highlight-current-line-momentarily ()
   (pulse-momentary-highlight-one-line nil 'zk-face-highlight-momentarily))
 
@@ -42,7 +48,6 @@ call `recenter-top-bottom'."
   (interactive "P")
   (with-selected-window (next-window)
     (zk-highlight-momentarily-or-recenter-top-bottom arg)))
-
 
 (defun zk-trim-string (string)
   "Remove white spaces in beginning and ending of STRING.

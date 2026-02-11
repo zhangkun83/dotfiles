@@ -63,20 +63,27 @@
 
 ;; Copied from the default mode-line-format, but 1. Added a condition
 ;; on mode-line-window-selected-p to hide mode-line-misc-info in
-;; unselected windows. 2. Removed vc-mode.
+;; unselected windows. 2. Removed vc-mode. 3. Removed modes (can be
+;; displayed by "C-z m".
 (setq-default mode-line-format
               '("%e" mode-line-front-space
+                (:eval
+                 (if (mode-line-window-selected-p)
+                     mode-line-misc-info
+                   (make-string (length (format-mode-line mode-line-misc-info)) ?\ )))
                 (:propertize
                  ("" mode-line-mule-info mode-line-client mode-line-modified
                   mode-line-remote mode-line-window-dedicated)
                  display (min-width (1.0)))
                 mode-line-frame-identification mode-line-buffer-identification " "
                 mode-line-position (project-mode-line project-mode-line-format)
-                mode-line-modes
-                (:eval
-                 (when (mode-line-window-selected-p)
-                   mode-line-misc-info))
                 mode-line-end-spaces))
+
+
+;; Adding a negative prefix to mode-line-buffer-identification limits
+;; the length of buffer name displayed in mode line.
+(setq-default mode-line-buffer-identification
+              (cons -50 mode-line-buffer-identification))
 
 (setq completion-styles '(substring)
       read-file-name-completion-ignore-case t
@@ -187,6 +194,7 @@
 (global-set-key (kbd "C-x C-\\") 'goto-last-change-with-auto-marks)
 (global-set-key (kbd "C-z r") 'revert-buffer)
 (global-set-key (kbd "C-z p") 'zk-copy-buffer-file-path)
+(global-set-key (kbd "C-z m") 'zk-echo-active-modes)
 (global-set-key (kbd "C-z u b") 'browse-url)
 (global-set-key (kbd "C-z u s") 'zk-shorten-url-at-point)
 (global-set-key (kbd "C-z C-b") 'zk-goto-base-buffer)
