@@ -50,12 +50,12 @@ initial view once initialization has succeeded")
 
 (defconst zk-zorg-status-display-names-alist
   '((init . "INIT")
-    (outdated . "OUTDT")
-    (pulling . "PULLG")
-    (pushing . "PUSHG")
-    (clean . "CLEAN")
-    (modified . "MODIF")
-    (dirty . "DIRTY")))
+    (outdated . "OUTD")
+    (pulling . "PULL")
+    (pushing . "PUSH")
+    (clean . "CLEN")
+    (modified . "MODD")
+    (dirty . "DRTY")))
 
 (setq-default mode-line-misc-info
               (cons '(:eval (format "%s/ "
