@@ -45,16 +45,28 @@ initial view once initialization has succeeded")
        "%s status is now `%s'" zk-zorg-profile-name status))))
 
 (defvar zk-zorg-status 'init
-  "Possible values: `init', `outdated', `downloading', `uploading', `clean',
+  "Possible values: `init', `outdated', `pulling', `pushing', `clean',
  `modified', `dirty'")
 
+(defconst zk-zorg-status-display-names-alist
+  '((init . "INIT")
+    (outdated . "OUTDT")
+    (pulling . "PULLG")
+    (pushing . "PUSHG")
+    (clean . "CLEAN")
+    (modified . "MODIF")
+    (dirty . "DIRTY")))
+
 (setq-default mode-line-misc-info
-              (cons '(:eval (format "[%s] " zk-zorg-status))
+              (cons '(:eval (format "%s/ "
+                                    (alist-get
+                                     zk-zorg-status
+                                     zk-zorg-status-display-names-alist)))
                     mode-line-misc-info))
 
 (defun zk-zorg-generate-upload-list-file ()
   "Generates a file that has the list of files eligible for
-uploading. It only include org and org_archive files, and exclude
+pushing. It only include org and org_archive files, and exclude
 Emacs temporary files (starting with #) and hidden
 files (starting with .). Returns the list file name."
   (let* ((list-file-name ".upload-list")
@@ -693,12 +705,12 @@ that need to be sorted."
     (user-error "There are unsaved files."))
   (unless (eq zk-zorg-status 'outdated)
     (user-error "Cannot download when status is %s" zk-zorg-status))
-  (zk-zorg-set-status 'downloading)
+  (zk-zorg-set-status 'pulling)
   (setq zk-zorg-reference-tree-destid-to-src-entry-mp-up-to-date-p nil)
   (let ((default-directory (zk-zorg-directory))
         (output-buffer (zk-zorg-rsync-create-log-buffer)))
     (switch-to-buffer output-buffer)
-    (zk-log-to-current-buffer "Downloading %s files from repo ..." zk-zorg-profile-name)
+    (zk-log-to-current-buffer "Pulling %s files from repo ..." zk-zorg-profile-name)
     (let* ((inhibit-read-only t)
            (ret-val (call-process "rsync" nil output-buffer t
                             "-rtuv" (concat zk-zorg-rsync-backup-dir "/") ".")))
@@ -729,9 +741,9 @@ that need to be sorted."
     (user-error "Cannot upload when status is %s" zk-zorg-status))
  (let ((default-directory (zk-zorg-directory))
         (output-buffer (zk-zorg-rsync-create-log-buffer)))
-    (zk-zorg-set-status 'uploading)
+    (zk-zorg-set-status 'pushing)
     (switch-to-buffer output-buffer)
-    (zk-log-to-current-buffer "Uploading %s files to repo ..." zk-zorg-profile-name)
+    (zk-log-to-current-buffer "Pushing %s files to repo ..." zk-zorg-profile-name)
     (let* ((inhibit-read-only t)
            (ret-val
             (call-process "rsync" nil output-buffer t
@@ -757,7 +769,7 @@ that need to be sorted."
       (when (get-buffer output-buffer)
         (kill-buffer output-buffer))
       (switch-to-buffer output-buffer)
-      (insert "#### Downloading remote files ...\n")
+      (insert "#### Pulling remote files ...\n")
       (unless (eq 0 (call-process "rsync" nil output-buffer t
                                   "-crti" "--delete" (concat zk-zorg-rsync-backup-dir "/") "."))
         (error "Failed to download remote files"))
@@ -807,14 +819,14 @@ org file."
 
 (defun zk-zorg-set-outdated ()
   "Set the zorg status to `outdated`.  Can be called only if the
- status is `init`, `downloading` or `clean`.  This is useful when we are
+ status is `init`, `pulling` or `clean`.  This is useful when we are
 about to modify the files from a different location, and don't want
 to close the current sessions."
   (interactive)
   (when (zk-has-unsaved-files-p)
     (user-error "There are unsaved files."))
   (unless (or (eq zk-zorg-status 'init)
-              (eq zk-zorg-status 'downloading)
+              (eq zk-zorg-status 'pulling)
               (eq zk-zorg-status 'clean))
     (user-error "Cannot transit from %s to outdated"
                 zk-zorg-status))

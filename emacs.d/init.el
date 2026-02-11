@@ -75,7 +75,8 @@
                  ("" mode-line-mule-info mode-line-client mode-line-modified
                   mode-line-remote mode-line-window-dedicated)
                  display (min-width (1.0)))
-                mode-line-frame-identification mode-line-buffer-identification " "
+                mode-line-frame-identification
+                mode-line-buffer-identification " @"
                 mode-line-position (project-mode-line project-mode-line-format)
                 mode-line-end-spaces))
 
@@ -261,7 +262,7 @@
  '(dabbrev-case-replace nil)
  '(dired-listing-switches "-alo")
  '(display-time-default-load-average nil)
- '(display-time-format "[%R]")
+ '(display-time-format "%R/")
  '(explicit-bash-args
    '("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i"))
  '(fci-rule-character 9474)
