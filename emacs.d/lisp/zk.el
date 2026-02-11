@@ -321,11 +321,6 @@ remote directory suddenly becomes inaccessible."
                              'zk-youdao-dict--history)))
   (eww-browse-url (concat "https://dict.youdao.com/w/eng/" (url-hexify-string word))) t)
 
-(defun zk-switch-to-other-buffer ()
-  "Switch to the other buffer without asking."
-  (interactive)
-  (switch-to-buffer (other-buffer (current-buffer) t)))
-
 (defun zk-yank-to-register (r)
   "Yank to a register"
   (interactive (list (register-read-with-preview
