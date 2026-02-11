@@ -260,7 +260,7 @@
  '(dabbrev-case-replace nil)
  '(dired-listing-switches "-alo")
  '(display-time-default-load-average nil)
- '(display-time-format "=%R=")
+ '(display-time-format "|%R|")
  '(explicit-bash-args
    '("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i"))
  '(fci-rule-character 9474)
