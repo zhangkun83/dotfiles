@@ -49,13 +49,13 @@ initial view once initialization has succeeded")
  `modified', `dirty'")
 
 (defconst zk-zorg-status-display-names-alist
-  '((init . "INIT")
-    (outdated . "OUTD")
-    (pulling . "PULL")
-    (pushing . "PUSH")
-    (clean . "CLEN")
-    (modified . "MODD")
-    (dirty . "DRTY")))
+  '((init . "INI")
+    (outdated . "OUT")
+    (pulling . "PLL")
+    (pushing . "PSH")
+    (clean . "CLN")
+    (modified . "MOD")
+    (dirty . "DRT")))
 
 (setq-default mode-line-misc-info
               (cons '(:eval (format "%s/ "
