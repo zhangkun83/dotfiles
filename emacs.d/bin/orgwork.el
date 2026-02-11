@@ -5,9 +5,6 @@
 (setq zk-zorg-startup-view-func
       (lambda ()
         (org-agenda-list)
-        (split-window)
-        (zk-zorg-open-tbs-agenda)
-        ;; Make sure the tbs window is deleted when I press q
-        (set-window-dedicated-p (selected-window) t)))
+        (zk-zorg-open-tbs-agenda)))
 
 (zk-zorg-startup-init)
