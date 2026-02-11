@@ -269,6 +269,12 @@ remote directory suddenly becomes inaccessible."
   (ignore-errors (kill-buffer name))
   (get-buffer-create name))
 
+(defun zk-minor-mode-active-p (mode)
+  "Return t if the given minor mode (as a symbol) is active for the current
+buffer."
+  (and (boundp mode)
+       (eval mode)))
+
 (defun zk-kill-buffer-visiting (file)
   "Delete the buffer that visits a file, if it exists."
   (let ((buffer (find-buffer-visiting file)))
