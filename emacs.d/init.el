@@ -140,9 +140,6 @@
 (add-hook 'before-save-hook `zk-save-local-copy-if-remote-file)
 (setq tramp-default-method "ssh")
 
-;; Completely disable left-right split
-(setq split-width-threshold nil)
-
 ;;; Quickly switch between the startup directory and current file's
 (defun zk-cd-initial()
   "Change to the initial directory from which emacs was started"
