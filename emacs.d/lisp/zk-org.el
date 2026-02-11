@@ -112,7 +112,8 @@ backward."
 The marked region starts after the current heading and ends before the
 next heading of the same or higher level.  The point is at the beginning
 of the region, while the mark is at the end."
-  (org-back-to-heading)
+  (unless (org-at-heading-p)
+    (org-back-to-heading))
   (forward-line)
   (let* ((beg (point))
          (end (if (org-at-heading-p)

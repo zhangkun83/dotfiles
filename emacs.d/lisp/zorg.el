@@ -30,6 +30,9 @@
 (defvar zk-zorg-startup-view-func nil "Called to present the
 initial view once initialization has succeeded")
 
+(defvar zk-zorg-meeting-notes-level 1
+  "The heading level of meeting notes.")
+
 (defconst zk-zorg-rsync-buffer-name "*zorg/rsync*")
 (defconst zk-zorg-rsync-diff-buffer-name "*zorg/diff*")
 
@@ -518,23 +521,14 @@ an empty line is entered."
       (when (not (equal new-tag ""))
         (org-toggle-tag new-tag 'on)))))
 
-(defun zk-zorg-populate-agenda-command ()
+(defun zk-zorg-populate-agenda (tag)
   "Find headings that have a `tbdsc' tag (which means to-be-discussed) and
-also match another tag given by the user, popuplate them as agenda
-items.  One agenda item includes a backlink to the topic, which is the
-parent heading of the tbdsc heading, and the content of the tbdsc
-heading that captures the agenda."
-  (interactive)
-  (let* ((all-tags (mapcar #'car (org-global-tags-completion-table)))
-         (tag (completing-read
-               "Populate agenda for tag: "
-               all-tags
-               nil
-               t
-               nil
-               t))
-         (items nil)
-         (org-use-tag-inheritance nil))
+also match the given TAG, popuplate them as agenda items.  One agenda
+item includes a backlink to the topic, which is the parent heading of
+the tbdsc heading, and the content of the tbdsc heading that captures
+the agenda."
+  (let ((items nil)
+        (org-use-tag-inheritance nil))
     (org-map-entries
      (lambda ()
        (let ((topic-link
@@ -564,8 +558,35 @@ heading that captures the agenda."
     (dolist (item items)
       (insert item)
       (newline))
-    (message "Populated %d agenda items" (length items))))
+    (message "Populated %d agenda items for %s" (length items) tag)))
 
+(defun zk-zorg-create-meeting-notes-entry ()
+  "Ask for a tag, and create a meeting notes heading entry at the end of
+the current buffer."
+  (interactive)
+  (let ((tag (completing-read
+              "Create meeting notes entry for tag: "
+              (mapcar #'car (org-global-tags-completion-table))
+              nil
+              t
+              nil
+              t)))
+    (when (= 0 (length (string-trim tag)))
+      (user-error "No tag entered."))
+    (zk-zorg-goto-latest-note-file)
+    (goto-char (point-max))
+    (delete-horizontal-space)
+    (when (> (point) (line-beginning-position))
+      ;; Not on an empty line.  Make a new line.
+      (newline))
+    ;; Leave an empty line above
+    (newline)
+    (insert (make-string zk-zorg-meeting-notes-level ?*)
+            " Unsorted meeting notes ")
+    (org-insert-timestamp (current-time))
+    (insert "    :" tag ":tbs:\n")
+    (zk-zorg-populate-agenda tag)
+    (org-back-to-heading)))
 
 (defun zk-org-rename-tag-command ()
   "Rename a tag throughout the agenda files."
@@ -632,7 +653,7 @@ that need to be sorted."
   "C-c M-s" 'zk-org-previous-search-view-buffer
   "C-c q" 'zk-org-set-tags-command
   "C-c l i" 'zk-zorg-set-customid-at-point
-  "C-c l a" 'zk-zorg-populate-agenda-command
+  "C-c l a" 'zk-zorg-create-meeting-notes-entry
   "C-c l l" 'zk-org-copy-external-link
   "C-c l r" 'zk-org-copy-external-reference
   "C-c l w" 'zk-zorg-copy-region-with-link-to-heading
