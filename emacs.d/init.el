@@ -74,6 +74,7 @@
                 mode-line-frame-identification
                 mode-line-buffer-identification " @"
                 mode-line-position (project-mode-line project-mode-line-format)
+                " "
                 (:eval (when (mode-line-window-selected-p)
                          mode-line-misc-info))
                 mode-line-end-spaces))

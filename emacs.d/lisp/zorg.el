@@ -37,13 +37,6 @@ initial view once initialization has succeeded")
   "Returns the absolute directory for local org files"
   (concat zk-user-home-dir "/" zk-zorg-profile-name))
 
-(defun zk-zorg-set-status (status)
-  (let ((log-buffer (zk-zorg-rsync-create-log-buffer)))
-    (with-current-buffer log-buffer
-      (setq zk-zorg-status status)
-      (zk-log-to-current-buffer
-       "%s status is now `%s'" zk-zorg-profile-name status))))
-
 (defvar zk-zorg-status 'init
   "Possible values: `init', `outdated', `pulling', `pushing', `clean',
  `modified', `dirty'")
@@ -56,6 +49,20 @@ initial view once initialization has succeeded")
     (clean . "CLN")
     (modified . "MOD")
     (dirty . "DRT")))
+
+(defun zk-zorg-get-status-logging-string (status)
+  "Get the logging string for the given `STATUS' as a symbol."
+  (format-message
+   "`%s' (%s)" status (alist-get status zk-zorg-status-display-names-alist)))
+
+(defun zk-zorg-set-status (status)
+  (let ((log-buffer (zk-zorg-rsync-create-log-buffer)))
+    (with-current-buffer log-buffer
+      (setq zk-zorg-status status)
+      (zk-log-to-current-buffer
+       "%s status is now %s"
+       zk-zorg-profile-name
+       (zk-zorg-get-status-logging-string status)))))
 
 (defun zk-zorg-status-mode-line-string ()
   (let ((str (format "%s>"
@@ -609,7 +616,9 @@ heading that captures the agenda."
     (when rsync-output-buffer
       (switch-to-buffer rsync-output-buffer)
       (goto-char (point-max))))
-  (message "%s status: %s" zk-zorg-profile-name zk-zorg-status))
+  (message "%s status: %s"
+           zk-zorg-profile-name
+           (zk-zorg-get-status-logging-string zk-zorg-status)))
 
 (defun zk-zorg-open-tbs-agenda ()
   "Open the org agenda for tag `tbs' (to-be-sorted) for raw meeting notes
@@ -841,8 +850,7 @@ to close the current sessions."
   (mapc (function
          (lambda (buf) (with-current-buffer buf
                          (zk-zorg-make-buffer-read-only))))
-        (buffer-list))
-  (message "%s is now outdated." zk-zorg-profile-name))
+        (buffer-list)))
 
 (defun zk-zorg-startup-open ()
   (when (or (eq zk-zorg-status 'clean)
