@@ -67,10 +67,6 @@
 ;; displayed by "C-z m".
 (setq-default mode-line-format
               '("%e" mode-line-front-space
-                (:eval
-                 (if (mode-line-window-selected-p)
-                     mode-line-misc-info
-                   (make-string (length (format-mode-line mode-line-misc-info)) ?\ )))
                 (:propertize
                  ("" mode-line-mule-info mode-line-client mode-line-modified
                   mode-line-remote mode-line-window-dedicated)
@@ -78,6 +74,8 @@
                 mode-line-frame-identification
                 mode-line-buffer-identification " @"
                 mode-line-position (project-mode-line project-mode-line-format)
+                (:eval (when (mode-line-window-selected-p)
+                         mode-line-misc-info))
                 mode-line-end-spaces))
 
 
@@ -262,7 +260,7 @@
  '(dabbrev-case-replace nil)
  '(dired-listing-switches "-alo")
  '(display-time-default-load-average nil)
- '(display-time-format "%R/")
+ '(display-time-format "=%R=")
  '(explicit-bash-args
    '("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i"))
  '(fci-rule-character 9474)

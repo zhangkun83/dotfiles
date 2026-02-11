@@ -57,12 +57,18 @@ initial view once initialization has succeeded")
     (modified . "MOD")
     (dirty . "DRT")))
 
-(setq-default mode-line-misc-info
-              (cons '(:eval (format "%s/ "
-                                    (alist-get
-                                     zk-zorg-status
-                                     zk-zorg-status-display-names-alist)))
-                    mode-line-misc-info))
+(defun zk-zorg-status-mode-line-string ()
+  (let ((str (format "%s>"
+                     (alist-get
+                      zk-zorg-status
+                      zk-zorg-status-display-names-alist))))
+    (if (mode-line-window-selected-p)
+        str
+      (make-string (length str) ?\ ))))
+
+(setq-default mode-line-format
+              (cons '(:eval (zk-zorg-status-mode-line-string))
+                    mode-line-format))
 
 (defun zk-zorg-generate-upload-list-file ()
   "Generates a file that has the list of files eligible for
