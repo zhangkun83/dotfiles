@@ -181,7 +181,7 @@
 (global-unset-key (kbd "C-x C-b"))
 (global-set-key (kbd "C-x C-b C-b") 'previous-buffer)
 (global-set-key (kbd "C-x C-b C-f") 'next-buffer)
-(global-set-key (kbd "C-x b") 'buffer-menu)
+(global-set-key (kbd "C-x b") 'ibuffer)
 (global-set-key (kbd "C-l") 'zk-highlight-momentarily-or-recenter-top-bottom)
 (global-set-key (kbd "C-x C-l")
                 'zk-highlight-momentarily-or-recenter-top-bottom-other-window)
@@ -265,6 +265,8 @@
    '("--noediting" "--rcfile" "~/.emacs.d/zk-bash-init.sh" "-i"))
  '(fci-rule-character 9474)
  '(global-hl-line-sticky-flag t)
+ '(ibuffer-formats
+   '((mark modified read-only locked " " (name 0 -1 :left) " ")))
  '(inhibit-startup-screen t)
  '(ns-command-modifier nil)
  '(org-agenda-sorting-strategy
