@@ -63,7 +63,8 @@
 
 (defun zk-mode-line-visible-mode-p ()
   "Return t if the modes module should be visible in the current mode line."
-  (or (memq major-mode '(ibuffer-mode))
+  (or (memq major-mode '(ibuffer-mode
+                         dired-mode))
       (zk-minor-mode-active-p 'isearch-mode)))
 
 ;; Copied from the default mode-line-format, but 1. Added a condition
