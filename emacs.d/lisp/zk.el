@@ -220,9 +220,8 @@ file name at point."
   (if (zk-file-remote-p (buffer-file-name))
       (zk-save-local-copy-for-remote-file)))
 
-(defun zk-switch-to-buffer-from-filtered-list (regex)
-  "Filter the buffer list in MRU order with the given `regex', then ask the
-user to select the buffer to switch to."
+(defun zk-previous-buffer-regex (regex)
+  "Switch to the most recently visited buffer whose name matches the REGEX."
   (let ((candidate-buffers
          (seq-filter (lambda (buf)
                        (string-match-p regex buf))
@@ -230,12 +229,11 @@ user to select the buffer to switch to."
                              (cdr (buffer-list)) ; first one is the current one.  Skip it.
                              ))))
     (unless candidate-buffers
-      (user-error "No preexisting buffer to choose from"))
-    (let ((default (car candidate-buffers)))
-      (switch-to-buffer
-       (completing-read
-        (format "Switch to (default: %s) " default)
-        candidate-buffers nil t nil nil default)))))
+      (user-error "No previous buffer to switch to"))
+    (let ((current-buffer (current-buffer))
+          (buffer (car candidate-buffers)))
+      (switch-to-buffer buffer)
+      (bury-buffer current-buffer))))
 
 (defvar zk-remote-file-prefix-list (list "/google/data/rw")
   "The list of file prefixes to be used by

@@ -481,12 +481,10 @@ the match string. "
       (setq tags (concat tags "-tbdsc")))
     (org-tags-view arg tags)))
 
-(defun zk-org-switch-to-tags-view-buffer ()
-  "Let the user to select one of the preexisting tag search buffers in
-MRU (most recently used) order,which is convenient for going back to the
-previous search"
+(defun zk-org-previous-tags-view-buffer ()
+  "Switch to the most recently viewed tag search buffer."
   (interactive)
-  (zk-switch-to-buffer-from-filtered-list "^\\*Org Agenda(m:[^)]+)\\*"))
+  (zk-previous-buffer-regex "^\\*Org Agenda(m:[^)]+)\\*"))
 
 (defun zk-org-search-view (arg)
   "Like org-search-view but always create a new buffer for the
@@ -497,12 +495,10 @@ query."
       (user-error "No tag string entered."))
     (org-search-view arg search)))
 
-(defun zk-org-switch-to-search-view-buffer ()
-  "Let the user to select one of the preexisting search view buffers in
-MRU (most recently used) order,which is convenient for going back to the
-previous search"
+(defun zk-org-previous-search-view-buffer ()
+  "Switch to the most recently visited search view buffer."
   (interactive)
-  (zk-switch-to-buffer-from-filtered-list "^\\*Org Agenda(s:[^)]+)\\*"))
+  (zk-previous-buffer-regex "^\\*Org Agenda(s:[^)]+)\\*"))
 
 (defun zk-org-set-tags-command ()
   "Set tags to the current entry. It's better than
@@ -631,9 +627,9 @@ that need to be sorted."
   "C-c t" 'org-todo-list
   "C-c M-t" 'zk-zorg-open-tbs-agenda
   "C-c m" 'zk-org-tags-view
-  "C-c M-m" 'zk-org-switch-to-tags-view-buffer
+  "C-c M-m" 'zk-org-previous-tags-view-buffer
   "C-c s" 'zk-org-search-view
-  "C-c M-s" 'zk-org-switch-to-search-view-buffer
+  "C-c M-s" 'zk-org-previous-search-view-buffer
   "C-c q" 'zk-org-set-tags-command
   "C-c l i" 'zk-zorg-set-customid-at-point
   "C-c l a" 'zk-zorg-populate-agenda-command
@@ -642,7 +638,7 @@ that need to be sorted."
   "C-c l w" 'zk-zorg-copy-region-with-link-to-heading
   "C-c l f" 'zk-zorg-reference-tree-command
   "C-c l C-f" 'zk-zorg-reference-trees-for-tags-command
-  "C-c l M-f" 'zk-zorg-reference-trees-switch-to-buffer
+  "C-c l M-f" 'zk-zorg-reference-tree-previous-buffer
   "C-c l o" 'zk-zorg-reference-tree-for-next-link-command
   "C-c l s" 'zk-org-locate-in-scratch-task-queue
   "C-c l C-s" 'zk-org-fill-scratch-task-queue
@@ -1317,12 +1313,10 @@ without refreshing it."
       (user-error "No tag entered."))
     (zk-zorg-reference-trees-for-tags tags)))
 
-(defun zk-zorg-reference-trees-switch-to-buffer ()
-  "Let the user to select one of the preexisting back reference buffers in
-MRU (most recently used) order,which is convenient for going back to the
-previous search"
+(defun zk-zorg-reference-tree-previous-buffer ()
+  "Switch to the most recently visited back reference buffer."
   (interactive)
-  (zk-switch-to-buffer-from-filtered-list "^\\*zorg/reftree\\* "))
+  (zk-previous-buffer-regex "^\\*zorg/reftree\\* "))
 
 (defun zk-zorg-reference-tree--expand-at-point ()
   "Expand the entry at point in back ref buffer."
