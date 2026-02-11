@@ -61,6 +61,23 @@
 (setq zk-frame-title-base-name
       (directory-file-name (zk-abbrev-home-dir-from-path zk-project-root)))
 
+;; Copied from the default mode-line-format, but 1. Added a condition
+;; on mode-line-window-selected-p to hide mode-line-misc-info in
+;; unselected windows. 2. Removed vc-mode.
+(setq-default mode-line-format
+              '("%e" mode-line-front-space
+                (:propertize
+                 ("" mode-line-mule-info mode-line-client mode-line-modified
+                  mode-line-remote mode-line-window-dedicated)
+                 display (min-width (1.0)))
+                mode-line-frame-identification mode-line-buffer-identification " "
+                mode-line-position (project-mode-line project-mode-line-format)
+                mode-line-modes
+                (:eval
+                 (when (mode-line-window-selected-p)
+                   mode-line-misc-info))
+                mode-line-end-spaces))
+
 (setq completion-styles '(substring)
       read-file-name-completion-ignore-case t
       read-buffer-completion-ignore-case t

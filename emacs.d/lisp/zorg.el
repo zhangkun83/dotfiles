@@ -48,15 +48,9 @@ initial view once initialization has succeeded")
   "Possible values: `init', `outdated', `downloading', `uploading', `clean',
  `modified', `dirty'")
 
-;; Most values are copied from the default mode-line-format. I added
-;; zk-zorg-status.
-(setq-default
- mode-line-format
- '("%e" mode-line-front-space mode-line-mule-info mode-line-client mode-line-modified mode-line-remote
-   mode-line-frame-identification mode-line-buffer-identification " " mode-line-position
-   " " (:eval (format "[%s]" zk-zorg-status))
-   " " mode-line-modes
-   mode-line-misc-info mode-line-end-spaces))
+(setq-default mode-line-misc-info
+              (cons '(:eval (format "[%s] " zk-zorg-status))
+                    mode-line-misc-info))
 
 (defun zk-zorg-generate-upload-list-file ()
   "Generates a file that has the list of files eligible for
