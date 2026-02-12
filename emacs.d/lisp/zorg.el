@@ -72,7 +72,7 @@ initial view once initialization has succeeded")
                      (alist-get
                       zk-zorg-status
                       zk-zorg-status-display-names-alist))))
-    (if (mode-line-window-selected-p)
+    (if zk-zorg-in-scope-buffer-p
         str
       (make-string (length str) ?\ ))))
 
@@ -722,7 +722,7 @@ that need to be sorted."
         (buffer
          (or (get-buffer zk-zorg-rsync-buffer-name)
              (with-current-buffer (zk-recreate-buffer zk-zorg-rsync-buffer-name)
-               (use-local-map zk-zorg-plain-viewer-keymap)
+               (zk-zorg-configure-in-scope-buffer zk-zorg-plain-viewer-keymap)
                (read-only-mode 1)
                (current-buffer)))))
     (with-current-buffer buffer
@@ -1107,6 +1107,14 @@ Entries that are tagged with any tag from
          (not print-src-entries-p))))))
 
 
+(defvar-local zk-zorg-in-scope-buffer-p nil
+  "t means this buffer is in scope of zorg, which means it has the zorg key
+bindings and will display zorg state in the mode line.")
+
+(defun zk-zorg-configure-in-scope-buffer (keymap)
+  (setq zk-zorg-in-scope-buffer-p t)
+  (use-local-map keymap))
+
 (defvar-local zk-zorg-reference-tree-refresh-form nil
   "The form to be evaluated to refresh the ref tree buffer")
 
@@ -1169,7 +1177,7 @@ refer (with \"RE:\") to any other entries.")
       . 'org-tag)
      ("([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*)"
       . 'zk-zorg-backref-neutralized-timestamp)))
-  (use-local-map zk-zorg-reference-tree-keymap)
+  (zk-zorg-configure-in-scope-buffer zk-zorg-reference-tree-keymap)
   (zk-use-proportional-font-for-current-buffer)
   (turn-on-font-lock)
   (setq truncate-lines t)
@@ -1480,9 +1488,9 @@ included in the context (default value is defined by
 (add-hook 'org-mode-hook 'zk-org-set-file-encoding)
 (add-hook 'org-mode-hook
           (lambda ()
-            (use-local-map zk-zorg-org-mode-keymap)))
+            (zk-zorg-configure-in-scope-buffer zk-zorg-org-mode-keymap)))
 (add-hook 'org-agenda-mode-hook
           (lambda ()
-            (use-local-map zk-zorg-org-agenda-mode-keymap)))
+            (zk-zorg-configure-in-scope-buffer zk-zorg-org-agenda-mode-keymap)))
 
 (provide 'zorg)
