@@ -114,6 +114,7 @@ next heading of the same or higher level.  The point is at the beginning
 of the region, while the mark is at the end."
   (unless (org-at-heading-p)
     (org-back-to-heading))
+  (beginning-of-line)
   (forward-line)
   (let* ((beg (point))
          (end (if (org-at-heading-p)
