@@ -45,13 +45,13 @@ initial view once initialization has succeeded")
  `modified', `dirty'")
 
 (defconst zk-zorg-status-display-names-alist
-  '((init . "INI")
-    (outdated . "OUT")
-    (pulling . "PLL")
-    (pushing . "PSH")
-    (clean . "CLN")
-    (modified . "MOD")
-    (dirty . "DRT")))
+  '((init . " ")
+    (outdated . "%")
+    (pulling . "v")
+    (pushing . "^")
+    (clean . "-")
+    (modified . "*")
+    (dirty . "!")))
 
 (defun zk-zorg-get-status-logging-string (status)
   "Get the logging string for the given `STATUS' as a symbol."
@@ -72,13 +72,18 @@ initial view once initialization has succeeded")
           (alist-get
            zk-zorg-status
            zk-zorg-status-display-names-alist))
-         (str (concat display-name ">")))
-    (if zk-zorg-in-scope-buffer-p
-        (propertize
-         str
-         'help-echo (format "%s is %s" zk-zorg-profile-name zk-zorg-status)
-         'mouse-face 'mode-line-highlight)
-      (make-string (length str) ?\ ))))
+         (str (concat "[" display-name "]")))
+    (replace-regexp-in-string
+     ;; mode-line formatter treat '%' as special character used for
+     ;; format specs (like %l for line number).  Need to convert them
+     ;; to double %
+     "%" "%%"
+     (if zk-zorg-in-scope-buffer-p
+         (propertize
+          str
+          'help-echo (format "%s is %s" zk-zorg-profile-name zk-zorg-status)
+          'mouse-face 'mode-line-highlight)
+       (make-string (length str) ?\ )))))
 
 (setq-default mode-line-format
               (cons '(:eval (zk-zorg-status-mode-line-string))
