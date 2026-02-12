@@ -490,7 +490,7 @@ the match string. "
     (unless (> (length tags) 0)
       (user-error "No tag entered."))
     (unless (string-match-p "+\\|^tbdsc\\b" tags)
-      (setq tags (concat tags "-tbdsc")))
+      (setq tags (concat "-tbdsc+" tags)))
     (org-tags-view arg tags)))
 
 (defun zk-org-previous-tags-view-buffer ()
