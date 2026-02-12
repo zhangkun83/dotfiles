@@ -31,6 +31,26 @@ line) in the echo area."
   (interactive)
   (message "Mode: %s" (format-mode-line mode-line-modes)))
 
+
+(defun zk-mode-line-modes ()
+  "Return zk's mode-line modes module that displays only the modes string
+that I want to display.  Usually they carry important information that
+cannot be inferred from the buffer itself."
+  (let ((result-list nil))
+    (when (memq major-mode '(ibuffer-mode
+                             dired-mode))
+      (add-to-list 'result-list (format-mode-line (list mode-name mode-line-process)) t))
+    (dolist (minor-mode '(isearch-mode))
+      (when (zk-minor-mode-active-p minor-mode)
+        (let ((mode-entry (assq minor-mode minor-mode-alist)))
+          (when mode-entry
+            (add-to-list 'result-list
+                         (string-trim (format-mode-line (cadr mode-entry))) t)))))
+    (if result-list
+        (concat "(" (mapconcat 'identity result-list ", ") ")")
+      "")))
+
+
 (defun zk-highlight-current-line-momentarily ()
   (pulse-momentary-highlight-one-line nil 'zk-face-highlight-momentarily))
 

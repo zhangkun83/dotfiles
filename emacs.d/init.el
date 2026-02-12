@@ -61,12 +61,6 @@
 (setq zk-frame-title-base-name
       (directory-file-name (zk-abbrev-home-dir-from-path zk-project-root)))
 
-(defun zk-mode-line-visible-mode-p ()
-  "Return t if the modes module should be visible in the current mode line."
-  (or (memq major-mode '(ibuffer-mode
-                         dired-mode))
-      (zk-minor-mode-active-p 'isearch-mode)))
-
 ;; Copied from the default mode-line-format, but 1. Added a condition
 ;; on mode-line-window-selected-p to hide mode-line-misc-info in
 ;; unselected windows. 2. Removed vc-mode. 3. Removed modes (can be
@@ -83,9 +77,7 @@
                 mode-line-position (project-mode-line project-mode-line-format)
                 " "
                 ;; I want to see some modes in the mode-line, but not all
-                (:eval (if (zk-mode-line-visible-mode-p)
-                           mode-line-modes
-                         ""))
+                (:eval (zk-mode-line-modes))
                 (:eval (when (mode-line-window-selected-p)
                          mode-line-misc-info))
                 mode-line-end-spaces))
