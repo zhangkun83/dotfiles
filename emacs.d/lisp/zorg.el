@@ -740,7 +740,7 @@ that need to be sorted."
   (when (zk-has-unsaved-files-p)
     (user-error "There are unsaved files."))
   (unless (eq zk-zorg-status 'outdated)
-    (user-error "Cannot download when status is %s" zk-zorg-status))
+    (user-error "Cannot pull when status is %s" zk-zorg-status))
   (zk-zorg-set-status 'pulling)
   (setq zk-zorg-reference-tree-destid-to-src-entry-mp-up-to-date-p nil)
   (let ((default-directory (zk-zorg-directory))
@@ -752,7 +752,7 @@ that need to be sorted."
                             "-rtuv" (concat zk-zorg-rsync-backup-dir "/") ".")))
       (if (eq 0 ret-val)
           (progn
-            (zk-log-to-current-buffer "SUCCESS: Download completed.")
+            (zk-log-to-current-buffer "SUCCESS: Pull completed.")
             (if (zk-zorg-rsync-check-remote-consistency)
                 (progn
                   (remove-hook 'org-mode-hook 'zk-zorg-make-buffer-read-only)
@@ -765,7 +765,7 @@ that need to be sorted."
                   (zk-zorg-set-status 'clean))
               (zk-zorg-set-status 'dirty)))
         (zk-zorg-set-status 'outdated)
-        (zk-log-to-current-buffer "FAILURE: Could not download from repo.")))))
+        (zk-log-to-current-buffer "FAILURE: Could not pull from repo.")))))
 
 (defun zk-zorg-rsync-upload ()
   (interactive)
@@ -774,7 +774,7 @@ that need to be sorted."
   (unless (or
            (eq zk-zorg-status 'clean)
            (eq zk-zorg-status 'modified))
-    (user-error "Cannot upload when status is %s" zk-zorg-status))
+    (user-error "Cannot push when status is %s" zk-zorg-status))
  (let ((default-directory (zk-zorg-directory))
         (output-buffer (zk-zorg-rsync-create-log-buffer)))
     (zk-zorg-set-status 'pushing)
@@ -789,9 +789,9 @@ that need to be sorted."
       (if (eq 0 ret-val)
           (progn
             (zk-zorg-set-status 'clean)
-            (zk-log-to-current-buffer "SUCCESS: Upload completed."))
+            (zk-log-to-current-buffer "SUCCESS: Push completed."))
         (zk-zorg-set-status 'modified)
-        (zk-log-to-current-buffer "FAILURE: Could not upload to repo.")))))
+        (zk-log-to-current-buffer "FAILURE: Could not push to repo.")))))
 
 (defun zk-zorg-rsync-diff ()
   "Display the diff of the local files against the remote files."
@@ -808,7 +808,7 @@ that need to be sorted."
       (insert "#### Pulling remote files ...\n")
       (unless (eq 0 (call-process "rsync" nil output-buffer t
                                   "-crti" "--delete" (concat zk-zorg-rsync-backup-dir "/") "."))
-        (error "Failed to download remote files"))
+        (error "Failed to pull remote files"))
       (insert "\n#### Generating diff ...\n"))
     (call-process "diff" nil output-buffer t
                   "-ur" temp-directory (zk-zorg-directory))
@@ -892,7 +892,7 @@ to close the current sessions."
 (defun zk-zorg-shutdown-confirm (prompt)
   (if (eq zk-zorg-status 'modified)
       (string-equal
-       (read-string "Some modifications have not been uploaded. Type \"I want to quit!\" if you really want to quit: ")
+       (read-string "Some modifications have not been pushed. Type \"I want to quit!\" if you really want to quit: ")
        "I want to quit!")
     (yes-or-no-p prompt)))
 
