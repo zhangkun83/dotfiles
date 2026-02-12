@@ -68,12 +68,16 @@ initial view once initialization has succeeded")
        (zk-zorg-get-status-logging-string status)))))
 
 (defun zk-zorg-status-mode-line-string ()
-  (let ((str (format "%s>"
-                     (alist-get
-                      zk-zorg-status
-                      zk-zorg-status-display-names-alist))))
+  (let* ((display-name
+          (alist-get
+           zk-zorg-status
+           zk-zorg-status-display-names-alist))
+         (str (concat display-name ">")))
     (if zk-zorg-in-scope-buffer-p
-        str
+        (propertize
+         str
+         'help-echo (format "%s is %s" zk-zorg-profile-name zk-zorg-status)
+         'mouse-face 'mode-line-highlight)
       (make-string (length str) ?\ ))))
 
 (setq-default mode-line-format
