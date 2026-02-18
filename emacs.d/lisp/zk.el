@@ -51,23 +51,15 @@ cannot be inferred from the buffer itself."
       "")))
 
 
-(defun zk-highlight-current-line-momentarily ()
+(defun zk-highlight-current-line-momentarily (&rest args)
   (pulse-momentary-highlight-one-line nil 'zk-face-highlight-momentarily))
 
-(defun zk-highlight-momentarily-or-recenter-top-bottom (&optional arg)
-  "Highlight the current line momentarily.  If executed repeatedly, also
-call `recenter-top-bottom'."
-  (interactive "P")
-  (when (eq this-command last-command)
-    (recenter-top-bottom arg))
-  (zk-highlight-current-line-momentarily))
 
-
-(defun zk-highlight-momentarily-or-recenter-top-bottom-other-window (&optional arg)
-  "Call `zk-highlight-momentarily-or-recenter-top-bottom' in the other window."
+(defun zk-recenter-top-bottom-other-window (&optional arg)
+  "Call `recenter-top-bottom' in the other window."
   (interactive "P")
   (with-selected-window (next-window)
-    (zk-highlight-momentarily-or-recenter-top-bottom arg)))
+    (recenter-top-bottom arg)))
 
 (defun zk-trim-string (string)
   "Remove white spaces in beginning and ending of STRING.

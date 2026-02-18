@@ -185,9 +185,8 @@
 (global-set-key (kbd "C-x C-b C-b") 'previous-buffer)
 (global-set-key (kbd "C-x C-b C-f") 'next-buffer)
 (global-set-key (kbd "C-x b") 'ibuffer)
-(global-set-key (kbd "C-l") 'zk-highlight-momentarily-or-recenter-top-bottom)
 (global-set-key (kbd "C-x C-l")
-                'zk-highlight-momentarily-or-recenter-top-bottom-other-window)
+                'zk-recenter-top-bottom-other-window)
 (require 'transpose-frame)
 (global-set-key (kbd "C-x 9") 'transpose-frame)
 (global-set-key (kbd "C-x 5 3") 'zk-popup-window-to-new-frame)
@@ -213,6 +212,8 @@
 (global-set-key (kbd "C-z C-l") 'zk-echo-current-line)
 (global-set-key (kbd "C-M-y") 'zk-yank-to-register)
 (global-set-key (kbd "C-M-q") 'zk-fill-paragraph-after-point)
+
+(advice-add 'recenter-top-bottom :after #'zk-highlight-current-line-momentarily)
 
 (add-hook 'shell-mode-hook
           (lambda()
