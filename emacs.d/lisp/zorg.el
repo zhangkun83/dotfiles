@@ -431,6 +431,14 @@ is not there."
     (org-back-to-heading)
     (org-element-property :CUSTOM_ID (org-element-at-point))))
 
+(defun zk-org-neutralize-link (str)
+  "Neutralize org links in STR, retaining only the text part of the link."
+    (replace-regexp-in-string
+     "\\[\\[\\([^]]+\\)\\]\\[\\([^]]+\\)\\]\\]"
+     "\\2"
+     str
+     t))
+
 (defun zk-org-neutralize-timestamp (text)
   "Convert org timestemps like \"[2023-07-27 Thu 14:58]\" or
 \"<2023-07-27 Thu 14:58>\" to a format that is not parsed by
@@ -445,6 +453,17 @@ parentheses."
       (aset result (match-beginning 0) ?\()
       (aset result (- (match-end 0) 1) ?\)))
     result))
+
+(defun zk-zorg-extract-date (text)
+  "Find the first timestamp (supported formats \"<YYYY-MM-DD ...>\",
+\"[YYYY-MM-DD ...]\", \"(YYYY-MM-DD ...)\") from TEXT, normaliz it
+to a date string in the form of \"YYYY-MM-DD\"."
+  (let ((date-pattern "\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)"))
+    (when (or
+           (string-match (concat "\\[" date-pattern "[^]]*\\]") text)
+           (string-match (concat "<" date-pattern "[^>]*>") text)
+           (string-match (concat "(" date-pattern "[^)]*)") text))
+      (match-string 1 text))))
 
 (defun zk-org-get-link-at-point()
   (let ((link-prop (get-text-property (point) 'htmlize-link)))
@@ -952,7 +971,7 @@ filtered by a tag."
                   (point) (buffer-file-name))))
 
 (defun zk-zorg-reference-tree--create-entry-alist-for-current-entry ()
-  "Create an alist for the current heading, which contains keys (:link :todo-keyword :title :file :tags :custom-id :file-path :pos)."
+  "Create an alist for the current heading, which contains keys (:link :todo-keyword :title :file :tags :date :custom-id :file-path :pos)."
   (save-excursion
     (org-back-to-heading)
     (let* ((element (or (org-element-at-point)
@@ -963,7 +982,8 @@ filtered by a tag."
            (file (file-name-nondirectory file-path))
            (todo-keyword (org-element-property :todo-keyword element))
            (tags (org-get-tags))  ; Use org-get-tags to include inherited tags
-           (title (zk-org-neutralize-timestamp (org-element-property :title element))))
+           (title (zk-org-neutralize-timestamp (org-element-property :title element)))
+           (date (zk-zorg-extract-date title)))
       (list (cons ':link heading-link)
             (cons ':todo-keyword todo-keyword)
             (cons ':title title)
@@ -971,6 +991,7 @@ filtered by a tag."
             (cons ':file file)
             (cons ':pos (point))
             (cons ':tags tags)
+            (cons ':date date)
             (cons ':custom-id custom-id)))))
 
 (defconst zk-zorg-reference-tree-link-regex
@@ -1017,13 +1038,16 @@ resulting list is set to the buffer-local variable
   (unless zk-zorg-reference-tree-destid-to-src-entry-mp-up-to-date-p
     (zk-zorg-reference-tree--create-index)))
 
+(defun zk-zorg-reference-tree--entry-sort-comparator (e1 e2)
+  (string> (alist-get ':date e1)
+           (alist-get ':date e2)))
+
 (defun zk-zorg-reference-tree--create-index ()
   "Scan the whole repo and create the index for creating reference trees.
 It creates a multimap where the key are entry IDs (CUSTOM_ID), and the
 values are alists (:link :todo-keyword :title :file :tags) of the
 heading entries that contain references to the key ID.  The result is
-set to the buffer-local variables
-`zk-zorg-reference-tree-destid-to-src-entry-mp'.
+set to `zk-zorg-reference-tree-destid-to-src-entry-mp'.
 
 Entries that are tagged with any tag from
 `zk-zorg-reference-tree-tag-exclude-list' are skipped."
@@ -1035,9 +1059,53 @@ Entries that are tagged with any tag from
               (zk-zorg-reference-tree--create-entry-alist-for-current-entry)))
          (unless (seq-intersection zk-zorg-reference-tree-tag-exclude-list
                                    (alist-get ':tags entry-alist))
+           ;; Build pseudo entries for log entries and assume back
+           ;; links from those log entries to the current heading
            (save-mark-and-excursion
              (zk-org-mark-heading-content)
-             ;; Search for CUSTOM_ID references
+             (let ((customid (alist-get ':custom-id entry-alist)))
+               (when (and customid
+                          (re-search-forward "^:LOGBOOK:$" (region-end) t))
+                 (let ((log-section-start (point)))
+                   (when (re-search-forward "^:END:$" (region-end) t)
+                     (let ((log-section-end (point))
+                           (timestamped-log-pattern
+                            "^- .*\\[\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)[^]]*\\]"))
+                       (goto-char log-section-start)
+                       (while (re-search-forward timestamped-log-pattern log-section-end t)
+                         (let ((date (match-string 1)))
+                           (forward-line)
+                           ;; In case we have moved to the next
+                           ;; bullet, we need to move to the beginning
+                           ;; of line do accommodate the next
+                           ;; timestamped-log-pattern search.
+                           (beginning-of-line)
+                           (let ((log-line
+                                  (zk-org-neutralize-link
+                                   (buffer-substring-no-properties
+                                    (line-beginning-position)
+                                    (line-end-position)))))
+                             (when (string-match-p "^  " log-line)
+                               (zk-multimap-add
+                                id-to-link-multimap
+                                customid
+                                ;; Refer to
+                                ;; zk-zorg-reference-tree--create-entry-alist-for-current-entry
+                                ;; for the alist keys
+                                (list (cons ':title (concat
+                                                     "[LOG] "
+                                                     (string-trim log-line)
+                                                     " (" date ")"))
+                                      (cons ':file-path
+                                            (alist-get ':file-path entry-alist))
+                                      (cons ':file
+                                            (alist-get ':file entry-alist))
+                                      (cons ':pos (point))
+                                      (cons ':date date)))))))))))))
+
+           ;; Search for CUSTOM_ID references
+           (save-mark-and-excursion
+             (zk-org-mark-heading-content)
              (while (re-search-forward link-regex (region-end) t)
                (let ((dest-id (match-string-no-properties 1))
                      (link-text (match-string-no-properties 2)))
@@ -1059,6 +1127,11 @@ Entries that are tagged with any tag from
                                       (cl-acons ':pos (point) entry-alist))))))))))
        t
        'agenda-with-archives)
+
+    ;; Sort the value lists based on date
+    (maphash (lambda (key value-list)
+               (sort value-list #'zk-zorg-reference-tree--entry-sort-comparator))
+             id-to-link-multimap)
     (setq zk-zorg-reference-tree-destid-to-src-entry-mp
           id-to-link-multimap
           zk-zorg-reference-tree-destid-to-src-entry-mp-up-to-date-p
