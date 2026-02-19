@@ -1093,7 +1093,7 @@ Entries that are tagged with any tag from
                                 ;; zk-zorg-reference-tree--create-entry-alist-for-current-entry
                                 ;; for the alist keys
                                 (list (cons ':title (concat
-                                                     "[LOG] "
+                                                     ":: "
                                                      (string-trim log-line)
                                                      " (" date ")"))
                                       (cons ':file-path
@@ -1252,14 +1252,16 @@ refer (with \"RE:\") to any other entries.")
   ;; would be overridden by org-mode font-lock anyway.
   (font-lock-add-keywords
    nil
-   '(("^ *[+-] \\(\\[[A-Z]+\\]\\)?"
+   '(("^ *[+-] \\(\\[[A-Z]+\\] \\)?"
       . 'zk-zorg-backref-bullet-prefix)
-     (":[a-zA-Z0-9_@#:]*:"
+     (":[a-zA-Z0-9_@#:]+:"
       . 'org-tag)
      ("([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*)"
       . 'zk-zorg-backref-neutralized-timestamp)))
   (zk-zorg-configure-in-scope-buffer zk-zorg-reference-tree-keymap)
   (zk-use-proportional-font-for-current-buffer)
+  ;; Disable the built-in font-locks for strings and comments
+  (setq font-lock-keywords-only t)
   (turn-on-font-lock)
   (setq truncate-lines t)
   (setq zk-zorg-reference-tree-refresh-form refresh-form))
