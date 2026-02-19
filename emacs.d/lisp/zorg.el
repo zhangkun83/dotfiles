@@ -1293,10 +1293,12 @@ refer (with \"RE:\") to any other entries.")
           (set-window-point window pos)
           (save-window-excursion
             (select-window window)
+            (zk-org-expand-drawer-at-point)
             (zk-highlight-current-line-momentarily)))
       (org-mark-ring-push)
       (switch-to-buffer buffer)
       (goto-char pos)
+      (zk-org-expand-drawer-at-point)
       (zk-highlight-current-line-momentarily))))
 
 (defun zk-zorg-reference-tree--open-link-other-window ()
