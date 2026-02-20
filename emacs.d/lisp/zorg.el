@@ -724,6 +724,7 @@ that need to be sorted."
   :keymap
   (make-composed-keymap zk-zorg-keymap-base org-agenda-mode-map))
 
+(require 'diff-mode)
 (defvar-keymap zk-zorg-diff-mode-keymap
   :keymap
   (make-composed-keymap zk-zorg-keymap-base diff-mode-map))
