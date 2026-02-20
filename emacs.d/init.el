@@ -291,9 +291,8 @@
  '(org-startup-indented t)
  ;; The "bottom" position, which internally calls (recenter -1 t),
  ;; doesn't work reliably with variable-width fonts, possibly due to
- ;; incorrect calculation of screen lines.  Here I'm giving it a small
- ;; error margin of 0.1 to make to work more reliably.
- '(recenter-positions '(0.5 0 0.9))
+ ;; incorrect calculation of screen lines.
+ '(recenter-positions '(middle top))
  '(set-mark-command-repeat-pop t)
  '(switch-to-buffer-obey-display-actions t)
  '(use-dialog-box nil)
