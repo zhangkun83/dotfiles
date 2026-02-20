@@ -1113,7 +1113,9 @@ Entries that are tagged with any tag from
                        "^<\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)[^>]*>\\(.*\\)$"
                        (region-end) t)
                  (let ((date (match-string-no-properties 1))
-                       (first-line (match-string-no-properties 2)))
+                       (first-line (zk-org-neutralize-link
+                                    (string-trim
+                                     (match-string-no-properties 2)))))
                    (zk-multimap-add
                     id-to-link-multimap
                     customid
@@ -1153,8 +1155,8 @@ Entries that are tagged with any tag from
                                     (save-excursion
                                       (back-to-indentation)
                                       (cl-acons ':pos (point) entry-alist))))))))))
-       t
-       'agenda-with-archives)
+     t
+     'agenda-with-archives)
 
     ;; Sort the value lists based on date
     (maphash (lambda (key value-list)
