@@ -727,6 +727,10 @@ that need to be sorted."
   :keymap
   (make-composed-keymap zk-zorg-keymap-base org-agenda-mode-map))
 
+(defvar-keymap zk-zorg-diff-mode-keymap
+  :keymap
+  (make-composed-keymap zk-zorg-keymap-base diff-mode-map))
+
 (defun zk-org-set-file-encoding ()
   ;; Force unix newline format, even on Windows
   (setq buffer-file-coding-system 'utf-8-unix))
@@ -855,6 +859,8 @@ that need to be sorted."
                   "-ur" temp-directory (zk-zorg-directory))
     (insert "#### End of diff.\n")
     (diff-mode)
+    (set-buffer-modified-p nil)
+    (zk-zorg-configure-in-scope-buffer zk-zorg-diff-mode-keymap)    
     (read-only-mode 1)))
 
 (defun zk-zorg-rsync-check-remote-consistency ()
