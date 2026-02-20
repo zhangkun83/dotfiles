@@ -185,6 +185,7 @@
 (global-set-key (kbd "C-x C-b C-b") 'previous-buffer)
 (global-set-key (kbd "C-x C-b C-f") 'next-buffer)
 (global-set-key (kbd "C-x b") 'ibuffer)
+(global-set-key (kbd "C-x M-b") 'switch-to-buffer)
 (global-set-key (kbd "C-x C-l")
                 'zk-recenter-top-bottom-other-window)
 (require 'transpose-frame)
