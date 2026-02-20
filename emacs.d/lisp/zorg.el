@@ -465,6 +465,24 @@ to a date string in the form of \"YYYY-MM-DD\"."
            (string-match (concat "(" date-pattern "[^)]*)") text))
       (match-string 1 text))))
 
+(defun zk-zorg-get-approx-date (&optional file-name)
+  "Get a timestap in the form of \"YYYY-MM-DD\", which is an approximate
+from FILE-NAME.  If FILE-NAME is not provied, use the file name of the
+current buffer.  For a name like \"notes2026.org\", will return
+\"2026-01-01\".  For a name like \"notes2026q3.org\", will return
+\"2026-07-01\".  For other forms of names, return nil."
+  (let ((name (file-name-nondirectory (or file-name (buffer-file-name)))))
+    (when (string-match "^notes\\([0-9][0-9][0-9][0-9]\\)\\(q\\([1-4]\\)\\)?\\.org"
+                        name)
+      (let ((year-str (match-string 1 name))
+            (quarter-str (match-string 3 name)))
+        (if quarter-str
+            (let ((quarter (string-to-number quarter-str)))
+              (concat year-str "-"
+                      (format "%02d" (+ (* (- quarter 1) 3) 1))
+                      "-01"))
+          (concat year-str "-01-01"))))))
+
 (defun zk-org-get-link-at-point()
   (let ((link-prop (get-text-property (point) 'htmlize-link)))
     (when link-prop
@@ -983,7 +1001,8 @@ filtered by a tag."
            (todo-keyword (org-element-property :todo-keyword element))
            (tags (org-get-tags))  ; Use org-get-tags to include inherited tags
            (title (zk-org-neutralize-timestamp (org-element-property :title element)))
-           (date (zk-zorg-extract-date title)))
+           (date (or (zk-zorg-extract-date title)
+                     (zk-zorg-get-approx-date))))
       (list (cons ':link heading-link)
             (cons ':todo-keyword todo-keyword)
             (cons ':title title)
