@@ -441,17 +441,14 @@ is not there."
 
 (defun zk-org-neutralize-timestamp (text)
   "Convert org timestemps like \"[2023-07-27 Thu 14:58]\" or
-\"<2023-07-27 Thu 14:58>\" to a format that is not parsed by
-org-mode, by changing the brackets and angel brackets to
-parentheses."
+\"<2023-07-27 Thu 14:58>\" to \"(2023-07-27)\" which is not parsed by
+org-mode."
   (let ((result (copy-sequence text))
-        (date-pattern "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]"))
-    (while (string-match (concat "\\[" date-pattern "[^]]*\\]") result)
-      (aset result (match-beginning 0) ?\()
-      (aset result (- (match-end 0) 1) ?\)))
-    (while (string-match (concat "<" date-pattern "[^>]*>") result)
-      (aset result (match-beginning 0) ?\()
-      (aset result (- (match-end 0) 1) ?\)))
+        (date-pattern "\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)"))
+    (setq result (replace-regexp-in-string
+                  (concat "\\[" date-pattern "[^]]*\\]") "(\\1)" result t))
+    (setq result (replace-regexp-in-string
+                  (concat "<" date-pattern "[^>]*>") "(\\1)" result t))
     result))
 
 (defun zk-zorg-extract-date (text)
