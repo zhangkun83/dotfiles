@@ -1130,7 +1130,7 @@ Entries that are tagged with any tag from
                                 (alist-get ':file-path entry-alist))
                           (cons ':file
                                 (alist-get ':file entry-alist))
-                          (cons ':pos (point))
+                          (cons ':pos (line-beginning-position))
                           (cons ':date date)))))))
 
            ;; Search for CUSTOM_ID references
