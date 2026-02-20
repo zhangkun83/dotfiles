@@ -1055,53 +1055,81 @@ Entries that are tagged with any tag from
         (link-regex zk-zorg-reference-tree-link-regex))
     (org-map-entries
      (lambda ()
-       (let ((entry-alist
-              (zk-zorg-reference-tree--create-entry-alist-for-current-entry)))
+       (let* ((entry-alist
+               (zk-zorg-reference-tree--create-entry-alist-for-current-entry))
+              (customid (alist-get ':custom-id entry-alist)))
          (unless (seq-intersection zk-zorg-reference-tree-tag-exclude-list
                                    (alist-get ':tags entry-alist))
            ;; Build pseudo entries for log entries and assume back
            ;; links from those log entries to the current heading
            (save-mark-and-excursion
              (zk-org-mark-heading-content)
-             (let ((customid (alist-get ':custom-id entry-alist)))
-               (when (and customid
-                          (re-search-forward "^:LOGBOOK:$" (region-end) t))
-                 (let ((log-section-start (point)))
-                   (when (re-search-forward "^:END:$" (region-end) t)
-                     (let ((log-section-end (point))
-                           (timestamped-log-pattern
-                            "^- .*\\[\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)[^]]*\\]"))
-                       (goto-char log-section-start)
-                       (while (re-search-forward timestamped-log-pattern log-section-end t)
-                         (let ((date (match-string 1)))
-                           (forward-line)
-                           ;; In case we have moved to the next
-                           ;; bullet, we need to move to the beginning
-                           ;; of line do accommodate the next
-                           ;; timestamped-log-pattern search.
-                           (beginning-of-line)
-                           (let ((log-line
-                                  (zk-org-neutralize-link
-                                   (buffer-substring-no-properties
-                                    (line-beginning-position)
-                                    (line-end-position)))))
-                             (when (string-match-p "^  " log-line)
-                               (zk-multimap-add
-                                id-to-link-multimap
-                                customid
-                                ;; Refer to
-                                ;; zk-zorg-reference-tree--create-entry-alist-for-current-entry
-                                ;; for the alist keys
-                                (list (cons ':title (concat
-                                                     ":: "
-                                                     (string-trim log-line)
-                                                     " (" date ")"))
-                                      (cons ':file-path
-                                            (alist-get ':file-path entry-alist))
-                                      (cons ':file
-                                            (alist-get ':file entry-alist))
-                                      (cons ':pos (point))
-                                      (cons ':date date)))))))))))))
+             (when (and customid
+                        (re-search-forward "^:LOGBOOK:$" (region-end) t))
+               (let ((log-section-start (point)))
+                 (when (re-search-forward "^:END:$" (region-end) t)
+                   (let ((log-section-end (point))
+                         (timestamped-log-pattern
+                          "^- .*\\[\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)[^]]*\\]"))
+                     (goto-char log-section-start)
+                     (while (re-search-forward timestamped-log-pattern log-section-end t)
+                       (let ((date (match-string-no-properties 1)))
+                         (forward-line)
+                         ;; In case we have moved to the next bullet,
+                         ;; we need to move to the beginning of line
+                         ;; do accommodate the next
+                         ;; timestamped-log-pattern search.
+                         (beginning-of-line)
+                         (let ((log-line
+                                (zk-org-neutralize-link
+                                 (buffer-substring-no-properties
+                                  (line-beginning-position)
+                                  (line-end-position)))))
+                           (when (string-match-p "^  " log-line)
+                             (zk-multimap-add
+                              id-to-link-multimap
+                              customid
+                              ;; Refer to
+                              ;; zk-zorg-reference-tree--create-entry-alist-for-current-entry
+                              ;; for the alist keys
+                              (list (cons ':title (concat
+                                                   ":: "
+                                                   (string-trim log-line)
+                                                   " (" date ")"))
+                                    (cons ':file-path
+                                          (alist-get ':file-path entry-alist))
+                                    (cons ':file
+                                          (alist-get ':file entry-alist))
+                                    (cons ':pos (point))
+                                    (cons ':date date))))))))))))
+
+           ;; Build pseudo entries for journal paragraphs that start
+           ;; with an active timestamp, as if those pseudo entries
+           ;; have back links to the current heading.
+           (save-mark-and-excursion
+             (zk-org-mark-heading-content)
+             (when customid
+               (while (re-search-forward
+                       "^<\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)[^>]*>\\(.*\\)$"
+                       (region-end) t)
+                 (let ((date (match-string-no-properties 1))
+                       (first-line (match-string-no-properties 2)))
+                   (zk-multimap-add
+                    id-to-link-multimap
+                    customid
+                    ;; Refer to
+                    ;; zk-zorg-reference-tree--create-entry-alist-for-current-entry
+                    ;; for the alist keys
+                    (list (cons ':title (concat
+                                         ":: "
+                                         (string-trim first-line)
+                                         " (" date ")"))
+                          (cons ':file-path
+                                (alist-get ':file-path entry-alist))
+                          (cons ':file
+                                (alist-get ':file entry-alist))
+                          (cons ':pos (point))
+                          (cons ':date date)))))))
 
            ;; Search for CUSTOM_ID references
            (save-mark-and-excursion

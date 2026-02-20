@@ -128,17 +128,17 @@ of the region, while the mark is at the end."
     (goto-char beg)))
 
 (defun zk-org-expand-drawer-at-point ()
-  "Expand the Org mode drawer at point, even from the middle."
+  "Expand the Org mode drawer at point, even from the middle.  Do nothing
+if not in a drawer."
   (interactive)
   (let* ((element (org-element-at-point))
          ;; Traverse up the AST to find an enclosing drawer
          (drawer (org-element-lineage element '(drawer property-drawer) t)))
-    (if drawer
+    (when drawer
         (save-excursion
           ;; Move to the start of the drawer and un-flag (reveal) it
           (goto-char (org-element-property :begin drawer))
-          (org-flag-drawer nil drawer))
-      (user-error "Point is not inside a drawer"))))
+          (org-flag-drawer nil drawer)))))
 
 (defun zk-org-get-current-heading-link ()
   "Get the link to the current Org heading without affecting org-stored-links.
