@@ -695,10 +695,10 @@ that need to be sorted."
   "C-c l l" 'zk-org-copy-external-link
   "C-c l r" 'zk-org-copy-external-reference
   "C-c l w" 'zk-zorg-copy-region-with-link-to-heading
-  "C-c l f" 'zk-zorg-retr-command
-  "C-c l C-f" 'zk-zorg-retrs-for-tags-command
-  "C-c l M-f" 'zk-zorg-retr-previous-buffer
+  "C-c l h" 'zk-zorg-retr-command
+  "C-c l m" 'zk-zorg-retrs-for-tags-command
   "C-c l o" 'zk-zorg-retr-for-next-link-command
+  "C-c M-l" 'zk-zorg-retr-previous-buffer
   "C-c l s" 'zk-org-locate-in-scratch-task-queue
   "C-c l C-s" 'zk-org-fill-scratch-task-queue
   "C-c r s" 'zk-zorg-show-status
