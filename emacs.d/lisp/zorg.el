@@ -1362,9 +1362,13 @@ refer (with \"RE:\") to any other entries.")
 
 (defun zk-zorg-retr (entry-alist &optional other-window)
   "Implementation for `zk-zorg-retr-command'."
+  (unless (alist-get ':custom-id entry-alist)
+    (user-error "No CUSTOM_ID found.  Won't have any reference."))
   (let* ((output-buffer-name
           (concat zk-zorg-retr-buffer-name-prefix (alist-get ':title entry-alist)))
-         (output-buffer (get-buffer output-buffer-name)))
+         (output-buffer (get-buffer output-buffer-name))
+         (entry-file-path (alist-get ':file-path entry-alist))
+         (entry-custom-id (alist-get ':custom-id entry-alist)))
     (if (and output-buffer org-agenda-sticky)
         (message "Sticky reftree buffer, use ‘g’ to refresh")
       (setq output-buffer (zk-recreate-buffer output-buffer-name))
@@ -1373,12 +1377,21 @@ refer (with \"RE:\") to any other entries.")
         (zk-zorg-retr--print-entry
          nil entry-alist t)
         (zk-zorg-retr--config-buffer
-         (list 'zk-zorg-retr
-               `(quote ,entry-alist)))))
+         `(zk-zorg-retr
+           (zk-zorg-retr--create-entry-alist-for-custom-id
+            ,entry-file-path ,entry-custom-id)))))
     (if other-window
         (select-window (display-buffer output-buffer 'display-buffer-below-selected))
       (switch-to-buffer output-buffer))))
-  
+
+(defun zk-zorg-retr--create-entry-alist-for-custom-id (file-path custom-id)
+  "Create the entry-alist for the heading in FILE-PATH with CUSTOM-ID."
+  (with-current-buffer (find-file-noselect file-path)
+    (save-excursion
+      (goto-char 0)
+      (unless (re-search-forward (concat "^:CUSTOM_ID: " custom-id "$") nil t)
+        (user-error "CUSTOM_ID \"%s\" not found in \"%s\"" custom-id file))
+      (zk-zorg-retr--create-entry-alist-for-current-entry))))
 
 (defun zk-zorg-retr-for-next-link-command (&optional arg)
   "Like `zk-zorg-retr-command', but do it for the heading
@@ -1386,25 +1399,19 @@ pointed to by the next link instead of the current heading.
 
 If ARG is not nil, display the result in the other window."
   (interactive "P")
-  (let ((entry-alist nil))
-    (save-excursion
-      (unless (re-search-forward
-               "\\[\\[file:\\([^:.]+\\.org\\)::#\\([a-z0-9_]+\\)\\]\\["
-               (line-end-position)
-               t)
-        (user-error "No usable link found on this line."))
-      (let* ((file (match-string-no-properties 1))
-             (id (match-string-no-properties 2))
-             (entry-buffer (find-file-noselect (concat (zk-zorg-directory) "/" file))))
-        (setq entry-alist
-              (with-current-buffer entry-buffer
-                (save-excursion
-                  (goto-char 0)
-                  (unless (re-search-forward (concat "^:CUSTOM_ID: " id "$") nil t)
-                    (user-error "CUSTOM_ID \"%s\" not found in \"%s\"" id file))
-                  (zk-zorg-retr--create-entry-alist-for-current-entry))))))
-    (cl-assert entry-alist t)
-    (zk-zorg-retr entry-alist arg)))
+  (save-excursion
+    (unless (re-search-forward
+             "\\[\\[file:\\([^:.]+\\.org\\)::#\\([a-z0-9_]+\\)\\]\\["
+             (line-end-position)
+             t)
+      (user-error "No usable link found on this line."))
+    (let* ((file (match-string-no-properties 1))
+           (id (match-string-no-properties 2))
+           (file-path (concat (zk-zorg-directory) "/" file)))
+      (let ((entry-alist
+             (zk-zorg-retr--create-entry-alist-for-custom-id file-path id)))
+        (cl-assert entry-alist t)
+        (zk-zorg-retr entry-alist arg)))))
 
 (defvar zk-zorg-retr-tag-exclude-list
   '("tbs" "tbdsc"))
