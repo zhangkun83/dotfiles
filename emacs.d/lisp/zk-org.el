@@ -37,7 +37,57 @@
       (set-face-attribute face nil :font zk-font-family :weight 'bold))))
 
 
-(setq org-fontify-done-headline nil)
+(defun zk-org-process-exported-html (src-file &optional exported-ids-ht)
+  "Process the exported HTML in the current buffer.
+
+SRC-FILE is the file name of the source org file.
+
+EXPORTED-IDS-HT is a hashtable of the CUSTOM_IDs of all exported
+headings.  If nil, assume all CUSTOM_IDs of SRC-FILE are exported."
+  ;; org-mode adds nbsp in headings between components, so timestamps
+  ;; in the headings are usually broken at the space between the date
+  ;; and the day of the week.  Add breakable spaces before and after
+  ;; timestamps, and put them in <nobr>, so that the timestamp can
+  ;; stay as a whole.
+  (replace-regexp-in-region
+   "<span class=\"timestamp\">\\([^<]+\\)</span>"
+   "<span class=\"timestamp\"> <nobr>\\1</nobr> </span>"
+   (point-min) (point-max))
+
+  ;; Change timestamp's style
+  (replace-regexp-in-region
+   "\\.timestamp +{[^}]*}"
+   ".timestamp { color: blue; font-family: monospace; }"
+   (point-min) (point-max))
+
+  ;; Add <br> to the end of RE: lines, so that they don't merge into
+  ;; one line.
+  (goto-char 0)
+  (while (search-forward-regexp "^RE: .*<a href=.*</a>$" (point-max) t)
+    (insert "<br>"))
+
+  ;; Check all hyper links.  If it points to the same file, and the
+  ;; destination ID is included in the export, remove the file name
+  ;; and keep the anchor.
+  (goto-char 0)
+  (let ((output-html-file-name
+         (concat
+          (file-name-sans-extension (file-name-nondirectory src-file)) ".html")))
+    (while (search-forward-regexp "<a href=\"\\([^/\"#]+\\)#\\([^\"]+\\)\">" nil t)
+      (let ((file-name (match-string-no-properties 1))
+            (anchor (match-string-no-properties 2)))
+        (when
+            (and
+             (string-equal file-name output-html-file-name)
+             (or (not exported-ids-ht)
+                 (gethash anchor exported-ids-ht)))
+          (delete-region (match-beginning 1) (match-end 1))))))
+  ;; If a link still contains file name at this point, it's pointing
+  ;; to an unreachable destination.  Remove those links.
+  (replace-regexp-in-region
+   "<a href=\"\\([^/\"]+\\.html#[^\"]+\\)\">" 
+   "<a style=\"background-color: red;\" title=\"Unreachable link: \\1\">" 
+   (point-min) (point-max)))
 
 (defun zk-org-export-html-to-clipboard (arg)
   "Export the whole file or the active region as HTML to the
@@ -46,8 +96,22 @@ clipboard.  If called with prefix argument, also export LOGBOOK
   (interactive "P")
   (let* ((org-export-with-drawers (if arg t org-export-with-drawers))
          (org-export-show-temporary-export-buffer nil)
-         (buffer (org-html-export-as-html)))
+         (whole-file-p (not (use-region-p)))
+         (org-export-with-toc whole-file-p)
+         (org-export-with-section-numbers whole-file-p)
+         (src-file-name (buffer-file-name))
+         (buffer (org-html-export-as-html))
+         (exported-ids-ht nil))
+    (when (not whole-file-p)
+      (save-mark-and-excursion
+        (setq exported-ids-ht (make-hash-table :test 'equal))
+        (let ((start (region-beginning))
+              (end (region-end)))
+          (goto-char start)
+          (while (re-search-forward "^:CUSTOM_ID: +\\(.+\\)$" end t)
+            (puthash (match-string-no-properties 1) t exported-ids-ht)))))
     (with-current-buffer buffer
+      (zk-org-process-exported-html src-file-name exported-ids-ht)
       (zk-clipboard-copy t))))
 
 (defun zk-org-extract-scheduled-timestamp-string (element)

@@ -747,11 +747,13 @@ that need to be sorted."
         zk-frame-title-base-name zk-zorg-profile-name)
   (setq org-agenda-span 'fortnight)
   (setq org-agenda-show-all-dates t)
+  (setq org-fontify-done-headline nil)
   ;; Allow tag inheritance, but exclude people tags.  Otherwise, when
   ;; searching for @person1+tbdsc, a child entry with @person2+tbdsc
   ;; would also match if it's under an entry with @person.
   (setq org-use-tag-inheritance "^[^@].*")
   (setq org-deadline-warning-days 180)
+
   (setq confirm-kill-emacs 'zk-zorg-shutdown-confirm)
   (zk-zorg-set-outdated)
   (zk-zorg-rsync-download)
