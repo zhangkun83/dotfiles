@@ -864,7 +864,7 @@ monitor."
              (progn
                (message "Using scale settings for Acer Chromebook Plus")
                (setq font-height 130)
-               (setq frame-height-pixels 800)))
+               (setq frame-height-pixels 750)))
             (t
              (progn
                (message "Using default scale settings per %s" monitor-attributes-alist))))
