@@ -101,9 +101,14 @@ meeting notes, and personal reminders.
 
 Sorting a meeting notes entry includes **all** of the following steps:
 
-1. If a paragraph lacks back reference, add relevant back references
-   when applicable.
-2. Fix typos and grammar errors.
+1. Fix typos and grammar errors.
+2. Add back references at the beginning of each section for the
+   following cases:
+    1. If this section is a direct follow up to a recent development
+       or discussion, add a back reference to that development or
+       discussion.
+    2. If this section is a notable development of a long-running
+       task, add a back reference to that task.
 3. Identify the topic of each section.  When necessary, reorder
    sections so that sections about the same topic are together.  If
    the meeting notes entry discusses multiple topics, create a new
@@ -114,7 +119,7 @@ Sorting a meeting notes entry includes **all** of the following steps:
        conclusions, instead of generalization in the summary.
     2. Update the tags to reflect the people and projects relevant to
        this meeting.  Use preexisting tags only.
-    3. If the content of the entry more than 8 lines, add a TL;DR
+    3. If the content of the entry more than 10 lines, add a TL;DR
        paragraph at the beginning for main take-aways, with the first
        line being "TL;DR:", followed by bullet points that summarize
        key conclusions, agreements, consensus, and action items.  An
