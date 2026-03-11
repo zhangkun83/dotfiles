@@ -112,11 +112,14 @@ Sorting a meeting notes entry includes **all** of the following steps:
 3. Identify the topic of each section.  When necessary, reorder
    sections so that sections about the same topic are together.  If
    the meeting notes entry discusses multiple topics, create a new
-   heading entry for each topic.
+   heading entry for each topic, at the same level of the orginal
+   meeting notes entry.
 4. For each heading entry:
     1. The heading text should be a summary of the whole entry, up to
        90 characters.  Try to include concrete events, updates, ideas,
        conclusions, instead of generalization in the summary.
+    2. The heading should include the timestamp from the original
+       entry.
     2. Update the tags to reflect the people and projects relevant to
        this meeting.  Use preexisting tags only.
     3. If the content of the entry more than 10 lines, add a TL;DR
