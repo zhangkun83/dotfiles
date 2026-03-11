@@ -122,13 +122,6 @@ element.  If there is no SCHEDULED timestamp, return nil."
         (plist-get (car (cdr timestamp)) ':raw-value)
       nil)))
 
-(defun zk-org-scheduled-for-today-p (element)
-  "Return t if the given element has a SCHEDULED timestamp that
- is on today."
-  (let ((scheduled-timestamp (zk-org-extract-scheduled-timestamp-string element)))
-    (if scheduled-timestamp (= 0 (org-time-stamp-to-now scheduled-timestamp))
-      nil)))
-
 (defun zk-org-link-at-point-p ()
   "Return t if the point is on a link.  nil otherwise."
    (let* ((context (org-element-context))

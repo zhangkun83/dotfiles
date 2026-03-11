@@ -303,11 +303,18 @@ exist in the queue yet."
              (let* ((headline (org-element-at-point))
                     (todo-type (org-element-property :todo-type headline))
                     (priority (org-element-property :priority headline))
-                    (scheduled-for-today-p (zk-org-scheduled-for-today-p headline)))
+                    ;; Include tasks that are scheduled for today or earlier
+                    (scheduled-date
+                     (let ((scheduled-timestamp (zk-org-extract-scheduled-timestamp-string headline)))
+                       (when (and scheduled-timestamp
+                                  (<= (org-time-stamp-to-now scheduled-timestamp) 0))
+                         ;; Only use the "YYYY-MM-DD" part of the timestamp like
+                         ;; "<YYYY-MM-DD Tue 12:30>"
+                         (substring scheduled-timestamp 1 11)))))
                (when (eq todo-type 'todo)
                  (let ((category
-                        (cond (scheduled-for-today-p
-                               (concat "Scheduled for " (format-time-string "%Y-%m-%d" (current-time))))
+                        (cond (scheduled-date
+                               (concat "Scheduled for " scheduled-date))
                               ((eq priority ?A) "Priorities")
                               ((eq priority ?B) "Back burner"))))
                    (when category
