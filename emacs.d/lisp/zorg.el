@@ -1192,9 +1192,17 @@ Entries that are tagged with any tag from
      t
      'agenda-with-archives)
 
-    ;; Sort the value lists based on date
+
     (maphash (lambda (key value-list)
-               (sort value-list #'zk-zorg-retr--entry-sort-comparator))
+               ;; Because zk-multimap-add push new values to the front
+               ;; of the list, we reverse the lists here to restore
+               ;; their original order.  Then we sort (merge-sort,
+               ;; thus stable) the value lists based on date.
+               (let* ((reversed-list
+                       (reverse value-list))
+                      (sorted-list
+                       (sort reversed-list #'zk-zorg-retr--entry-sort-comparator)))
+                 (puthash key sorted-list id-to-link-multimap)))
              id-to-link-multimap)
     (setq zk-zorg-retr-destid-to-src-entry-mp
           id-to-link-multimap
