@@ -8,6 +8,7 @@
 (require 'zk)
 (require 'chinese-punct)
 (require 'htmlize)
+(require 'zk-ai-gemini)
 
 ;; Disable tool-bar
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
