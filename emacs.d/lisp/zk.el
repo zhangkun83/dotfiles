@@ -16,8 +16,9 @@ than $HOME which is \"c:\\Users\\foo\\AppData\\Roaming\".")
 (defun zk-abbrev-home-dir-from-path (path)
   "If the given path starts with the home directory, replace that
  portion with `~'"
-  (if (equal zk-user-home-dir
-               (substring path 0 (length zk-user-home-dir)))
+  (if (and (>= (length path) (length zk-user-home-dir))
+           (equal zk-user-home-dir
+                  (substring path 0 (length zk-user-home-dir))))
       (concat "~" (substring path (length zk-user-home-dir)))
     path))
 
