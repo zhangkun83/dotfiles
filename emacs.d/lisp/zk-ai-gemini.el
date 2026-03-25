@@ -70,11 +70,13 @@ This function reads all files and use their content as the context."
   (let ((context-text (zk-ai-gemini--format-files-context files)))
     (setq context-text
           (concat
-           context-text "\n**IMPORTANT**: Use org-mode format for all your responses"))
+           "\n**IMPORTANT**: Use org-mode format for all your responses.
+Unnumbered lists in the text body uses `-` or `+` as the bullet character.
+`*` is reserved for entry headings only.\n\n" context-text))
     (when additional-system-instruction
       (setq context-text
             (concat
-             context-text "\n**IMPORTANT**: " additional-system-instruction)))
+             "\n**IMPORTANT**: " additional-system-instruction "\n" context-text)))
     (zk-ai-gemini--create-session-buffer context-text files)))
 
 (defun zk-ai-gemini-send (prompt &optional model-level)
