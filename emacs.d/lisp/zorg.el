@@ -1618,13 +1618,14 @@ without refreshing it."
        conclusions, instead of generalization in the summary.
     2. The heading should include the timestamp from the original
        entry.
-    2. Update the tags to reflect the people and projects relevant to
+    3. Update the tags to reflect the people and projects relevant to
        this meeting.  Use preexisting tags only.
-    3. If the content of the entry more than 10 lines, add a TL;DR
+    4. If the content of the entry more than 10 lines, add a TL;DR
        paragraph at the beginning for main take-aways, with the first
        line being \"TL;DR:\", followed by bullet points that summarize
        key conclusions, agreements, consensus, and action items.  An
-       action item is prepended with `*AI*`.")
+       action item is prepended with `*AI*`.
+    5. Copy quotes verbatim, while putting a one-line summary in front of it.")
                        ((eq choice ?t)
                         "Generate TODO entries for the given meeting notes entry using the following steps:\n
 Find every `*AI*` in the meeting notes, create a TODO entry to capture that
