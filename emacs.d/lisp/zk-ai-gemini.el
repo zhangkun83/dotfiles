@@ -23,7 +23,7 @@
   (let* ((buf-name (generate-new-buffer-name "*gemini-session*"))
          (buffer (get-buffer-create buf-name)))
     (with-current-buffer buffer
-      (ignore-errors (markdown-mode))
+      (ignore-errors (org-mode))
       (setq zk-ai-gemini--context-text context-text)
       (setq zk-ai-gemini--history nil)
       (insert "# Gemini Session\n\n")
@@ -46,14 +46,12 @@
    "\n"))
 
 
-(defun zk-ai-gemini-new-session (files)
+(defun zk-ai-gemini-new-session (files &optional additional-system-instruction)
   "Create a new Gemini session using FILES as context.
-This function reads all files, attempts to create a cached context on the
-Gemini server. If caching fails (e.g., content too small), it falls back
-to sending the full context with each request."
-  (interactive (list (dired-get-marked-files)))
-
+This function reads all files and use their content as the context."
   (let ((context-text (zk-ai-gemini--format-files-context files)))
+    (when additional-system-instruction
+      (setq context-text (concat context-text "\n**IMPORTANT**: " additional-system-instruction)))
     (zk-ai-gemini--create-session-buffer context-text files)))
 
 (defun zk-ai-gemini-send (prompt)
@@ -67,7 +65,7 @@ to sending the full context with each request."
     ;; Update UI and history
     (save-excursion
       (goto-char (point-max))
-      (insert "**User**: " prompt "\n\n**Gemini**: "))
+      (insert "*User*:\n " prompt "\n\n*Gemini*:\n "))
     (push `((role . "user") (parts . [((text . ,prompt))])) zk-ai-gemini--history)
     
     (message "Gemini is thinking...")

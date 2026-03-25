@@ -8,6 +8,7 @@
 (require 'cl-seq)
 (require 'cl-lib)
 (require 'pulse)
+(require 'zk-ai-gemini)
 
 (when (display-graphic-p)
   (setq leuven-scale-outline-headlines nil
@@ -718,9 +719,11 @@ that need to be sorted."
   "C-c n n" 'zk-zorg-goto-next-note-file
   "C-c n p" 'zk-zorg-goto-prev-note-file
   "C-c z i" 'zk-zorg-ai-use-current-entry-as-input
-  "C-c z SPC" 'zk-zorg-ai-goto-original-input-pos
   "C-c z o" 'zk-zorg-ai-view-output
-  "C-c z p" 'zk-zorg-ai-generate-gemini-cli-prompts
+  "C-c z SPC" 'zk-zorg-ai-goto-original-input-pos
+  "C-c z c" 'zk-zorg-ai-gemini-create-session
+  "C-c z p" 'zk-zorg-ai-gemini-generate-prompt-for-current-heading
+  "C-c z s" 'zk-zorg-ai-gemini-send-prompt
   "C-c c" 'zk-org-clone-narrowed-buffer)
 
 (defvar-keymap zk-zorg-org-mode-keymap
@@ -1578,6 +1581,45 @@ without refreshing it."
   (switch-to-buffer (car zk-zorg-ai-original-input-pos))
   (goto-char (cdr zk-zorg-ai-original-input-pos)))
 
+(defun zk-zorg-ai-gemini-create-session (&optional arg)
+  "Create a session with Gemini AI for zorg tasks."
+  (interactive)
+  (let* ((all-file-list (zk-zorg-list-note-files))
+         (used-num-files (or arg zk-zorg-ai-num-recent-notes-files-for-context))
+         (file-list-for-context
+          (cons "GEMINI.md" (last all-file-list used-num-files))))
+    (zk-ai-gemini-new-session file-list-for-context "Use org-mode format for all your responses")))
+
+(defvar zk-zorg-ai-gemini--prompt nil "The prompt to sent to the Gemini session")
+
+(defun zk-zorg-ai-gemini-generate-prompt-for-current-heading ()
+  "Generates a gemini-cli prompt for a selected task.  If the prefix arg is
+present, it indicates the number of recent notes files that need to be
+included in the context (default value is defined by
+`zk-zorg-ai-num-recent-notes-files-for-context'"
+  (interactive)
+  (let* ((choice (read-char-choice
+                  "Generate prompt to: [s] sort notes; [t] generate TODO entries"
+                  '(?s ?t)))
+         (prompt (cond ((eq choice ?s)
+                        (concat "Sort the following meeting notes entry:\n"))
+                       ((eq choice ?t)
+                        (format "Generate TODO entries for the following meeting notes entry:\n"))))
+         (entry-content (save-mark-and-excursion
+                          (org-back-to-heading)
+                          (setq zk-zorg-ai-original-input-pos
+                                (cons (current-buffer) (point)))
+                          (org-mark-element)
+                          (buffer-substring (region-beginning) (region-end)))))
+    (setq zk-zorg-ai-gemini--prompt (concat prompt entry-content))
+    (message "Prompt set")))
+
+(defun zk-zorg-ai-gemini-send-prompt ()
+  (interactive)
+  (unless zk-zorg-ai-gemini--prompt
+    (user-error "Prompt not set"))
+  (zk-ai-gemini-send zk-zorg-ai-gemini--prompt))
+
 (defun zk-zorg-ai-use-current-entry-as-input ()
   "Use the entire current entry as the input for AI.  Sets
 `zk-zorg-ai-original-input-pos'"
@@ -1612,34 +1654,6 @@ without refreshing it."
            (find-file-other-window file)))))
 
 (defvar zk-zorg-ai-num-recent-notes-files-for-context 5)
-
-(defun zk-zorg-ai-generate-gemini-cli-prompts (&optional arg)
-  "Generates a gemini-cli prompt for a selected task.  If the prefix arg is
-present, it indicates the number of recent notes files that need to be
-included in the context (default value is defined by
-`zk-zorg-ai-num-recent-notes-files-for-context'"
-  (interactive "P")
-  (let* ((choice (read-char-choice
-                  "Get prompt to: [s] sort notes; [t] generate TODO entries"
-                  '(?s ?t)))
-         (file-list (zk-zorg-list-note-files))
-         (used-num-files (or arg zk-zorg-ai-num-recent-notes-files-for-context))
-         (file-list-in-prompt
-          (mapconcat (lambda (file) (concat "@" file))
-                     (last file-list used-num-files)
-                     " "))
-         (prompt (cond ((eq choice ?s)
-                        (format "Sort the meeting notes entry in @%s, considering %s.  Write the new meeting notes entry to a file named \"%s\". DO NOT modify any input file."
-                                zk-zorg-ai-input-file-name
-                                file-list-in-prompt
-                                zk-zorg-ai-output-file-name))
-                       ((eq choice ?t)
-                        (format "Generate TODO entries for a meeting notes entry in @%s, considering %s.  Write the new entries to a file named \"%s\". DO NOT modify any input file."
-                                zk-zorg-ai-input-file-name
-                                file-list-in-prompt
-                                zk-zorg-ai-output-file-name)))))
-      (kill-new prompt)
-      (message "Copied prompt: %s" prompt)))
 
 ;; Allow tag completion input (bound to TAB (C-i)) in minibuffers.
 ;; enable-recursive-minibuffers is needed because
