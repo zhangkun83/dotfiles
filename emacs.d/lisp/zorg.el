@@ -718,8 +718,6 @@ that need to be sorted."
   "C-c C-o" 'zk-org-open-next-link
   "C-c n n" 'zk-zorg-goto-next-note-file
   "C-c n p" 'zk-zorg-goto-prev-note-file
-  "C-c z i" 'zk-zorg-ai-use-current-entry-as-input
-  "C-c z o" 'zk-zorg-ai-view-output
   "C-c z SPC" 'zk-zorg-ai-goto-original-input-pos
   "C-c z c" 'zk-zorg-ai-gemini-create-session
   "C-c z p" 'zk-zorg-ai-gemini-generate-prompt-for-current-heading
@@ -1591,6 +1589,7 @@ without refreshing it."
     (zk-ai-gemini-new-session file-list-for-context "Use org-mode format for all your responses")))
 
 (defvar zk-zorg-ai-gemini--prompt nil "The prompt to sent to the Gemini session")
+(defvar zk-zorg-ai-num-recent-notes-files-for-context 5)
 
 (defun zk-zorg-ai-gemini-generate-prompt-for-current-heading ()
   "Generates a gemini-cli prompt for a selected task.  If the prefix arg is
@@ -1620,40 +1619,6 @@ included in the context (default value is defined by
     (user-error "Prompt not set"))
   (zk-ai-gemini-send zk-zorg-ai-gemini--prompt))
 
-(defun zk-zorg-ai-use-current-entry-as-input ()
-  "Use the entire current entry as the input for AI.  Sets
-`zk-zorg-ai-original-input-pos'"
-  (interactive)
-  (let ((file (zk-zorg-ai-input-file-path))
-        (output-file (zk-zorg-ai-output-file-path)))
-    (zk-kill-buffer-visiting file)
-    (save-mark-and-excursion
-      (org-back-to-heading)
-      (setq zk-zorg-ai-original-input-pos
-            (cons (current-buffer) (point)))
-      (org-mark-element)
-      (write-region (region-beginning) (region-end) file))
-    (find-file-other-window file)
-    (when (and (file-exists-p output-file)
-               (yes-or-no-p "AI output file exists, delete it?"))
-      (zk-kill-buffer-visiting output-file)
-      (delete-file output-file)
-      (message "%s was deleted" output-file))))
-
-(defun zk-zorg-ai-view-output ()
-  "Display the AI's output buffer."
-  (interactive)
-  (let ((file (zk-zorg-ai-output-file-path)))
-    (cond ((equal (buffer-file-name) file)
-           (revert-buffer nil t))
-          ((equal (buffer-file-name) (zk-zorg-ai-input-file-path))
-           (zk-kill-buffer-visiting file)
-           (find-file file))
-          (t
-           (zk-kill-buffer-visiting file)
-           (find-file-other-window file)))))
-
-(defvar zk-zorg-ai-num-recent-notes-files-for-context 5)
 
 ;; Allow tag completion input (bound to TAB (C-i)) in minibuffers.
 ;; enable-recursive-minibuffers is needed because

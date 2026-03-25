@@ -65,9 +65,9 @@ This function reads all files and use their content as the context."
     ;; Update UI and history
     (save-excursion
       (goto-char (point-max))
-      (insert "*User*:\n " prompt "\n\n*Gemini*:\n "))
+      (insert "* User\n" prompt "\n\n* Gemini\n"))
     (push `((role . "user") (parts . [((text . ,prompt))])) zk-ai-gemini--history)
-    
+
     (message "Gemini is thinking...")
     (request
      "http://localhost:1880/generateContent"
