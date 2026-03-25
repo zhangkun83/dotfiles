@@ -1592,10 +1592,7 @@ without refreshing it."
 (defvar zk-zorg-ai-num-recent-notes-files-for-context 5)
 
 (defun zk-zorg-ai-gemini-generate-prompt-for-current-heading ()
-  "Generates a gemini-cli prompt for a selected task.  If the prefix arg is
-present, it indicates the number of recent notes files that need to be
-included in the context (default value is defined by
-`zk-zorg-ai-num-recent-notes-files-for-context'"
+  "Generates a gemini-cli prompt for a selected task."
   (interactive)
   (let* ((choice (read-char-choice
                   "Generate prompt to: [s] sort notes; [t] generate TODO entries"
@@ -1613,11 +1610,14 @@ included in the context (default value is defined by
     (setq zk-zorg-ai-gemini--prompt (concat prompt entry-content))
     (message "Prompt set")))
 
-(defun zk-zorg-ai-gemini-send-prompt ()
-  (interactive)
+(defun zk-zorg-ai-gemini-send-prompt (&optional arg)
+  "Send the generated prompt to Gemini.  The model level is set to
+'thoughtful if a prefix ARG is present, otherwise 'fast."
+  (interactive "P")
   (unless zk-zorg-ai-gemini--prompt
     (user-error "Prompt not set"))
-  (zk-ai-gemini-send zk-zorg-ai-gemini--prompt))
+  (let ((model-level (if arg 'thoughtful 'fast)))
+    (zk-ai-gemini-send zk-zorg-ai-gemini--prompt model-level)))
 
 
 ;; Allow tag completion input (bound to TAB (C-i)) in minibuffers.
