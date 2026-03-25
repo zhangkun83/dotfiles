@@ -1586,7 +1586,7 @@ without refreshing it."
          (used-num-files (or arg zk-zorg-ai-num-recent-notes-files-for-context))
          (file-list-for-context
           (cons "GEMINI.md" (last all-file-list used-num-files))))
-    (zk-ai-gemini-new-session file-list-for-context "Use org-mode format for all your responses")))
+    (zk-ai-gemini-new-session file-list-for-context)))
 
 (defvar zk-zorg-ai-gemini--prompt nil "The prompt to sent to the Gemini session")
 (defvar zk-zorg-ai-num-recent-notes-files-for-context 5)

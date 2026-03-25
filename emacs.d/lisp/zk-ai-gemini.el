@@ -18,6 +18,9 @@
 (defvar-local zk-ai-gemini--history nil
   "The conversation history for the current session buffer.")
 
+(defvar zk-ai-gemini--pending-prompt nil
+  "The pending prompt to be sent to a Gemini session.")
+
 (defun zk-ai-gemini--get-model (level)
   "Get the model name for LEVEL (fast or thoughtful) from ~/.zk/emacs/ai-models."
   (let* ((config-file (expand-file-name "~/.zk/emacs/ai-models"))
@@ -65,8 +68,13 @@
   "Create a new Gemini session using FILES as context.
 This function reads all files and use their content as the context."
   (let ((context-text (zk-ai-gemini--format-files-context files)))
+    (setq context-text
+          (concat
+           context-text "\n**IMPORTANT**: Use org-mode format for all your responses"))
     (when additional-system-instruction
-      (setq context-text (concat context-text "\n**IMPORTANT**: " additional-system-instruction)))
+      (setq context-text
+            (concat
+             context-text "\n**IMPORTANT**: " additional-system-instruction)))
     (zk-ai-gemini--create-session-buffer context-text files)))
 
 (defun zk-ai-gemini-send (prompt &optional model-level)
@@ -119,6 +127,22 @@ MODEL-LEVEL can be 'fast or 'thoughtful. Default is 'fast."
                (let ((status (request-response-status-code response)))
                  (message "Gemini request failed (Status %s): %s" 
                           status (or data "No details available"))))))))
+
+(defun zk-ai-gemini-send-pending-prompt (&optional arg)
+  "Send the pending prompt to the current Gemini session.
+The model level is set to 'thoughtful if a prefix ARG is present, otherwise 'fast."
+  (interactive "P")
+  (unless zk-ai-gemini--pending-prompt
+    (user-error "No pending prompt set"))
+  (zk-ai-gemini-send zk-ai-gemini--pending-prompt (if arg 'thoughtful 'fast)))
+
+(defun zk-ai-gemini-generate-prompt-with-region (beg end)
+  "Set the pending prompt to a user input followed by the content of the region."
+  (interactive "r")
+  (let ((user-prompt (read-string "Short prompt: ")))
+    (setq zk-ai-gemini--pending-prompt
+          (concat user-prompt "\n" (buffer-substring-no-properties beg end)))
+    (message "Pending prompt set with region content.")))
 
 (provide 'zk-ai-gemini)
 ;;; zk-ai-gemini.el ends here
