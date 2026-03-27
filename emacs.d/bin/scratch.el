@@ -1,13 +1,8 @@
 ;; Set up the scratch environment
 (require 'zk-org)
 
-(when (display-graphic-p)
-  (load-theme 'modus-operandi-tinted t)
-  (zk-org-init-fonts))
-
 (require 'zk)
 (zk-start-server-or-create-frame "scratch")
-
 
 (setq zk-frame-title-base-name "scratch")
 (setq confirm-kill-emacs 'yes-or-no-p)

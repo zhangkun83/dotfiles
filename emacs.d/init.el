@@ -248,6 +248,13 @@
 (add-hook 'dired-mode-hook
           (lambda() (dired-hide-details-mode 1)))
 
+(require 'zk-org)
+(when (display-graphic-p)
+  (setq leuven-scale-outline-headlines nil
+        leuven-scale-org-agenda-structure nil)
+  (load-theme 'leuven t)
+  (zk-org-init-fonts))
+
 ;; The cache sometimes get corrupted, and could lead to hanging in tag
 ;; search, or scheduled TODO not displayed in agenda view.  I don't
 ;; notice performance difference when it's enabled, so I'd rather

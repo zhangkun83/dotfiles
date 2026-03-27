@@ -10,12 +10,6 @@
 (require 'pulse)
 (require 'zk-ai-gemini)
 
-(when (display-graphic-p)
-  (setq leuven-scale-outline-headlines nil
-        leuven-scale-org-agenda-structure nil)
-  (load-theme 'leuven t)
-  (zk-org-init-fonts))
-
 (defvar zk-zorg-rsync-backup-dir
   nil "The remote path used by rsync for backing up org files")
 
