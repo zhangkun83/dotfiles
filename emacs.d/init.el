@@ -193,6 +193,7 @@
 (require 'transpose-frame)
 (global-set-key (kbd "C-x 9") 'transpose-frame)
 (global-set-key (kbd "C-x 5 3") 'zk-popup-window-to-new-frame)
+(global-set-key (kbd "C-x 5 s") 'zk-raise-server-frame)
 (global-set-key (kbd "C-z k") 'zk-kill-buffer-and-window-or-frame)
 (require 'goto-last-change)
 (global-set-key (kbd "C-x C-\\") 'goto-last-change-with-auto-marks)

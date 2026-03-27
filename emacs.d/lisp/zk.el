@@ -680,6 +680,19 @@ server to create a frame and quit myself."
   (server-start)
   (message "\"%s\" server started" server-name))
 
+(defun zk-raise-server-frame ()
+  "Choose an Emacs server from the lock files and ask it to raise its frame."
+  (interactive)
+  (let* ((lock-dir (concat zk-user-home-dir "/.zk-emacs-server-locks/"))
+         (servers (and (file-directory-p lock-dir)
+                       (directory-files lock-dir nil "^[^.]"))))
+    (if (not servers)
+        (message "No servers found in %s" lock-dir)
+      (let ((server (completing-read "Raise frame of server: " servers nil t)))
+        (require 'server)
+        (server-eval-at server '(zk-remote-raise-frame))
+        (message "Asked %s to raise its frame." server)))))
+
 (defun zk-buffer-to-register ()
   "Put the current buffer to a register.  This is different from
 point-to-register in that this command doesn't save the point, so
@@ -740,6 +753,11 @@ staying in the same buffer."
 indicating this frame is from an existing server."
   (raise-frame (make-frame))
   (message "New frame from existing \"%s\" instance" server-name))
+
+(defun zk-remote-raise-frame ()
+  "(To be called from a client) raise the current frame."
+  (raise-frame)
+  (message "Raised frame of \"%s\" instance" server-name))
 
 (defun zk-get-selected-frame-index ()
   "Return the index (base 0) of the selected frame in the list from
