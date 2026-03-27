@@ -4,14 +4,6 @@
 (require 'request)
 (require 'json)
 
-(defgroup zk-ai-gemini nil
-  "Interacting with Gemini AI through Google's Generative Language API."
-  :group 'zk)
-
-(defcustom zk-ai-gemini-cache-ttl 3600
-  "Time-to-live for the cached context in seconds."
-  :type 'integer)
-
 (defvar-local zk-ai-gemini--context-text nil
   "The full context text.")
 
