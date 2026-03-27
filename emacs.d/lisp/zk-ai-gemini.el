@@ -64,8 +64,9 @@ This function reads all files and use their content as the context."
     (setq context-text
           (concat
            "\n**IMPORTANT**: Use org-mode format for all your responses.
-Unnumbered lists in the text body uses `-` or `+` as the bullet character.
-`*` is reserved for entry headings only.\n\n" context-text))
+Unnumbered lists in the text body uses `-` or `+` as the bullet
+character.  `*` is reserved for entry headings only.  Avoid generating
+top-level headings which start with a single `*`.  \n\n" context-text))
     (when additional-system-instruction
       (setq context-text
             (concat
