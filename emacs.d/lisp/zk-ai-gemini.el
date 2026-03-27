@@ -101,7 +101,7 @@ MODEL-LEVEL can be 'fast or 'thoughtful. Default is 'fast."
                (setq payload (append `((system_instruction . ((parts . [((text . ,context-text))])))) payload))
                payload))
             'utf-8)
-     :parser (lambda () (buffer-string))
+     :parser (lambda () (decode-coding-string (buffer-string) 'utf-8))
      :success (cl-function
                (lambda (&key data &allow-other-keys)
                  (let* ((json-object-type 'alist)
