@@ -28,16 +28,17 @@
         (cadr (split-string model-entry ":"))
       (error "Model level %s not found in %s" level config-file))))
 
-(defun zk-ai-gemini--create-session-buffer (context-text files)
+(defun zk-ai-gemini--create-session-buffer (context-text files &optional buffer-name)
   "Helper to create and initialize a Gemini session buffer."
-  (let* ((buf-name (generate-new-buffer-name "*gemini-session*"))
+  (let* ((buf-name (generate-new-buffer-name (or buffer-name "*gemini-session*")))
          (buffer (get-buffer-create buf-name)))
     (with-current-buffer buffer
       (ignore-errors (org-mode))
       (setq zk-ai-gemini--context-text context-text)
       (setq zk-ai-gemini--history nil)
       (insert "# Gemini Session\n\n")
-      (insert "Context Files: " (mapconcat #'zk-abbrev-home-dir-from-path files ", ") "\n\n")
+      (when files
+        (insert "Context Files: " (mapconcat #'zk-abbrev-home-dir-from-path files ", ") "\n\n"))
       (insert "--- Session started ---\n\n"))
     (switch-to-buffer buffer)
     buffer))
@@ -56,7 +57,7 @@
    "\n"))
 
 
-(defun zk-ai-gemini-new-session (files &optional additional-system-instruction)
+(defun zk-ai-gemini-new-session (files &optional additional-system-instruction buffer-name)
   "Create a new Gemini session using FILES as context.
 This function reads all files and use their content as the context."
   (let ((context-text (zk-ai-gemini--format-files-context files)))
@@ -69,7 +70,7 @@ Unnumbered lists in the text body uses `-` or `+` as the bullet character.
       (setq context-text
             (concat
              "\n**IMPORTANT**: " additional-system-instruction "\n" context-text)))
-    (zk-ai-gemini--create-session-buffer context-text files)))
+    (zk-ai-gemini--create-session-buffer context-text files buffer-name)))
 
 (defun zk-ai-gemini-send (prompt &optional model-level)
   "Send PROMPT to the Gemini session in the current buffer.
@@ -133,10 +134,25 @@ The model level is set to 'thoughtful if a prefix ARG is present, otherwise 'fas
 (defun zk-ai-gemini-generate-prompt-with-region (beg end)
   "Set the pending prompt to a user input followed by the content of the region."
   (interactive "r")
-  (let ((user-prompt (read-string "Short prompt: ")))
+  (let ((user-prompt (read-string "Prompt: ")))
     (setq zk-ai-gemini--pending-prompt
           (concat user-prompt "\n" (buffer-substring-no-properties beg end)))
     (message "Pending prompt set with region content.")))
+
+(defun zk-ai-gemini-start-session-for-region (beg end)
+  "Start a new Gemini session with the active region and a user prompt."
+  (interactive "r")
+  (unless (use-region-p)
+    (user-error "No active region"))
+  (let* ((user-prompt (read-string "Prompt: "))
+         (region-content (buffer-substring-no-properties beg end))
+         (full-prompt (concat user-prompt "\n*Input*:\n" region-content))
+         (buf-name (format "*gemini-session* %s"
+                           (if (> (length user-prompt) 50)
+                               (substring user-prompt 0 50)
+                             user-prompt))))
+    (zk-ai-gemini-new-session nil nil buf-name)
+    (zk-ai-gemini-send full-prompt)))
 
 (provide 'zk-ai-gemini)
 ;;; zk-ai-gemini.el ends here
