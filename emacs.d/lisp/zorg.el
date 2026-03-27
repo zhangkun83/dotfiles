@@ -1611,7 +1611,7 @@ without refreshing it."
 5. For each heading entry:
     1. The heading text should be a summary of the whole entry, up to
        90 characters.  Try to include concrete events, updates, ideas,
-       conclusions, instead of generalization in the summary.
+       conclusions, capturing the who, what and how.
     2. The heading should include the timestamp from the original
        entry.
     3. Update the tags to reflect the people and projects relevant to
