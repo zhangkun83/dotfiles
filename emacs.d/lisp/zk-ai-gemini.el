@@ -40,7 +40,7 @@
       (when files
         (insert "Context Files: " (mapconcat #'zk-abbrev-home-dir-from-path files ", ") "\n\n"))
       (insert "--- Session started ---\n\n"))
-    (switch-to-buffer buffer)
+    (switch-to-buffer-other-window buffer)
     buffer))
 
 
