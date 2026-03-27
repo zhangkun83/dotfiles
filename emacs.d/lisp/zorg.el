@@ -1601,12 +1601,14 @@ without refreshing it."
        discussion.
     2. If this section is a notable development of a long-running
        task, add a back reference to that task.
-3. Identify the topic of each section.  When necessary, reorder
+3. If a section starts with a \"RE:\" line without a link, replace the line
+   with the most likely back references.
+4. Identify the topic of each section.  When necessary, reorder
    sections so that sections about the same topic are together.  If
    the meeting notes entry discusses multiple topics, create a new
    heading entry for each topic, at the same level of the orginal
    meeting notes entry.
-4. For each heading entry:
+5. For each heading entry:
     1. The heading text should be a summary of the whole entry, up to
        90 characters.  Try to include concrete events, updates, ideas,
        conclusions, instead of generalization in the summary.
