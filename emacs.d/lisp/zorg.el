@@ -1583,7 +1583,7 @@ without refreshing it."
     (zk-ai-gemini-new-session file-list-for-context)))
 
 (defvar zk-zorg-ai-gemini--prompt nil "The prompt to sent to the Gemini session")
-(defvar zk-zorg-ai-num-recent-notes-files-for-context 5)
+(defvar zk-zorg-ai-num-recent-notes-files-for-context 2)
 
 (defun zk-zorg-ai-gemini-generate-prompt-for-current-heading ()
   "Generates a gemini-cli prompt for a selected task."

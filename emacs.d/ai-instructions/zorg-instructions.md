@@ -62,9 +62,8 @@ meeting notes, and personal reminders.
 
 ## Meeting notes
 
-*  A meeting notes entry usually has a heading like "Meeting with XXX"
-   where XXX is the name of the person, and is tagged with the tag for
-   that person.
+*  A meeting notes entry is tagged with the tag for the persons
+   involved.
 
 *  A meeting notes entry with a `tbs` tag means it's raw notes that
    are yet to be sorted.
