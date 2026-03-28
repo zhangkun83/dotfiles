@@ -3,6 +3,7 @@
 (require 'zk)
 (require 'request)
 (require 'json)
+(require 'cl-lib)
 
 (defvar-local zk-ai-gemini--context-text nil
   "The full context text.")
@@ -12,6 +13,9 @@
 
 (defvar zk-ai-gemini--pending-prompt nil
   "The pending prompt to be sent to a Gemini session.")
+
+(defvar zk-ai-gemini--session-counter 0
+  "Counter for Gemini session buffers.")
 
 (defun zk-ai-gemini--get-model (level)
   "Get the model name for LEVEL (fast or thoughtful) from ~/.zk/emacs/ai-models."
@@ -30,7 +34,10 @@
 
 (defun zk-ai-gemini--create-session-buffer (context-text files &optional buffer-name-suffix)
   "Helper to create and initialize a Gemini session buffer."
-  (let* ((buf-name (generate-new-buffer-name (format "*zk-ai* %s" (or buffer-name-suffix "session"))))
+  (let* ((buf-name (generate-new-buffer-name
+                    (format "*zk/ai*<%d> %s"
+                            (cl-incf zk-ai-gemini--session-counter)
+                            (or buffer-name-suffix "session"))))
          (buffer (get-buffer-create buf-name)))
     (with-current-buffer buffer
       (ignore-errors (org-mode))
@@ -65,9 +72,11 @@ This function reads all files and use their content as the context."
           (concat
            "\nResponse format requirements:
 - Use org-mode format for all your responses. Unnumbered lists in the text body uses `-` or `+` as the bullet character.
+- Use ** for first-level heading, *** for second-level heading, and so on.
 - Avoid using single `*` for bullet character.
 - Use ~ instead of ` to quote inline code.
-- Use #+begin_src and #end_src instead of ``` to quote multi-line code" context-text))
+- Use '#+begin_src text' and '#end_src' instead of ``` to quote multi-line code
+- Wrap text using width of 80" context-text))
     (when additional-system-instruction
       (setq context-text
             (concat
