@@ -11,9 +11,6 @@
 (defvar-local zk-ai-gemini--history nil
   "The conversation history for the current session buffer.")
 
-(defvar zk-ai-gemini--pending-prompt nil
-  "The pending prompt to be sent to a Gemini session.")
-
 (defvar zk-ai-gemini--session-counter 0
   "Counter for Gemini session buffers.")
 
@@ -133,22 +130,6 @@ MODEL-LEVEL can be 'fast or 'thoughtful. Default is 'fast."
                (let ((status (request-response-status-code response)))
                  (message "Gemini request failed (Status %s): %s" 
                           status (or data "No details available"))))))))
-
-(defun zk-ai-gemini-send-pending-prompt (&optional arg)
-  "Send the pending prompt to the current Gemini session.
-The model level is set to 'thoughtful if a prefix ARG is present, otherwise 'fast."
-  (interactive "P")
-  (unless zk-ai-gemini--pending-prompt
-    (user-error "No pending prompt set"))
-  (zk-ai-gemini-send zk-ai-gemini--pending-prompt (if arg 'thoughtful 'fast)))
-
-(defun zk-ai-gemini-generate-prompt-with-region (beg end)
-  "Set the pending prompt to a user input followed by the content of the region."
-  (interactive "r")
-  (let ((user-prompt (read-string "Prompt: ")))
-    (setq zk-ai-gemini--pending-prompt
-          (concat user-prompt "\n" (buffer-substring-no-properties beg end)))
-    (message "Pending prompt set with region content.")))
 
 (defun zk-ai-gemini-start-session-for-region (beg end)
   "Start a new Gemini session with the active region and a user prompt."
