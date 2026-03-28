@@ -11,6 +11,9 @@
 (defvar-local zk-ai-gemini--history nil
   "The conversation history for the current session buffer.")
 
+(defvar-local zk-ai-gemini--model-level 'fast
+  "The model level for the current session (e.g., 'fast or 'thoughtful).")
+
 (defvar zk-ai-gemini--session-counter 0
   "Counter for Gemini session buffers.")
 
@@ -40,6 +43,7 @@
       (ignore-errors (org-mode))
       (setq zk-ai-gemini--context-text context-text)
       (setq zk-ai-gemini--history nil)
+      (zk-ai-gemini-set-model-level 'fast)
       (insert "# Gemini Session\n\n")
       (when files
         (insert "Context Files: " (mapconcat #'zk-abbrev-home-dir-from-path files ", ") "\n\n"))
@@ -80,20 +84,30 @@ This function reads all files and use their content as the context."
              "\n**IMPORTANT**: " additional-system-instruction "\n" context-text)))
     (zk-ai-gemini--create-session-buffer context-text files buffer-name-suffix)))
 
-(defun zk-ai-gemini-send (prompt &optional model-level)
-  "Send PROMPT to the Gemini session in the current buffer.
-MODEL-LEVEL can be 'fast or 'thoughtful. Default is 'fast."
+(defun zk-ai-gemini-set-model-level (level)
+  "Set the model level for the current Gemini session."
+  (interactive
+   (list (intern (completing-read "Model level: " '("fast" "thoughtful") nil t))))
+  (unless (boundp 'zk-ai-gemini--history)
+    (user-error "Current buffer is not an active Gemini session"))
+  (setq zk-ai-gemini--model-level level)
+  (let ((model-name (zk-ai-gemini--get-model level)))
+    (goto-char (point-max))
+    (insert (format "\n--- Model level set to %s (%s) ---\n\n" level model-name)))
+    (message "Model level set to %s (%s)" level model-name))
+
+(defun zk-ai-gemini-send (prompt)
+  "Send PROMPT to the Gemini session in the current buffer."
   (interactive "sPrompt: ")
   (unless (boundp 'zk-ai-gemini--history)
     (user-error "Current buffer is not an active Gemini session"))
 
   (let ((buffer (current-buffer))
         (context-text zk-ai-gemini--context-text)
-        (model-name (zk-ai-gemini--get-model (or model-level 'fast))))
+        (model-name (zk-ai-gemini--get-model zk-ai-gemini--model-level)))
     ;; Update UI and history
-    (save-excursion
-      (goto-char (point-max))
-      (insert (format "* User (%s)\n" model-name) prompt "\n\n* Gemini\n"))
+    (goto-char (point-max))
+    (insert "\n* User\n" prompt "\n\n* Gemini\n")
     (push `((role . "user") (parts . [((text . ,prompt))])) zk-ai-gemini--history)
 
     (message "Gemini is thinking...")

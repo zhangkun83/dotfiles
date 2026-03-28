@@ -216,6 +216,7 @@
 (global-set-key (kbd "C-z C-l") 'zk-echo-current-line)
 (global-set-key (kbd "C-z z s") 'zk-ai-gemini-send)
 (global-set-key (kbd "C-z z c") 'zk-ai-gemini-start-session)
+(global-set-key (kbd "C-z z m") 'zk-ai-gemini-set-model-level)
 (global-set-key (kbd "C-M-y") 'zk-yank-to-register)
 (global-set-key (kbd "C-M-q") 'zk-fill-paragraph-after-point)
 

@@ -1651,14 +1651,12 @@ action item.  The TODO entry shall:
           (concat prompt "\n\nBelow is the meeting notes entry content:\n\n" entry-content))
     (message "Prompt set")))
 
-(defun zk-zorg-ai-gemini-send-prompt (&optional arg)
-  "Send the generated prompt to Gemini.  The model level is set to
-'thoughtful if a prefix ARG is present, otherwise 'fast."
-  (interactive "P")
+(defun zk-zorg-ai-gemini-send-prompt ()
+  (interactive)
+  "Send the generated prompt to Gemini."
   (unless zk-zorg-ai-gemini--prompt
     (user-error "Prompt not set"))
-  (let ((model-level (if arg 'thoughtful 'fast)))
-    (zk-ai-gemini-send zk-zorg-ai-gemini--prompt model-level)))
+  (zk-ai-gemini-send zk-zorg-ai-gemini--prompt))
 
 
 ;; Allow tag completion input (bound to TAB (C-i)) in minibuffers.
