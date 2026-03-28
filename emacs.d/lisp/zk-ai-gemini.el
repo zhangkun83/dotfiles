@@ -131,19 +131,24 @@ MODEL-LEVEL can be 'fast or 'thoughtful. Default is 'fast."
                  (message "Gemini request failed (Status %s): %s" 
                           status (or data "No details available"))))))))
 
-(defun zk-ai-gemini-start-session-for-region (beg end)
-  "Start a new Gemini session with the active region and a user prompt."
-  (interactive "r")
-  (unless (use-region-p)
-    (user-error "No active region"))
-  (let* ((user-prompt (read-string "Prompt: "))
-         (region-content (buffer-substring-no-properties beg end))
-         (full-prompt (concat user-prompt "\n*Input*:\n" region-content))
-         (suffix (if (> (length user-prompt) 50)
-                     (substring user-prompt 0 50)
-                   user-prompt)))
-    (zk-ai-gemini-new-session nil nil suffix)
-    (zk-ai-gemini-send full-prompt)))
+(defun zk-ai-gemini-start-session (&optional beg end)
+  "Start a new Gemini session.
+If BEG and END are provided (e.g., when the region is active), use it as
+context and prompt for an initial user prompt.
+If BEG and END are nil, just create a new empty session."
+  (interactive (if (use-region-p)
+                   (list (region-beginning) (region-end))
+                 (list nil nil)))
+  (if (and beg end)
+      (let* ((user-prompt (read-string "Prompt: "))
+             (region-content (buffer-substring-no-properties beg end))
+             (full-prompt (concat user-prompt "\n*Input*:\n" region-content))
+             (suffix (if (> (length user-prompt) 80)
+                         (substring user-prompt 0 80)
+                       user-prompt)))
+        (zk-ai-gemini-new-session nil nil suffix)
+        (zk-ai-gemini-send full-prompt))
+    (zk-ai-gemini-new-session nil nil "new session")))
 
 (provide 'zk-ai-gemini)
 ;;; zk-ai-gemini.el ends here
