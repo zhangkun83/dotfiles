@@ -44,10 +44,9 @@
       (setq zk-ai-gemini--context-text context-text)
       (setq zk-ai-gemini--history nil)
       (zk-ai-gemini-set-model-level 'fast)
-      (insert "# Gemini Session\n\n")
       (when files
-        (insert "Context Files: " (mapconcat #'zk-abbrev-home-dir-from-path files ", ") "\n\n"))
-      (insert "--- Session started ---\n\n"))
+        (insert "* Context Files: " (mapconcat #'zk-abbrev-home-dir-from-path files ", ") "\n\n"))
+      (insert "* Session started\n\n"))
     (switch-to-buffer-other-window buffer)
     buffer))
 
@@ -93,8 +92,8 @@ This function reads all files and use their content as the context."
   (setq zk-ai-gemini--model-level level)
   (let ((model-name (zk-ai-gemini--get-model level)))
     (goto-char (point-max))
-    (insert (format "\n--- Model level set to %s (%s) ---\n\n" level model-name)))
-    (message "Model level set to %s (%s)" level model-name))
+    (insert (format "\n* Model level set to %s (%s)\n\n" level model-name))
+    (message "Model level set to %s (%s)" level model-name)))
 
 (defun zk-ai-gemini-send (prompt)
   "Send PROMPT to the Gemini session in the current buffer."
