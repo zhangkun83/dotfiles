@@ -63,10 +63,11 @@ This function reads all files and use their content as the context."
   (let ((context-text (zk-ai-gemini--format-files-context files)))
     (setq context-text
           (concat
-           "\n**IMPORTANT**: Use org-mode format for all your responses.
-Unnumbered lists in the text body uses `-` or `+` as the bullet
-character.  `*` is reserved for entry headings only.  Avoid generating
-top-level headings which start with a single `*`.  \n\n" context-text))
+           "\nResponse format requirements:
+- Use org-mode format for all your responses. Unnumbered lists in the text body uses `-` or `+` as the bullet character.
+- `*` is reserved for entry headings only.  Avoid generating top-level headings which start with a single `*`
+- Use ~ instead of ` to quote inline code.
+- Use #+begin_src and #end_src instead of ``` to quote multi-line code" context-text))
     (when additional-system-instruction
       (setq context-text
             (concat
