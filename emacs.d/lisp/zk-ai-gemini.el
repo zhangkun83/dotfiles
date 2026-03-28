@@ -45,7 +45,10 @@
       (setq zk-ai-gemini--history nil)
       (zk-ai-gemini-set-model-level 'fast)
       (when files
-        (insert "* Context Files: " (mapconcat #'zk-abbrev-home-dir-from-path files ", ") "\n\n"))
+        (insert "* Context Files\n"
+                (mapconcat (lambda (f) (concat "- " (zk-abbrev-home-dir-from-path f)))
+                           files "\n")
+                "\n\n"))
       (insert "* Session started\n\n"))
     (switch-to-buffer-other-window buffer)
     buffer))
