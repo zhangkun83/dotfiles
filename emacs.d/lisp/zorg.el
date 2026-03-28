@@ -1576,10 +1576,16 @@ without refreshing it."
 (defun zk-zorg-ai-gemini-create-session (&optional arg)
   "Create a session with Gemini AI for zorg tasks."
   (interactive)
-  (let* ((all-file-list (zk-zorg-list-note-files))
+  (let* ((instruction-file (expand-file-name (format "~/.emacs.d/ai-instructions/%s.md" zk-zorg-profile-name)))
+         (all-file-list (zk-zorg-list-note-files))
          (used-num-files (or arg zk-zorg-ai-num-recent-notes-files-for-context))
+         (zorg-dir (zk-zorg-directory))
          (file-list-for-context
-          (cons "GEMINI.md" (last all-file-list used-num-files))))
+          (cons instruction-file
+                (mapcar (lambda (f) (expand-file-name f zorg-dir))
+                        (last all-file-list used-num-files)))))
+    (unless (file-exists-p instruction-file)
+      (user-error "Instruction file not found: %s" instruction-file))
     (zk-ai-gemini-new-session file-list-for-context)))
 
 (defvar zk-zorg-ai-gemini--prompt nil "The prompt to sent to the Gemini session")
