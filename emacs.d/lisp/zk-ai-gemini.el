@@ -28,9 +28,9 @@
         (cadr (split-string model-entry ":"))
       (error "Model level %s not found in %s" level config-file))))
 
-(defun zk-ai-gemini--create-session-buffer (context-text files &optional buffer-name)
+(defun zk-ai-gemini--create-session-buffer (context-text files &optional buffer-name-suffix)
   "Helper to create and initialize a Gemini session buffer."
-  (let* ((buf-name (generate-new-buffer-name (or buffer-name "*gemini-session*")))
+  (let* ((buf-name (generate-new-buffer-name (format "*zk-ai* %s" (or buffer-name-suffix "session"))))
          (buffer (get-buffer-create buf-name)))
     (with-current-buffer buffer
       (ignore-errors (org-mode))
@@ -57,7 +57,7 @@
    "\n"))
 
 
-(defun zk-ai-gemini-new-session (files &optional additional-system-instruction buffer-name)
+(defun zk-ai-gemini-new-session (files &optional additional-system-instruction buffer-name-suffix)
   "Create a new Gemini session using FILES as context.
 This function reads all files and use their content as the context."
   (let ((context-text (zk-ai-gemini--format-files-context files)))
@@ -65,14 +65,14 @@ This function reads all files and use their content as the context."
           (concat
            "\nResponse format requirements:
 - Use org-mode format for all your responses. Unnumbered lists in the text body uses `-` or `+` as the bullet character.
-- `*` is reserved for entry headings only.  Avoid generating top-level headings which start with a single `*`
+- Avoid using single `*` for bullet character.
 - Use ~ instead of ` to quote inline code.
 - Use #+begin_src and #end_src instead of ``` to quote multi-line code" context-text))
     (when additional-system-instruction
       (setq context-text
             (concat
              "\n**IMPORTANT**: " additional-system-instruction "\n" context-text)))
-    (zk-ai-gemini--create-session-buffer context-text files buffer-name)))
+    (zk-ai-gemini--create-session-buffer context-text files buffer-name-suffix)))
 
 (defun zk-ai-gemini-send (prompt &optional model-level)
   "Send PROMPT to the Gemini session in the current buffer.
@@ -149,11 +149,10 @@ The model level is set to 'thoughtful if a prefix ARG is present, otherwise 'fas
   (let* ((user-prompt (read-string "Prompt: "))
          (region-content (buffer-substring-no-properties beg end))
          (full-prompt (concat user-prompt "\n*Input*:\n" region-content))
-         (buf-name (format "*gemini-session* %s"
-                           (if (> (length user-prompt) 50)
-                               (substring user-prompt 0 50)
-                             user-prompt))))
-    (zk-ai-gemini-new-session nil nil buf-name)
+         (suffix (if (> (length user-prompt) 50)
+                     (substring user-prompt 0 50)
+                   user-prompt)))
+    (zk-ai-gemini-new-session nil nil suffix)
     (zk-ai-gemini-send full-prompt)))
 
 (provide 'zk-ai-gemini)
