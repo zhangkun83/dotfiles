@@ -137,8 +137,8 @@ element.  If there is no SCHEDULED timestamp, return nil."
 next link and open it.  If the prefix arg is non-nil, move
 backward."
   (interactive "P")
-  (unless (eq major-mode 'org-mode)
-    (user-error "Not in org-mode."))
+  (unless (derived-mode-p 'org-mode)
+    (user-error "Not in org-mode or its derived mode."))
   (org-open-link-from-string
    (if (zk-org-link-at-point-p)
        (zk-org-get-link-at-point)
