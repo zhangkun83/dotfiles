@@ -4,6 +4,7 @@
 (require 'request)
 (require 'json)
 (require 'cl-lib)
+(require 'subr-x)
 
 (defvar-local zk-ai-gemini--context-text nil
   "The full context text.")
@@ -16,6 +17,16 @@
 
 (defvar zk-ai-gemini--session-counter 0
   "Counter for Gemini session buffers.")
+
+(defvar zk-ai-gemini-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-j") #'zk-ai-gemini-send)
+    map)
+  "Keymap for `zk-ai-gemini-mode'.")
+
+(define-derived-mode zk-ai-gemini-mode org-mode "Gemini"
+  "Major mode for Gemini AI interaction."
+  (setq-local org-adapt-indentation nil))
 
 (defun zk-ai-gemini--get-model (level)
   "Get the model name for LEVEL (fast or thoughtful) from ~/.zk/emacs/ai-models."
@@ -40,7 +51,7 @@
                             (or buffer-name-suffix "session"))))
          (buffer (get-buffer-create buf-name)))
     (with-current-buffer buffer
-      (ignore-errors (org-mode))
+      (zk-ai-gemini-mode)
       (setq zk-ai-gemini--context-text context-text)
       (setq zk-ai-gemini--history nil)
       (zk-ai-gemini-set-model-level 'fast)
@@ -49,7 +60,7 @@
                 (mapconcat (lambda (f) (concat "- " (zk-abbrev-home-dir-from-path f)))
                            files "\n")
                 "\n"))
-      (insert "* Session started\n"))
+      (insert "* Session started\n\n* User\n"))
     (switch-to-buffer-other-window buffer)
     buffer))
 
@@ -98,9 +109,10 @@ This function reads all files and use their content as the context."
     (insert (format "\n* Model level set to ~%s~ (~%s~)\n" level model-name))
     (message "Model level set to %s (%s)" level model-name)))
 
-(defun zk-ai-gemini-send (prompt)
-  "Send PROMPT to the Gemini session in the current buffer."
-  (interactive "sPrompt: ")
+(defun zk-ai-gemini-send (&optional prompt)
+  "Send PROMPT to the Gemini session in the current buffer.
+If PROMPT is nil, use the content after the last '* User' heading."
+  (interactive)
   (unless (boundp 'zk-ai-gemini--history)
     (user-error "Current buffer is not an active Gemini session"))
 
@@ -108,8 +120,26 @@ This function reads all files and use their content as the context."
         (context-text zk-ai-gemini--context-text)
         (model-name (zk-ai-gemini--get-model zk-ai-gemini--model-level)))
     ;; Update UI and history
-    (goto-char (point-max))
-    (insert "\n* User\n" prompt "\n* Gemini\n")
+    (if prompt
+        (progn
+          (goto-char (point-max))
+          (unless (bolp) (insert "\n"))
+          (unless (save-excursion (re-search-backward "^\\* User\\s-*$" nil t))
+            (insert "* User\n"))
+          (goto-char (point-max))
+          (insert prompt "\n\n* Gemini\n"))
+      ;; Extract from buffer
+      (save-excursion
+        (goto-char (point-max))
+        (if (re-search-backward "^\\* User\\s-*$" nil t)
+            (setq prompt (buffer-substring-no-properties (line-end-position) (point-max)))
+          (user-error "Could not find '* User' heading")))
+      (setq prompt (string-trim prompt))
+      (if (string-empty-p prompt)
+          (user-error "Prompt is empty")
+        (goto-char (point-max))
+        (insert "\n\n* Gemini\n")))
+
     (push `((role . "user") (parts . [((text . ,prompt))])) zk-ai-gemini--history)
 
     (message "Gemini is thinking...")
@@ -135,10 +165,8 @@ This function reads all files and use their content as the context."
                         (parts (alist-get 'parts content))
                         (text (alist-get 'text (elt parts 0))))
                    (with-current-buffer buffer
-                     (save-excursion
-                       (goto-char (point-max))
-                       (insert text "\n")
-                       (goto-char (point-max)))
+                     (goto-char (point-max))
+                     (insert text "\n\n* User\n")
                      (push `((role . "model") (parts . [((text . ,text))])) zk-ai-gemini--history))
                    (message "Gemini reply received."))))
      :error (cl-function
