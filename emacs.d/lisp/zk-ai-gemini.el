@@ -20,15 +20,14 @@
 
 (defun zk-ai-gemini--set-state (state)
   "Set the session STATE and update buffer read-only status."
-  (unless (eq zk-ai-gemini--state state)
-    (setq zk-ai-gemini--state state)
-    (setq buffer-read-only (not (eq state 'ready)))
-    (goto-char (point-max))
-    (let ((inhibit-read-only t))
-      (insert (format "\n* State: %s\n" state))
-      (when (eq state 'ready)
-        (insert "\n* User\n")))
-    (message "Gemini state: %s" state)))
+  (setq zk-ai-gemini--state state)
+  (setq buffer-read-only (not (eq state 'ready)))
+  (goto-char (point-max))
+  (let ((inhibit-read-only t))
+    (insert (format "\n* State: %s\n" state))
+    (when (eq state 'ready)
+      (insert "\n* User\n")))
+  (message "Gemini state: %s" state))
 
 (defvar zk-ai-gemini--session-counter 0
   "Counter for Gemini session buffers.")
@@ -63,14 +62,14 @@
       (setq-local org-adapt-indentation nil)
       (setq zk-ai-gemini--context-text context-text)
       (setq zk-ai-gemini--history nil)
-      (zk-ai-gemini--set-state 'ready)
       (zk-ai-gemini-set-model-level 'fast)
       (when files
         (insert "* Context Files\n"
                 (mapconcat (lambda (f) (concat "- " (zk-abbrev-home-dir-from-path f)))
                            files "\n")
                 "\n"))
-      (insert "* Session started\n"))
+      (insert "* Session started\n")
+      (zk-ai-gemini--set-state 'ready))
     (switch-to-buffer-other-window buffer)
     buffer))
 
