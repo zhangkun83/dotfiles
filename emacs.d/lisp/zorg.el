@@ -1586,7 +1586,8 @@ without refreshing it."
                         (last all-file-list used-num-files)))))
     (unless (file-exists-p instruction-file)
       (user-error "Instruction file not found: %s" instruction-file))
-    (zk-ai-gemini-new-session file-list-for-context)))
+    (zk-ai-gemini-new-session file-list-for-context)
+    (zk-ai-gemini-set-model-level 'thoughtful)))
 
 (defvar zk-zorg-ai-gemini--prompt nil "The prompt to sent to the Gemini session")
 (defvar zk-zorg-ai-num-recent-notes-files-for-context 2)

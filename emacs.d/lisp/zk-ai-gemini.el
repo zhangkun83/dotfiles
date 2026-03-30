@@ -48,8 +48,8 @@
         (insert "* Context Files\n"
                 (mapconcat (lambda (f) (concat "- " (zk-abbrev-home-dir-from-path f)))
                            files "\n")
-                "\n\n"))
-      (insert "* Session started\n\n"))
+                "\n"))
+      (insert "* Session started\n"))
     (switch-to-buffer-other-window buffer)
     buffer))
 
@@ -95,7 +95,7 @@ This function reads all files and use their content as the context."
   (setq zk-ai-gemini--model-level level)
   (let ((model-name (zk-ai-gemini--get-model level)))
     (goto-char (point-max))
-    (insert (format "\n* Model level set to %s (%s)\n\n" level model-name))
+    (insert (format "\n* Model level set to ~%s~ (~%s~)\n" level model-name))
     (message "Model level set to %s (%s)" level model-name)))
 
 (defun zk-ai-gemini-send (prompt)
@@ -109,7 +109,7 @@ This function reads all files and use their content as the context."
         (model-name (zk-ai-gemini--get-model zk-ai-gemini--model-level)))
     ;; Update UI and history
     (goto-char (point-max))
-    (insert "\n* User\n" prompt "\n\n* Gemini\n")
+    (insert "\n* User\n" prompt "\n* Gemini\n")
     (push `((role . "user") (parts . [((text . ,prompt))])) zk-ai-gemini--history)
 
     (message "Gemini is thinking...")
@@ -137,7 +137,7 @@ This function reads all files and use their content as the context."
                    (with-current-buffer buffer
                      (save-excursion
                        (goto-char (point-max))
-                       (insert text "\n\n")
+                       (insert text "\n")
                        (goto-char (point-max)))
                      (push `((role . "model") (parts . [((text . ,text))])) zk-ai-gemini--history))
                    (message "Gemini reply received."))))
