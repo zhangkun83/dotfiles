@@ -18,16 +18,6 @@
 (defvar zk-ai-gemini--session-counter 0
   "Counter for Gemini session buffers.")
 
-(defvar zk-ai-gemini-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-j") #'zk-ai-gemini-send)
-    map)
-  "Keymap for `zk-ai-gemini-mode'.")
-
-(define-derived-mode zk-ai-gemini-mode org-mode "Gemini"
-  "Major mode for Gemini AI interaction."
-  (setq-local org-adapt-indentation nil))
-
 (defun zk-ai-gemini--get-model (level)
   "Get the model name for LEVEL (fast or thoughtful) from ~/.zk/emacs/ai-models."
   (let* ((config-file (expand-file-name "~/.zk/emacs/ai-models"))
@@ -51,7 +41,11 @@
                             (or buffer-name-suffix "session"))))
          (buffer (get-buffer-create buf-name)))
     (with-current-buffer buffer
-      (zk-ai-gemini-mode)
+      (org-mode)
+      (let ((map (copy-keymap org-mode-map)))
+        (define-key map (kbd "C-j") #'zk-ai-gemini-send)
+        (use-local-map map))
+      (setq-local org-adapt-indentation nil)
       (setq zk-ai-gemini--context-text context-text)
       (setq zk-ai-gemini--history nil)
       (zk-ai-gemini-set-model-level 'fast)
