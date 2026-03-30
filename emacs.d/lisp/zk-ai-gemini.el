@@ -56,7 +56,7 @@
          (buffer (get-buffer-create buf-name)))
     (with-current-buffer buffer
       (org-mode)
-      (let ((map (copy-keymap org-mode-map)))
+      (let ((map (copy-keymap (current-local-map))))
         (define-key map (kbd "C-j") #'zk-ai-gemini-send)
         (use-local-map map))
       (setq-local org-adapt-indentation nil)
