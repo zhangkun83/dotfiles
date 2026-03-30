@@ -1,6 +1,7 @@
 ;;; zk-ai-gemini.el --- Gemini AI interaction using request.el -*- lexical-binding: t; -*-
 
 (require 'zk)
+(require 'zk-org)
 (require 'request)
 (require 'json)
 (require 'cl-lib)
@@ -18,14 +19,35 @@
 (defvar-local zk-ai-gemini--state 'ready
   "The current state of the Gemini session ('ready or 'waiting-for-response).")
 
+(defun zk-ai-gemini--find-user-prompt-heading ()
+  "Moves point to the top-level heading and checks if it matches \"* User\".
+Returns t if found, nil otherwise. Suppresses errors during navigation."
+  (ignore-errors
+    (zk-org-go-to-top-heading)
+    (and (= (org-outline-level) 1)
+         (looking-at "^\\* User\\s-*$"))))
+
+(defun zk-ai-gemini--log (msg &optional preserve-user-prompt)
+  "Log MSG at the end of the session buffer.  If PRESERVE-USER-PROMPT is
+not nil, insert the log before '* User' if it exists."
+  (let ((inhibit-read-only t))
+    (save-excursion
+      (goto-char (point-max))
+      (if (and preserve-user-prompt
+               (zk-ai-gemini--find-user-prompt-heading))
+          (insert "* " msg "\n\n")
+        (goto-char (point-max))
+        (unless (bolp) (insert "\n"))
+        (insert "* " msg "\n")))))
+
 (defun zk-ai-gemini--set-state (state)
   "Set the session STATE and update buffer read-only status."
   (setq zk-ai-gemini--state state)
   (setq buffer-read-only (not (eq state 'ready)))
-  (goto-char (point-max))
-  (let ((inhibit-read-only t))
-    (insert (format "\n* State: %s\n" state))
-    (when (eq state 'ready)
+  (zk-ai-gemini--log (format "State: ~%s~" state))
+  (when (eq state 'ready)
+    (let ((inhibit-read-only t))
+      (goto-char (point-max))
       (insert "\n* User\n")))
   (message "Gemini state: %s" state))
 
@@ -68,7 +90,6 @@
                 (mapconcat (lambda (f) (concat "- " (zk-abbrev-home-dir-from-path f)))
                            files "\n")
                 "\n"))
-      (insert "* Session started\n")
       (zk-ai-gemini--set-state 'ready))
     (switch-to-buffer-other-window buffer)
     buffer))
@@ -114,8 +135,7 @@ This function reads all files and use their content as the context."
     (user-error "Current buffer is not an active Gemini session"))
   (setq zk-ai-gemini--model-level level)
   (let ((model-name (zk-ai-gemini--get-model level)))
-    (goto-char (point-max))
-    (insert (format "\n* Model level set to ~%s~ (~%s~)\n" level model-name))
+    (zk-ai-gemini--log (format "Model level set to ~%s~ (~%s~)" level model-name) t)
     (message "Model level set to %s (%s)" level model-name)))
 
 (defun zk-ai-gemini-send (&optional prompt)
@@ -140,7 +160,7 @@ If PROMPT is nil, use the content after the last '* User' heading."
       ;; Extract from buffer
       (save-excursion
         (goto-char (point-max))
-        (if (re-search-backward "^\\* User\\s-*$" nil t)
+        (if (zk-ai-gemini--find-user-prompt-heading)
             (setq prompt (buffer-substring-no-properties (line-end-position) (point-max)))
           (user-error "Could not find '* User' heading")))
       (setq prompt (string-trim prompt))

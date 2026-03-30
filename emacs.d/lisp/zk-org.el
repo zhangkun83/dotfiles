@@ -185,6 +185,12 @@ of the region, while the mark is at the end."
     (set-mark end)
     (goto-char beg)))
 
+(defun zk-org-go-to-top-heading ()
+  "Go to the top-level heading that covers the current point."
+  (org-back-to-heading t)
+  (while (> (org-outline-level) 1)
+    (org-up-heading-all 1)))
+
 (defun zk-org-expand-drawer-at-point ()
   "Expand the Org mode drawer at point, even from the middle.  Do nothing
 if not in a drawer."
