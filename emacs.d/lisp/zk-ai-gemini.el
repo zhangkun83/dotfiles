@@ -15,6 +15,21 @@
 (defvar-local zk-ai-gemini--model-level 'fast
   "The model level for the current session (e.g., 'fast or 'thoughtful).")
 
+(defvar-local zk-ai-gemini--state 'ready
+  "The current state of the Gemini session ('ready or 'waiting-for-response).")
+
+(defun zk-ai-gemini--set-state (state)
+  "Set the session STATE and update buffer read-only status."
+  (unless (eq zk-ai-gemini--state state)
+    (setq zk-ai-gemini--state state)
+    (setq buffer-read-only (not (eq state 'ready)))
+    (goto-char (point-max))
+    (let ((inhibit-read-only t))
+      (insert (format "\n* State: %s\n" state))
+      (when (eq state 'ready)
+        (insert "\n* User\n")))
+    (message "Gemini state: %s" state)))
+
 (defvar zk-ai-gemini--session-counter 0
   "Counter for Gemini session buffers.")
 
@@ -48,13 +63,14 @@
       (setq-local org-adapt-indentation nil)
       (setq zk-ai-gemini--context-text context-text)
       (setq zk-ai-gemini--history nil)
+      (zk-ai-gemini--set-state 'ready)
       (zk-ai-gemini-set-model-level 'fast)
       (when files
         (insert "* Context Files\n"
                 (mapconcat (lambda (f) (concat "- " (zk-abbrev-home-dir-from-path f)))
                            files "\n")
                 "\n"))
-      (insert "* Session started\n\n* User\n"))
+      (insert "* Session started\n"))
     (switch-to-buffer-other-window buffer)
     buffer))
 
@@ -109,6 +125,8 @@ If PROMPT is nil, use the content after the last '* User' heading."
   (interactive)
   (unless (boundp 'zk-ai-gemini--history)
     (user-error "Current buffer is not an active Gemini session"))
+  (unless (eq zk-ai-gemini--state 'ready)
+    (user-error "Gemini is already waiting for a response (state: %s)" zk-ai-gemini--state))
 
   (let ((buffer (current-buffer))
         (context-text zk-ai-gemini--context-text)
@@ -118,10 +136,8 @@ If PROMPT is nil, use the content after the last '* User' heading."
         (progn
           (goto-char (point-max))
           (unless (bolp) (insert "\n"))
-          (unless (save-excursion (re-search-backward "^\\* User\\s-*$" nil t))
-            (insert "* User\n"))
           (goto-char (point-max))
-          (insert prompt "\n\n* Gemini\n"))
+          (insert prompt "\n"))
       ;; Extract from buffer
       (save-excursion
         (goto-char (point-max))
@@ -131,10 +147,10 @@ If PROMPT is nil, use the content after the last '* User' heading."
       (setq prompt (string-trim prompt))
       (if (string-empty-p prompt)
           (user-error "Prompt is empty")
-        (goto-char (point-max))
-        (insert "\n\n* Gemini\n")))
+        (goto-char (point-max))))
 
     (push `((role . "user") (parts . [((text . ,prompt))])) zk-ai-gemini--history)
+    (zk-ai-gemini--set-state 'waiting-for-response)
 
     (message "Gemini is thinking...")
     (request
@@ -159,13 +175,17 @@ If PROMPT is nil, use the content after the last '* User' heading."
                         (parts (alist-get 'parts content))
                         (text (alist-get 'text (elt parts 0))))
                    (with-current-buffer buffer
-                     (goto-char (point-max))
-                     (insert text "\n\n* User\n")
-                     (push `((role . "model") (parts . [((text . ,text))])) zk-ai-gemini--history))
+                     (let ((inhibit-read-only t))
+                       (goto-char (point-max))
+                       (insert "\n* Gemini\n" text "\n"))
+                     (push `((role . "model") (parts . [((text . ,text))])) zk-ai-gemini--history)
+                     (zk-ai-gemini--set-state 'ready))
                    (message "Gemini reply received."))))
      :error (cl-function
              (lambda (&key data response &allow-other-keys)
                (let ((status (request-response-status-code response)))
+                 (with-current-buffer buffer
+                   (zk-ai-gemini--set-state 'ready))
                  (message "Gemini request failed (Status %s): %s" 
                           status (or data "No details available"))))))))
 
