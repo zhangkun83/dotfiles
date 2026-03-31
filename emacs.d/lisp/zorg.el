@@ -712,7 +712,6 @@ that need to be sorted."
   "C-c C-o" 'zk-org-open-next-link
   "C-c n n" 'zk-zorg-goto-next-note-file
   "C-c n p" 'zk-zorg-goto-prev-note-file
-  "C-c z SPC" 'zk-zorg-ai-goto-original-input-pos
   "C-c z c" 'zk-zorg-ai-gemini-create-session
   "C-c z p" 'zk-zorg-ai-gemini-generate-prompt-for-current-heading
   "C-c z s" 'zk-zorg-ai-gemini-send-prompt
@@ -1552,27 +1551,6 @@ without refreshing it."
 
 ;; Generative AI (LLM) related
 
-(defconst zk-zorg-ai-input-file-name ".tmp-ai-input.org")
-(defconst zk-zorg-ai-output-file-name ".tmp-ai-output.org")
-
-(defun zk-zorg-ai-input-file-path ()
-  (concat (zk-zorg-directory) "/" zk-zorg-ai-input-file-name))
-
-(defun zk-zorg-ai-output-file-path ()
-  (concat (zk-zorg-directory) "/" zk-zorg-ai-output-file-name))
-
-(defvar zk-zorg-ai-original-input-pos nil
-  "The position as (buffer . pos) of the org entry that was last used by
-`zk-zorg-ai-use-current-entry-as-input'")
-
-(defun zk-zorg-ai-goto-original-input-pos ()
-  "Go to the position indicated by `zk-zorg-ai-original-input-pos'"
-  (interactive)
-  (unless zk-zorg-ai-original-input-pos
-    (user-error "`zk-zorg-ai-original-input-pos was' was not set"))
-  (switch-to-buffer (car zk-zorg-ai-original-input-pos))
-  (goto-char (cdr zk-zorg-ai-original-input-pos)))
-
 (defun zk-zorg-ai-gemini-create-session (&optional arg)
   "Create a session with Gemini AI for zorg tasks."
   (interactive)
@@ -1644,8 +1622,6 @@ action item.  The TODO entry shall:
 ")))
          (entry-content (save-mark-and-excursion
                           (org-back-to-heading)
-                          (setq zk-zorg-ai-original-input-pos
-                                (cons (current-buffer) (point)))
                           (org-mark-element)
                           (buffer-substring (region-beginning) (region-end)))))
     (setq zk-zorg-ai-gemini--prompt
