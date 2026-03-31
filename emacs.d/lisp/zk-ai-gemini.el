@@ -31,14 +31,15 @@ Returns t if found, nil otherwise. Suppresses errors during navigation."
   "Log MSG at the end of the session buffer.  If PRESERVE-USER-PROMPT is
 not nil, insert the log before '* User' if it exists."
   (let ((inhibit-read-only t))
-    (save-excursion
-      (goto-char (point-max))
-      (if (and preserve-user-prompt
-               (zk-ai-gemini--find-user-prompt-heading))
+    (goto-char (point-max))
+    (if (and preserve-user-prompt
+             (zk-ai-gemini--find-user-prompt-heading))
+        (progn
           (insert "* " msg "\n\n")
-        (goto-char (point-max))
-        (unless (bolp) (insert "\n"))
-        (insert "* " msg "\n")))))
+          (goto-char (point-max)))
+      (goto-char (point-max))
+      (unless (bolp) (insert "\n"))
+      (insert "* " msg "\n"))))
 
 (defun zk-ai-gemini--set-state (state)
   "Set the session STATE and update buffer read-only status."
@@ -48,7 +49,7 @@ not nil, insert the log before '* User' if it exists."
   (when (eq state 'ready)
     (let ((inhibit-read-only t))
       (goto-char (point-max))
-      (insert "\n* User\n")))
+      (zk-ai-gemini--log "User")))
   (message "Gemini state: %s" state))
 
 (defvar zk-ai-gemini--session-counter 0
@@ -186,27 +187,42 @@ If PROMPT is nil, use the content after the last '* User' heading."
      :parser (lambda () (decode-coding-string (buffer-string) 'utf-8))
      :success (cl-function
                (lambda (&key data &allow-other-keys)
-                 (let* ((json-object-type 'alist)
-                        (response-data (json-read-from-string data))
-                        (candidates (alist-get 'candidates response-data))
-                        (first-candidate (elt candidates 0))
-                        (content (alist-get 'content first-candidate))
-                        (parts (alist-get 'parts content))
-                        (text (alist-get 'text (elt parts 0))))
-                   (with-current-buffer buffer
-                     (let ((inhibit-read-only t))
-                       (goto-char (point-max))
-                       (insert "\n* Gemini\n" text "\n"))
-                     (push `((role . "model") (parts . [((text . ,text))])) zk-ai-gemini--history)
-                     (zk-ai-gemini--set-state 'ready))
-                   (message "Gemini reply received."))))
+                 (with-current-buffer buffer
+                   (unless (eq zk-ai-gemini--state 'ready)
+                     (condition-case err
+                         (let* ((json-object-type 'alist)
+                                (response-data (json-read-from-string data))
+                                (candidates (alist-get 'candidates response-data))
+                                (first-candidate (elt candidates 0))
+                                (content (alist-get 'content first-candidate))
+                                (parts (alist-get 'parts content))
+                                (text (alist-get 'text (elt parts 0))))
+                           (let ((inhibit-read-only t))
+                             (goto-char (point-max))
+                             (zk-ai-gemini--log "Gemini")
+                             (insert text "\n")
+                             (message "Gemini reply received."))
+                           (push `((role . "model") (parts . [((text . ,text))])) zk-ai-gemini--history))
+                       (error
+                        (zk-ai-gemini--log "Error")
+                        (let ((inhibit-read-only t))
+                          (insert (format "%S\n" err)))))
+                     (zk-ai-gemini--set-state 'ready)))))
      :error (cl-function
              (lambda (&key data response &allow-other-keys)
-               (let ((status (request-response-status-code response)))
+               (let ((status (request-response-status-code response))
+                     (err (request-response-error-thrown response)))
                  (with-current-buffer buffer
-                   (zk-ai-gemini--set-state 'ready))
-                 (message "Gemini request failed (Status %s): %s" 
-                          status (or data "No details available"))))))))
+                   (unless (eq zk-ai-gemini--state 'ready)
+                     (goto-char (point-max))
+                     (zk-ai-gemini--log "Request failed")
+                     (let ((inhibit-read-only t))
+                       (insert (cond 
+                                (status (format "Status: %d\n" status))
+                                (err (format "Network Error: %S\n" err))
+                                (t "Unknown Error\n"))
+                               (when data (concat "\n" data "\n"))))
+                     (zk-ai-gemini--set-state 'ready)))))))))
 
 (defun zk-ai-gemini-start-session (&optional beg end)
   "Start a new Gemini session.
