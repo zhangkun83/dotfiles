@@ -238,19 +238,18 @@ Specifically, it adds a comma before lines starting with '*' or '#+'."
    content                     ; The source string
    t))                         ; fixedcase
 
-(defun zk-ai-gemini-start-session (&optional beg end)
+(defun zk-ai-gemini-start-session ()
   "Start a new Gemini session.
-If BEG and END are provided (e.g., when the region is active), use it as
-context and prompt for an initial user prompt.
-If BEG and END are nil, just create a new empty session."
-  (interactive (if (use-region-p)
-                   (list (region-beginning) (region-end))
-                 (list nil nil)))
-  (if (and beg end)
-      (let* ((region-content (buffer-substring-no-properties beg end))
+If the region is active, use it as context and prompt for an initial
+user prompt.  Otherwise, just create a new empty session.  Returns the
+session buffer."
+  (interactive)
+  (if (use-region-p)
+      (let* ((region-content (buffer-substring-no-properties
+                              (region-beginning) (region-end)))
              (src-buffer-mode major-mode)
-             (suffix (concat "region from " (buffer-name))))
-        (zk-ai-gemini-new-session suffix)
+             (suffix (concat "region from " (buffer-name)))
+             (session-buffer (zk-ai-gemini-new-session suffix)))
         (insert (concat "Consider the following input:\n"
                         "--- Begin of input ---\n"
                         (if (eq src-buffer-mode 'org-mode)
@@ -259,7 +258,8 @@ If BEG and END are nil, just create a new empty session."
                                   (zk-ai-gemini--escape-src-content region-content)
                                   "#+end_src"))
                         "\n--- End of input ---\n"))
-        (deactivate-mark))
+        (deactivate-mark)
+        session-buffer)
     (zk-ai-gemini-new-session)))
 
 (provide 'zk-ai-gemini)

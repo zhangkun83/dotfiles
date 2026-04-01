@@ -713,7 +713,7 @@ that need to be sorted."
   "C-c n n" 'zk-zorg-goto-next-note-file
   "C-c n p" 'zk-zorg-goto-prev-note-file
   "C-c z c" 'zk-zorg-ai-gemini-create-session
-  "C-c z p" 'zk-zorg-ai-gemini-generate-prompt-for-current-heading
+  "C-c z p" 'zk-zorg-ai-gemini-insert-prompt
   "C-c z s" 'zk-zorg-ai-gemini-send-prompt
   "C-c c" 'zk-org-clone-narrowed-buffer)
 
@@ -1564,20 +1564,19 @@ without refreshing it."
                         (last all-file-list used-num-files)))))
     (unless (file-exists-p instruction-file)
       (user-error "Instruction file not found: %s" instruction-file))
-    (let ((session-buffer (zk-ai-gemini-new-session zk-zorg-profile-name)))
+    (let ((session-buffer (zk-ai-gemini-start-session)))
       (with-current-buffer session-buffer
         (dolist (file file-list-for-context)
           (zk-ai-gemini-add-context-file file))
         (zk-ai-gemini-set-model-level 'thoughtful)))))
 
-(defvar zk-zorg-ai-gemini--prompt nil "The prompt to sent to the Gemini session")
 (defvar zk-zorg-ai-num-recent-notes-files-for-context 2)
 
-(defun zk-zorg-ai-gemini-generate-prompt-for-current-heading ()
-  "Generates a gemini-cli prompt for a selected task."
+(defun zk-zorg-ai-gemini-insert-prompt ()
+  "Insert a zorg prompt into the Gemini session."
   (interactive)
   (let* ((choice (read-char-choice
-                  "Generate prompt to: [s] sort notes; [t] generate TODO entries"
+                  "Insert a prompt to: [s] sort notes; [t] generate TODO entries"
                   '(?s ?t)))
          (prompt (cond ((eq choice ?s)
                         "Sort the given meeting notes entry using the following steps\n
@@ -1622,22 +1621,11 @@ action item.  The TODO entry shall:
    number of asterisks) as the meeting notes entry
 4. Be tagged according to the project and people associated with this
    TODO entry.
-")))
-         (entry-content (save-mark-and-excursion
-                          (org-back-to-heading)
-                          (org-mark-element)
-                          (buffer-substring (region-beginning) (region-end)))))
-    (setq zk-zorg-ai-gemini--prompt
-          (concat prompt "\n\nBelow is the meeting notes entry content:\n\n" entry-content))
-    (message "Prompt set")))
-
-(defun zk-zorg-ai-gemini-send-prompt ()
-  (interactive)
-  "Send the generated prompt to Gemini."
-  (unless zk-zorg-ai-gemini--prompt
-    (user-error "Prompt not set"))
-  (zk-ai-gemini-send zk-zorg-ai-gemini--prompt))
-
+"))))
+    (goto-char (point-max))
+    (insert "#+begin_src markdown\n"
+            prompt
+            "\n#+end_src")))
 
 ;; Allow tag completion input (bound to TAB (C-i)) in minibuffers.
 ;; enable-recursive-minibuffers is needed because
