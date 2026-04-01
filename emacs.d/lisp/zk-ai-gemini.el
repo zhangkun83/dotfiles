@@ -70,32 +70,6 @@ not nil, insert the log before '* User' if it exists."
         (cadr (split-string model-entry ":"))
       (error "Model level %s not found in %s" level config-file))))
 
-(defun zk-ai-gemini--create-session-buffer (context-text files &optional buffer-name-suffix)
-  "Helper to create and initialize a Gemini session buffer."
-  (let* ((buf-name (generate-new-buffer-name
-                    (format "*zk/ai*<%d> %s"
-                            (cl-incf zk-ai-gemini--session-counter)
-                            (or buffer-name-suffix "session"))))
-         (buffer (get-buffer-create buf-name)))
-    (with-current-buffer buffer
-      (org-mode)
-      (let ((map (copy-keymap (current-local-map))))
-        (define-key map (kbd "C-j") #'zk-ai-gemini-send)
-        (use-local-map map))
-      (setq-local org-adapt-indentation nil)
-      (setq zk-ai-gemini--context-text context-text)
-      (setq zk-ai-gemini--history nil)
-      (zk-ai-gemini-set-model-level 'fast)
-      (when files
-        (insert "* Context Files\n"
-                (mapconcat (lambda (f) (concat "- " (zk-abbrev-home-dir-from-path f)))
-                           files "\n")
-                "\n"))
-      (zk-ai-gemini--set-state 'ready))
-    (switch-to-buffer-other-window buffer)
-    buffer))
-
-
 (defun zk-ai-gemini--format-files-context (files)
   "Read the content of FILES and format them as a single context string."
   (mapconcat
@@ -126,7 +100,27 @@ This function reads all files and use their content as the context."
       (setq context-text
             (concat
              "\n**IMPORTANT**: " additional-system-instruction "\n" context-text)))
-    (zk-ai-gemini--create-session-buffer context-text files buffer-name-suffix)))
+    (let* ((buf-name (generate-new-buffer-name
+                      (format "*zk/ai*<%d> %s"
+                              (cl-incf zk-ai-gemini--session-counter)
+                              (or buffer-name-suffix "session"))))
+           (buffer (get-buffer-create buf-name)))
+      (with-current-buffer buffer
+        (org-mode)
+        (let ((map (copy-keymap (current-local-map))))
+          (define-key map (kbd "C-j") #'zk-ai-gemini-send)
+          (use-local-map map))
+        (setq-local org-adapt-indentation nil)
+        (setq zk-ai-gemini--context-text context-text)
+        (setq zk-ai-gemini--history nil)
+        (zk-ai-gemini-set-model-level 'fast)
+        (when files
+          (insert "* Context Files\n"
+                  (mapconcat (lambda (f) (concat "- " (zk-abbrev-home-dir-from-path f)))
+                             files "\n")
+                  "\n"))
+        (zk-ai-gemini--set-state 'ready))
+      (switch-to-buffer-other-window buffer))))
 
 (defun zk-ai-gemini-set-model-level (level)
   "Set the model level for the current Gemini session."
