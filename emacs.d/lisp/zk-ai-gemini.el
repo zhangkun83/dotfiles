@@ -10,6 +10,9 @@
 (defvar-local zk-ai-gemini--context-text nil
   "The full context text.")
 
+(defvar-local zk-ai-gemini--context-files nil
+  "List of files currently in the context.")
+
 (defvar-local zk-ai-gemini--history nil
   "The conversation history for the current session buffer.")
 
@@ -83,19 +86,18 @@ not nil, insert the log before '* User' if it exists."
    "\n"))
 
 
-(defun zk-ai-gemini-new-session (files &optional buffer-name-suffix)
-  "Create a new Gemini session using FILES as context.
-This function reads all files and use their content as the context."
-  (let ((context-text (zk-ai-gemini--format-files-context files)))
-    (setq context-text
-          (concat
-           "\nResponse format requirements:
+(defun zk-ai-gemini-new-session (&optional buffer-name-suffix)
+  "Create a new Gemini session.
+This function initializes a new session with default system instructions."
+  (let ((context-text
+         (concat
+          "\nResponse format requirements:
 - Use org-mode format for all your responses. Unnumbered lists in the text body uses `-` or `+` as the bullet character.
 - Use ** for first-level heading, *** for second-level heading, and so on.
 - Avoid using single `*` for bullet character.
 - Use ~ instead of ` to quote inline code.
 - Use '#+begin_src text' and '#end_src' instead of ``` to quote multi-line code
-- Wrap text using width of 80" context-text))
+- Wrap text using width of 80\n")))
     (let* ((buf-name (generate-new-buffer-name
                       (format "*zk/ai*<%d> %s"
                               (cl-incf zk-ai-gemini--session-counter)
@@ -109,14 +111,24 @@ This function reads all files and use their content as the context."
         (setq-local org-adapt-indentation nil)
         (setq zk-ai-gemini--context-text context-text)
         (setq zk-ai-gemini--history nil)
+        (setq zk-ai-gemini--context-files nil)
         (zk-ai-gemini-set-model-level 'fast)
-        (when files
-          (insert "* Context Files\n"
-                  (mapconcat (lambda (f) (concat "- " (zk-abbrev-home-dir-from-path f)))
-                             files "\n")
-                  "\n"))
         (zk-ai-gemini--set-state 'ready))
       (switch-to-buffer-other-window buffer))))
+
+(defun zk-ai-gemini-add-context-file (file)
+  "Add FILE to the current Gemini session context.
+Do nothing if the file is already in the context."
+  (interactive "fAdd context file: ")
+  (unless (boundp 'zk-ai-gemini--context-files)
+    (user-error "Current buffer is not an active Gemini session"))
+  (setq file (expand-file-name file))
+  (if (member file zk-ai-gemini--context-files)
+      (message "File %s is already in context" (zk-abbrev-home-dir-from-path file))
+    (let ((file-context (zk-ai-gemini--format-files-context (list file))))
+      (setq zk-ai-gemini--context-text (concat zk-ai-gemini--context-text "\n" file-context))
+      (push file zk-ai-gemini--context-files)
+      (zk-ai-gemini--log (format "Added context file: ~%s~" (zk-abbrev-home-dir-from-path file)) t))))
 
 (defun zk-ai-gemini-set-model-level (level)
   "Set the model level for the current Gemini session."
@@ -229,9 +241,9 @@ If BEG and END are nil, just create a new empty session."
              (suffix (if (> (length user-prompt) 80)
                          (substring user-prompt 0 80)
                        user-prompt)))
-        (zk-ai-gemini-new-session nil suffix)
+        (zk-ai-gemini-new-session suffix)
         (zk-ai-gemini-send full-prompt))
-    (zk-ai-gemini-new-session nil "new session")))
+    (zk-ai-gemini-new-session "new session")))
 
 (provide 'zk-ai-gemini)
 ;;; zk-ai-gemini.el ends here
