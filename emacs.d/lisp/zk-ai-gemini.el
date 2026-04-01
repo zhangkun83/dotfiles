@@ -100,9 +100,10 @@ This function initializes a new session with default system instructions."
 - Use '#+begin_src text' and '#end_src' instead of ``` to quote multi-line code
 - Wrap text using width of 80\n")))
     (let* ((buf-name (generate-new-buffer-name
-                      (format "*zk/ai*<%d> %s"
-                              (cl-incf zk-ai-gemini--session-counter)
-                              (or buffer-name-suffix "session"))))
+                      (string-trim
+                       (format "*zk/ai*<%d> %s"
+                               (cl-incf zk-ai-gemini--session-counter)
+                               (or buffer-name-suffix "")))))
            (buffer (get-buffer-create buf-name)))
       (with-current-buffer buffer
         (org-mode)
@@ -236,15 +237,14 @@ If BEG and END are nil, just create a new empty session."
                    (list (region-beginning) (region-end))
                  (list nil nil)))
   (if (and beg end)
-      (let* ((user-prompt (read-string "Prompt: "))
-             (region-content (buffer-substring-no-properties beg end))
-             (full-prompt (concat user-prompt "\n*Input*:\n" region-content))
-             (suffix (if (> (length user-prompt) 80)
-                         (substring user-prompt 0 80)
-                       user-prompt)))
+      (let* ((region-content (buffer-substring-no-properties beg end))
+             (suffix (concat "region from " (buffer-name))))
         (zk-ai-gemini-new-session suffix)
-        (zk-ai-gemini-send full-prompt))
-    (zk-ai-gemini-new-session "new session")))
+        (insert (concat "Consider the following input:\n"
+                        "--- Begin of input ---\n"
+                        region-content
+                        "\n--- End of input ---\n")))
+    (zk-ai-gemini-new-session)))
 
 (provide 'zk-ai-gemini)
 ;;; zk-ai-gemini.el ends here
