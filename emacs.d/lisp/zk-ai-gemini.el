@@ -38,7 +38,7 @@ not nil, insert the log before '* User' if it exists."
     (if (and preserve-user-prompt
              (zk-ai-gemini--find-user-prompt-heading))
         (progn
-          (insert "* " msg "\n\n")
+          (insert "* " msg "\n")
           (goto-char (point-max)))
       (goto-char (point-max))
       (unless (bolp) (insert "\n"))
@@ -96,6 +96,7 @@ This function initializes a new session with default system instructions."
 - Use ** for first-level heading, *** for second-level heading, and so on.
 - Avoid using single `*` for bullet character.
 - Use ~ instead of ` to quote inline code.
+- Use single * for bold text.
 - Use '#+begin_src text' and '#end_src' instead of ``` to quote multi-line code
 - Wrap text using width of 80\n")))
     (let* ((buf-name (generate-new-buffer-name
