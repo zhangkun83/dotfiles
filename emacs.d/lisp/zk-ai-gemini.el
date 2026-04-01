@@ -228,6 +228,16 @@ If PROMPT is nil, use the content after the last '* User' heading."
                                (when data (concat "\n" data "\n"))))
                      (zk-ai-gemini--set-state 'ready)))))))))
 
+
+(defun zk-ai-gemini--escape-src-content (content)
+  "Escape CONTENT so it can be safely placed inside an Org-mode src block.
+Specifically, it adds a comma before lines starting with '*' or '#+'."  
+  (replace-regexp-in-string 
+   "^[ \t]*\\(?:\\*\\|#\\+\\)" ; The pattern
+   ",\\&"                      ; The replacement (& means 'the whole match')
+   content                     ; The source string
+   t))                         ; fixedcase
+
 (defun zk-ai-gemini-start-session (&optional beg end)
   "Start a new Gemini session.
 If BEG and END are provided (e.g., when the region is active), use it as
@@ -238,12 +248,18 @@ If BEG and END are nil, just create a new empty session."
                  (list nil nil)))
   (if (and beg end)
       (let* ((region-content (buffer-substring-no-properties beg end))
+             (src-buffer-mode major-mode)
              (suffix (concat "region from " (buffer-name))))
         (zk-ai-gemini-new-session suffix)
         (insert (concat "Consider the following input:\n"
                         "--- Begin of input ---\n"
-                        region-content
-                        "\n--- End of input ---\n")))
+                        (if (eq src-buffer-mode 'org-mode)
+                            region-content
+                          (concat "#+begin_src text\n"
+                                  (zk-ai-gemini--escape-src-content region-content)
+                                  "#+end_src"))
+                        "\n--- End of input ---\n"))
+        (deactivate-mark))
     (zk-ai-gemini-new-session)))
 
 (provide 'zk-ai-gemini)
