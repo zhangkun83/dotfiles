@@ -83,7 +83,7 @@ not nil, insert the log before '* User' if it exists."
    "\n"))
 
 
-(defun zk-ai-gemini-new-session (files &optional additional-system-instruction buffer-name-suffix)
+(defun zk-ai-gemini-new-session (files &optional buffer-name-suffix)
   "Create a new Gemini session using FILES as context.
 This function reads all files and use their content as the context."
   (let ((context-text (zk-ai-gemini--format-files-context files)))
@@ -96,10 +96,6 @@ This function reads all files and use their content as the context."
 - Use ~ instead of ` to quote inline code.
 - Use '#+begin_src text' and '#end_src' instead of ``` to quote multi-line code
 - Wrap text using width of 80" context-text))
-    (when additional-system-instruction
-      (setq context-text
-            (concat
-             "\n**IMPORTANT**: " additional-system-instruction "\n" context-text)))
     (let* ((buf-name (generate-new-buffer-name
                       (format "*zk/ai*<%d> %s"
                               (cl-incf zk-ai-gemini--session-counter)
@@ -233,9 +229,9 @@ If BEG and END are nil, just create a new empty session."
              (suffix (if (> (length user-prompt) 80)
                          (substring user-prompt 0 80)
                        user-prompt)))
-        (zk-ai-gemini-new-session nil nil suffix)
+        (zk-ai-gemini-new-session nil suffix)
         (zk-ai-gemini-send full-prompt))
-    (zk-ai-gemini-new-session nil nil "new session")))
+    (zk-ai-gemini-new-session nil "new session")))
 
 (provide 'zk-ai-gemini)
 ;;; zk-ai-gemini.el ends here
