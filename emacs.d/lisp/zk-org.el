@@ -191,6 +191,19 @@ of the region, while the mark is at the end."
   (while (> (org-outline-level) 1)
     (org-up-heading-all 1)))
 
+
+(defun zk-org-pack-url-at-point ()
+  (interactive)
+  "Replace the URL at point with a link with a short label."
+  (let ((url-bounds (bounds-of-thing-at-point 'url)))
+    (unless url-bounds (user-error "No URL at point"))
+    (let ((url-start (car url-bounds))
+          (url-end (cdr url-bounds)))
+      (or (replace-regexp-in-region
+           "https?://docs\\.google\\.com/.*"
+           "([[\\&][doc]])" url-start url-end)
+          (message "Don't know how to pack this URL.")))))
+
 (defun zk-org-expand-drawer-at-point ()
   "Expand the Org mode drawer at point, even from the middle.  Do nothing
 if not in a drawer."

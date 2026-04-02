@@ -606,7 +606,7 @@ apps are not started from a shell."
 
 (defun zk-shorten-url-at-point ()
   (interactive)
-  "Returns a shortened version of the url at point."
+  "Replace the URL at point with a shortened version."
   (let ((url-bounds (bounds-of-thing-at-point 'url)))
     (unless url-bounds (user-error "No URL at point"))
     (let ((url-start (car url-bounds))

@@ -9,6 +9,7 @@
 (require 'chinese-punct)
 (require 'htmlize)
 (require 'zk-ai-gemini)
+(require 'zk-org)
 
 ;; Disable tool-bar
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
@@ -219,6 +220,10 @@
 
 (advice-add 'recenter-top-bottom :after #'zk-highlight-current-line-momentarily)
 
+(add-hook 'org-mode-hook
+          (lambda()
+            (local-set-key (kbd "C-c u p") 'zk-org-pack-url-at-point)))
+
 (add-hook 'shell-mode-hook
           (lambda()
             ;; Make dots part of the word so full paths can be expanded by M+/
@@ -249,7 +254,6 @@
 (add-hook 'dired-mode-hook
           (lambda() (dired-hide-details-mode 1)))
 
-(require 'zk-org)
 (when (display-graphic-p)
   (setq leuven-scale-outline-headlines nil
         leuven-scale-org-agenda-structure nil)
