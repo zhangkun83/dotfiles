@@ -245,8 +245,10 @@ user prompt.  Otherwise, just create a new empty session.  Returns the
 session buffer."
   (interactive)
   (if (use-region-p)
-      (let* ((region-content (buffer-substring-no-properties
-                              (region-beginning) (region-end)))
+      (let* ((region-content (prog1
+                                 (buffer-substring-no-properties
+                                  (region-beginning) (region-end))
+                               (deactivate-mark)))
              (src-buffer-mode major-mode)
              (suffix (concat "region from " (buffer-name)))
              (session-buffer (zk-ai-gemini-new-session suffix)))
@@ -258,7 +260,6 @@ session buffer."
                                   (zk-ai-gemini--escape-src-content region-content)
                                   "#+end_src"))
                         "\n--- End of input ---\n"))
-        (deactivate-mark)
         session-buffer)
     (zk-ai-gemini-new-session)))
 
