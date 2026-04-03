@@ -216,6 +216,48 @@ for scratch.el"
                             link)))
     reference))
 
+(defun zk-zorg-copy-region-to-backref-logbook (start end)
+  (interactive "r")
+  "Copy the content of the current active region to the back reference
+entry of this region.  The back reference entry is the first link right
+before the beginning of the region.  The timestamp of the current
+heading is used as the timestamp of the log entry."
+  (unless (use-region-p)
+    (user-error "No active region."))
+  (let ((heading-pos nil)
+        (content nil)
+        (date nil)
+        (link-pos nil))
+    (save-mark-and-excursion
+      (org-back-to-heading t)
+      (setq heading-pos (point)
+            content (buffer-substring-no-properties start end)
+            date (zk-zorg-extract-date
+                  (substring-no-properties (org-get-heading t t t t))))
+      (unless date (user-error "Heading doesn't have timestamp"))
+      ;; Find the last backref in the area between the heading and START
+      (goto-char start)
+      (unless (re-search-backward
+               "\\[\\[file:\\([^:.]+\\.org\\)::#\\([a-z0-9_]+\\)\\]\\["
+               heading-pos
+               t)
+        (user-error "No usable link found before the region."))
+      (cl-assert (zk-org-link-at-point-p) t)
+      (setq link-pos (point)))
+    (deactivate-mark)
+    ;; Follow the link
+    (goto-char link-pos)
+    (zk-org-open-next-link)
+    ;; Insert the log
+    (goto-char (org-log-beginning t))
+    (insert "- Note taken on [" date "] \\\\\n")
+    ;; Add two spaces in front of each line because the log entry is
+    ;; a list item.
+    (insert (replace-regexp-in-string "^" "  " (string-trim content))
+            "\n")
+    ;; Expand the LOGBOOK drawer if it's folded
+    (org-show-context)))
+
 (defun zk-zorg-copy-region-with-link-to-heading (&optional arg)
   "Copy the content of the current active region, with a
 link to the current headline.  By default the content of the headline
@@ -419,8 +461,7 @@ zk-zorg-profile-name so that it can be used for scratch.el"
         (buffer (current-buffer)))
     (save-excursion
       (org-back-to-heading)
-      (let* ((headline (org-element-at-point))
-             (headline-text (substring-no-properties (org-get-heading t t t t)))
+      (let* ((headline-text (substring-no-properties (org-get-heading t t t t)))
              (custom-id (zk-zorg-set-customid-at-point))
              (link (zk-org-generate-link custom-id with-profile-name)))
         (setq return-value (list link (zk-org-neutralize-timestamp headline-text)))))
@@ -443,10 +484,10 @@ is not there."
 
 (defun zk-org-neutralize-timestamp (text)
   "Convert org timestemps like \"[2023-07-27 Thu 14:58]\" or
-\"<2023-07-27 Thu 14:58>\" to \"(2023-07-27)\" which is not parsed by
+\"<2023-07-27 Thu 14:58>\" to \"(2023-07-27 Thu)\" which is not parsed by
 org-mode."
   (let ((result (copy-sequence text))
-        (date-pattern "\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)"))
+        (date-pattern "\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\(?: [A-Z][a-z][a-z]\\)?\\)"))
     (setq result (replace-regexp-in-string
                   (concat "\\[" date-pattern "[^]]*\\]") "(\\1)" result t))
     (setq result (replace-regexp-in-string
@@ -456,8 +497,8 @@ org-mode."
 (defun zk-zorg-extract-date (text)
   "Find the first timestamp (supported formats \"<YYYY-MM-DD ...>\",
 \"[YYYY-MM-DD ...]\", \"(YYYY-MM-DD ...)\") from TEXT, normaliz it
-to a date string in the form of \"YYYY-MM-DD\"."
-  (let ((date-pattern "\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\)"))
+to a date string in the form of \"YYYY-MM-DD\" or \"YYYY-MM-DD Www\"."
+  (let ((date-pattern "\\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\\(?: [A-Z][a-z][a-z]\\)?\\)"))
     (when (or
            (string-match (concat "\\[" date-pattern "[^]]*\\]") text)
            (string-match (concat "<" date-pattern "[^>]*>") text)
@@ -697,6 +738,7 @@ that need to be sorted."
   "C-c l l" 'zk-org-copy-external-link
   "C-c l r" 'zk-org-copy-external-reference
   "C-c l w" 'zk-zorg-copy-region-with-link-to-heading
+  "C-c l b" 'zk-zorg-copy-region-to-backref-logbook
   "C-c l h" 'zk-zorg-retr-command
   "C-c l m" 'zk-zorg-retrs-for-tags-command
   "C-c l o" 'zk-zorg-retr-for-next-link-command
