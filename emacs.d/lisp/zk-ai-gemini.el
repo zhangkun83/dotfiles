@@ -42,18 +42,19 @@ not nil, insert the log before '* User' if it exists."
           (goto-char (point-max)))
       (goto-char (point-max))
       (unless (bolp) (insert "\n"))
-      (insert "* " msg "\n"))))
+      (insert "* " msg "\n"))
+    (message "%s" msg)))
 
 (defun zk-ai-gemini--set-state (state)
   "Set the session STATE and update buffer read-only status."
   (setq zk-ai-gemini--state state)
   (setq buffer-read-only (not (eq state 'ready)))
-  (zk-ai-gemini--log (format "State: ~%s~" state))
+  (zk-ai-gemini--log (format "Gemini state: ~%s~" state))
   (when (eq state 'ready)
     (let ((inhibit-read-only t))
       (goto-char (point-max))
-      (zk-ai-gemini--log "User")))
-  (message "Gemini state: %s" state))
+      (unless (bolp) (insert "\n"))
+      (insert "* User\n"))))
 
 (defvar zk-ai-gemini--session-counter 0
   "Counter for Gemini session buffers.")
@@ -101,7 +102,7 @@ This function initializes a new session with default system instructions."
 - Wrap text using width of 80\n")))
     (let* ((buf-name (generate-new-buffer-name
                       (string-trim
-                       (format "*zk/ai*<%d> %s"
+                       (format "*zk/gemini*<%d> %s"
                                (cl-incf zk-ai-gemini--session-counter)
                                (or buffer-name-suffix "")))))
            (buffer (get-buffer-create buf-name)))
@@ -140,8 +141,7 @@ Do nothing if the file is already in the context."
     (user-error "Current buffer is not an active Gemini session"))
   (setq zk-ai-gemini--model-level level)
   (let ((model-name (zk-ai-gemini--get-model level)))
-    (zk-ai-gemini--log (format "Model level set to ~%s~ (~%s~)" level model-name) t)
-    (message "Model level set to %s (%s)" level model-name)))
+    (zk-ai-gemini--log (format "Model level set to ~%s~ (~%s~)" level model-name) t)))
 
 (defun zk-ai-gemini-send (&optional prompt)
   "Send PROMPT to the Gemini session in the current buffer.
@@ -176,7 +176,6 @@ If PROMPT is nil, use the content after the last '* User' heading."
     (push `((role . "user") (parts . [((text . ,prompt))])) zk-ai-gemini--history)
     (zk-ai-gemini--set-state 'waiting-for-response)
 
-    (message "Gemini is thinking...")
     (request
      "http://localhost:1880/generateContent"
      :type "POST"
@@ -193,25 +192,27 @@ If PROMPT is nil, use the content after the last '* User' heading."
                (lambda (&key data &allow-other-keys)
                  (with-current-buffer buffer
                    (unless (eq zk-ai-gemini--state 'ready)
-                     (condition-case err
-                         (let* ((json-object-type 'alist)
-                                (response-data (json-read-from-string data))
-                                (candidates (alist-get 'candidates response-data))
-                                (first-candidate (elt candidates 0))
-                                (content (alist-get 'content first-candidate))
-                                (parts (alist-get 'parts content))
-                                (text (alist-get 'text (elt parts 0))))
-                           (let ((inhibit-read-only t))
+                     (let ((answer-start-pos nil)
+                           (inhibit-read-only t))
+                       (condition-case err
+                           (let* ((json-object-type 'alist)
+                                  (response-data (json-read-from-string data))
+                                  (candidates (alist-get 'candidates response-data))
+                                  (first-candidate (elt candidates 0))
+                                  (content (alist-get 'content first-candidate))
+                                  (parts (alist-get 'parts content))
+                                  (text (alist-get 'text (elt parts 0))))
                              (goto-char (point-max))
-                             (zk-ai-gemini--log "Gemini")
+                             (unless (bolp) (insert "\n"))
+                             (insert "* Gemini\n")
+                             (setq answer-start-pos (point))
                              (insert text "\n")
-                             (message "Gemini reply received."))
-                           (push `((role . "model") (parts . [((text . ,text))])) zk-ai-gemini--history))
-                       (error
-                        (zk-ai-gemini--log "Error")
-                        (let ((inhibit-read-only t))
-                          (insert (format "%S\n" err)))))
-                     (zk-ai-gemini--set-state 'ready)))))
+                             (push `((role . "model") (parts . [((text . ,text))])) zk-ai-gemini--history))
+                         (error
+                          (zk-ai-gemini--log "Error")
+                          (insert (format "%S\n" err))))
+                       (zk-ai-gemini--set-state 'ready)
+                       (goto-char answer-start-pos))))))
      :error (cl-function
              (lambda (&key data response &allow-other-keys)
                (let ((status (request-response-status-code response))
@@ -220,13 +221,15 @@ If PROMPT is nil, use the content after the last '* User' heading."
                    (unless (eq zk-ai-gemini--state 'ready)
                      (goto-char (point-max))
                      (zk-ai-gemini--log "Request failed")
-                     (let ((inhibit-read-only t))
+                     (let ((inhibit-read-only t)
+                           (answer-start-pos (point)))
                        (insert (cond 
                                 (status (format "Status: %d\n" status))
                                 (err (format "Network Error: %S\n" err))
                                 (t "Unknown Error\n"))
-                               (when data (concat "\n" data "\n"))))
-                     (zk-ai-gemini--set-state 'ready)))))))))
+                               (when data (concat "\n" data "\n")))
+                       (zk-ai-gemini--set-state 'ready)
+                       (goto-char answer-start-pos))))))))))
 
 
 (defun zk-ai-gemini--escape-src-content (content)
