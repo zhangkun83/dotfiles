@@ -200,7 +200,10 @@ of the region, while the mark is at the end."
     (let ((url-start (car url-bounds))
           (url-end (cdr url-bounds)))
       (or (replace-regexp-in-region
-           "https?://docs\\.google\\.com/.*"
+           "https?://docs\\.google\\.com/spreadsheets/.*"
+           "([[\\&][sheet]])" url-start url-end)
+          (replace-regexp-in-region
+           "https?://docs\\.google\\.com/document/.*"
            "([[\\&][doc]])" url-start url-end)
           (message "Don't know how to pack this URL.")))))
 
