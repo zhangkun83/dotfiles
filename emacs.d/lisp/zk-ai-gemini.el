@@ -7,8 +7,8 @@
 (require 'cl-lib)
 (require 'subr-x)
 
-(defvar-local zk-ai-gemini--context-text nil
-  "The full context text.")
+(defvar-local zk-ai-gemini--sys-instruct nil
+  "The system instructions.")
 
 (defvar-local zk-ai-gemini--context-files nil
   "List of files currently in the context.")
@@ -90,7 +90,7 @@ not nil, insert the log before '* User' if it exists."
 (defun zk-ai-gemini-new-session (&optional buffer-name-suffix)
   "Create a new Gemini session.
 This function initializes a new session with default system instructions."
-  (let ((context-text
+  (let ((sys-instruct
          (concat
           "\nResponse format requirements:
 - Use org-mode format for all your responses. Unnumbered lists in the text body uses `-` or `+` as the bullet character.
@@ -112,7 +112,7 @@ This function initializes a new session with default system instructions."
           (define-key map (kbd "C-j") #'zk-ai-gemini-send)
           (use-local-map map))
         (setq-local org-adapt-indentation nil)
-        (setq zk-ai-gemini--context-text context-text)
+        (setq zk-ai-gemini--sys-instruct sys-instruct)
         (setq zk-ai-gemini--history nil)
         (setq zk-ai-gemini--context-files nil)
         (zk-ai-gemini-set-model-level 'fast)
@@ -129,7 +129,7 @@ Do nothing if the file is already in the context."
   (if (member file zk-ai-gemini--context-files)
       (message "File %s is already in context" (zk-abbrev-home-dir-from-path file))
     (let ((file-context (zk-ai-gemini--format-files-context (list file))))
-      (setq zk-ai-gemini--context-text (concat zk-ai-gemini--context-text "\n" file-context))
+      (setq zk-ai-gemini--sys-instruct (concat zk-ai-gemini--sys-instruct "\n" file-context))
       (push file zk-ai-gemini--context-files)
       (zk-ai-gemini--log (format "Added context file: ~%s~" (zk-abbrev-home-dir-from-path file)) t))))
 
@@ -153,7 +153,7 @@ If PROMPT is nil, use the content after the last '* User' heading."
     (user-error "Gemini is already waiting for a response (state: %s)" zk-ai-gemini--state))
 
   (let ((buffer (current-buffer))
-        (context-text zk-ai-gemini--context-text)
+        (sys-instruct zk-ai-gemini--sys-instruct)
         (model-name (zk-ai-gemini--get-model zk-ai-gemini--model-level)))
     ;; Update UI and history
     (if prompt
@@ -184,7 +184,7 @@ If PROMPT is nil, use the content after the last '* User' heading."
             (json-encode
              (let ((payload `((model . ,model-name)
                               (contents . ,(vconcat (reverse zk-ai-gemini--history))))))
-               (setq payload (append `((system_instruction . ((parts . [((text . ,context-text))])))) payload))
+               (setq payload (append `((system_instruction . ((parts . [((text . ,sys-instruct))])))) payload))
                payload))
             'utf-8)
      :parser (lambda () (decode-coding-string (buffer-string) 'utf-8))
