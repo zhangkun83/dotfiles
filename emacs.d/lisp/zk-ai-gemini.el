@@ -10,8 +10,8 @@
 (defvar-local zk-ai-gemini--sys-instruct nil
   "The system instructions.")
 
-(defvar-local zk-ai-gemini--context-files nil
-  "List of files currently in the context.")
+(defvar-local zk-ai-gemini--context-content ""
+  "The accumulated content of context files to be prepended to the next prompt.")
 
 (defvar-local zk-ai-gemini--history nil
   "The conversation history for the current session buffer.")
@@ -78,11 +78,13 @@ not nil, insert the log before '* User' if it exists."
   "Read the content of FILES and format them as a single context string."
   (mapconcat
    (lambda (file)
-     (format "--- File: %s ---\n%s\n"
-             (zk-abbrev-home-dir-from-path file)
+     (let ((short-file-name (zk-abbrev-home-dir-from-path file)))
+       (format "--- Beginning of File: %s ---\n%s\n--- End of File: %s ---\n"
+             short-file-name
              (with-temp-buffer
                (insert-file-contents file)
-               (buffer-string))))
+               (buffer-string))
+             short-file-name)))
    files
    "\n"))
 
@@ -114,24 +116,32 @@ This function initializes a new session with default system instructions."
         (setq-local org-adapt-indentation nil)
         (setq zk-ai-gemini--sys-instruct sys-instruct)
         (setq zk-ai-gemini--history nil)
-        (setq zk-ai-gemini--context-files nil)
+        (setq zk-ai-gemini--context-content "")
         (zk-ai-gemini-set-model-level 'fast)
         (zk-ai-gemini--set-state 'ready))
       (switch-to-buffer-other-window buffer))))
 
 (defun zk-ai-gemini-add-context-file (file)
-  "Add FILE to the current Gemini session context.
-Do nothing if the file is already in the context."
+  "Add FILE to the next request of the current Gemini session context."
   (interactive "fAdd context file: ")
-  (unless (boundp 'zk-ai-gemini--context-files)
+  (unless (boundp 'zk-ai-gemini--context-content)
     (user-error "Current buffer is not an active Gemini session"))
   (setq file (expand-file-name file))
-  (if (member file zk-ai-gemini--context-files)
-      (message "File %s is already in context" (zk-abbrev-home-dir-from-path file))
-    (let ((file-context (zk-ai-gemini--format-files-context (list file))))
-      (setq zk-ai-gemini--sys-instruct (concat zk-ai-gemini--sys-instruct "\n" file-context))
-      (push file zk-ai-gemini--context-files)
-      (zk-ai-gemini--log (format "Added context file: ~%s~" (zk-abbrev-home-dir-from-path file)) t))))
+  (let ((file-context (zk-ai-gemini--format-files-context (list file))))
+    (setq zk-ai-gemini--context-content (concat zk-ai-gemini--context-content "\n" file-context))
+    (zk-ai-gemini--log (format "Added context file: ~%s~" (zk-abbrev-home-dir-from-path file)) t)))
+
+(defun zk-ai-gemini-add-sys-instruct-file (file)
+  "Add a system instructions FILE to the current Gemini session context."
+  (interactive "fAdd system instructions file: ")
+  (unless (boundp 'zk-ai-gemini--sys-instruct)
+    (user-error "Current buffer is not an active Gemini session"))
+  (setq file (expand-file-name file))
+  (let ((file-context (with-temp-buffer
+                        (insert-file-contents file)
+                        (buffer-string))))
+    (setq zk-ai-gemini--sys-instruct (concat zk-ai-gemini--sys-instruct "\n" file-context))
+    (zk-ai-gemini--log (format "Added system instructions file: ~%s~" (zk-abbrev-home-dir-from-path file)) t)))
 
 (defun zk-ai-gemini-set-model-level (level)
   "Set the model level for the current Gemini session."
@@ -172,6 +182,13 @@ If PROMPT is nil, use the content after the last '* User' heading."
       (if (string-empty-p prompt)
           (user-error "Prompt is empty")
         (goto-char (point-max))))
+
+    (unless (string-empty-p zk-ai-gemini--context-content)
+      (setq prompt (concat
+                    "Using the following files as reference:\n"
+                    (string-trim zk-ai-gemini--context-content) "\n"
+                    prompt))
+      (setq zk-ai-gemini--context-content ""))
 
     (push `((role . "user") (parts . [((text . ,prompt))])) zk-ai-gemini--history)
     (zk-ai-gemini--set-state 'waiting-for-response)

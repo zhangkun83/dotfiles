@@ -1602,15 +1602,15 @@ without refreshing it."
          (used-num-files (or arg zk-zorg-ai-num-recent-notes-files-for-context))
          (zorg-dir (zk-zorg-directory))
          (file-list-for-context
-          (cons instruction-file
-                (mapcar (lambda (f) (expand-file-name f zorg-dir))
-                        (last all-file-list used-num-files)))))
+          (mapcar (lambda (f) (expand-file-name f zorg-dir))
+                  (last all-file-list used-num-files))))
     (unless (file-exists-p instruction-file)
       (user-error "Instruction file not found: %s" instruction-file))
     (let ((session-buffer (zk-ai-gemini-start-session)))
       (with-current-buffer session-buffer
         (dolist (file file-list-for-context)
           (zk-ai-gemini-add-context-file file))
+        (zk-ai-gemini-add-sys-instruct-file instruction-file)
         (zk-ai-gemini-set-model-level 'thoughtful)))))
 
 (defvar zk-zorg-ai-num-recent-notes-files-for-context 2)
