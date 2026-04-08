@@ -198,7 +198,7 @@ based on the CUSTOM_ID, to the kill ring.  When called with the
 prefix argument, the link will include zk-zorg-profile-name so
 that it can be used for scratch.el"
   (interactive "P")
-  (let ((reference (zk-org-get-external-reference arg)))
+  (let ((reference (zk-org-get-external-reference (when arg t))))
     (kill-new reference)
     (message "Copied \"%s\"" reference)))
 
