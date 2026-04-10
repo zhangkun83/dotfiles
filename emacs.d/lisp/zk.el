@@ -887,6 +887,18 @@ monitor."
                (message "Using scale settings for Acer Chromebook Plus")
                (setq font-height 130)
                (setq frame-height-pixels 750)))
+            ((and (= monitor-height-pixels 900)
+                  (= monitor-dpi 96))
+             (progn
+               (message "Using scale settings for Thinkpad T440s")
+               (setq font-height 150)
+               (setq frame-height-pixels 750)))
+            ((and (= monitor-height-pixels 1080)
+                  (= monitor-dpi 96))
+             (progn
+               (message "Using scale settings for Acer monitor with Thinkpad T440s")
+               (setq font-height 140)
+               (setq frame-height-pixels 750)))
             (t
              (progn
                (message "Using default scale settings per %s" monitor-attributes-alist))))
