@@ -897,7 +897,7 @@ monitor."
                   (= monitor-dpi 96))
              (progn
                (message "Using scale settings for Acer monitor with Thinkpad T440s")
-               (setq font-height 140)
+               (setq font-height 120)
                (setq frame-height-pixels 750)))
             (t
              (progn
