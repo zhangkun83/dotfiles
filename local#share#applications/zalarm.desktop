@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=zalarm
+Path=github/misc-scripts/zalarm
+Exec=make run
+Icon=zalarm
+Categories=zk
+Terminal=false

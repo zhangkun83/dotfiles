@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=DesktopHelper Server
+Exec=bash -c 'echo -ne "\033]0;Desktop Helper Server\007"; cd ~/github/dotfiles/emacs.d/desktop-helper && make run-server; read -p "Press Enter to exit"'
+Icon=desktop-helper
+Categories=zk
+Terminal=true

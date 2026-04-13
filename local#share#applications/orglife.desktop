@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=orglife
+Exec=bash -c "emacs --load ~/.emacs.d/bin/orglife.el"
+Path=orglife
+Icon=emacs-document.svg
+Categories=zk
+Terminal=false

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=scratch
+Exec=bash -c "emacs --load ~/.emacs.d/bin/scratch.el"
+Path=scratch
+Icon=emacs-document.svg
+Categories=zk
+Terminal=false

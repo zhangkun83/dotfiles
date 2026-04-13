@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=uglywafer tunnel
+Exec=bash -c 'echo -ne "\033]0;uglywafer tunnel\007"; ssh uglywafer.com -L 127.0.0.1:1874:127.0.0.1:1873 -o ExitOnForwardFailure=yes -t github/dotfiles/emacs.d/bin/ssh-tunnel-stub.py; read -p "Press Enter to exit"'
+Icon=network-vpn
+Categories=zk
+Terminal=true
