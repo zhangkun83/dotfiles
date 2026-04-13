@@ -208,6 +208,9 @@ of the region, while the mark is at the end."
           (replace-regexp-in-region
            "https?://docs\\.google\\.com/document/.*"
            "([[\\&][doc]])" url-start url-end)
+          (replace-regexp-in-region
+           "https?://docs\\.google\\.com/presentation/.*"
+           "([[\\&][slides]])" url-start url-end)
           (message "Don't know how to pack this URL.")))))
 
 (defun zk-org-expand-drawer-at-point ()
