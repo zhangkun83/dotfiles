@@ -211,7 +211,12 @@ of the region, while the mark is at the end."
           (replace-regexp-in-region
            "https?://docs\\.google\\.com/presentation/.*"
            "([[\\&][slides]])" url-start url-end)
-          (message "Don't know how to pack this URL.")))))
+          (replace-regexp-in-region
+           "https://critique.corp.google.com/search/.*"
+           "([[\\&][CLs]])" url-start url-end)
+          (replace-regexp-in-region
+           "https?://.*"
+           "([[\\&][link]])" url-start url-end)))))
 
 (defun zk-org-expand-drawer-at-point ()
   "Expand the Org mode drawer at point, even from the middle.  Do nothing
