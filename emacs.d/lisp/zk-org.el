@@ -203,6 +203,9 @@ of the region, while the mark is at the end."
            "https?://docs\\.google\\.com/document/.*&disco=.+$"
            "([[\\&][comment]])" url-start url-end)
           (replace-regexp-in-region
+           "https?://docs\\.google\\.com/document/.*#bookmark=.+$"
+           "([[\\&][bookmark]])" url-start url-end)
+          (replace-regexp-in-region
            "https?://docs\\.google\\.com/spreadsheets/.*"
            "([[\\&][sheet]])" url-start url-end)
           (replace-regexp-in-region
