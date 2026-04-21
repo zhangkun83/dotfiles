@@ -249,14 +249,28 @@ heading is used as the timestamp of the log entry."
     (goto-char link-pos)
     (zk-org-open-next-link)
     ;; Insert the log
-    (goto-char (org-log-beginning t))
-    (insert "- Note taken on [" date "] \\\\\n")
-    ;; Add two spaces in front of each line because the log entry is
-    ;; a list item.
-    (insert (replace-regexp-in-string "^" "  " (string-trim content))
-            "\n")
-    ;; Expand the LOGBOOK drawer if it's folded
-    (org-show-context)))
+    (zk-org-add-to-logbook (concat "Note taken on [" date "]") content)))
+
+(defun zk-zorg-change-current-heading ()
+  "Change the heading of the current entry. It prompts the user
+to enter the new heading (prefill the input with the current heading),
+then update the heading, and finally record a log entry to LOGBOOK."
+  (interactive)
+  (unless (derived-mode-p 'org-mode)
+    (user-error "Must be called from an org-mode buffer"))
+  (org-back-to-heading t)
+  ;; Extract the raw title text (index 4 of components)
+  (let* ((old-heading (or (nth 4 (org-heading-components)) ""))
+         (new-heading (read-string "New heading: " old-heading))
+         (time (format-time-string (org-time-stamp-format t t))))
+    ;; Only proceed if the heading actually changed
+    (when (and (not (string-empty-p new-heading))
+               (not (string= old-heading new-heading)))
+      ;; 1. Update the heading text (preserves TODOs, tags, and priorities)
+      (org-edit-headline new-heading)
+      (zk-org-add-to-logbook
+       (concat "Note taken on " time)
+       (format "[Rename] \"%s\" -> \"%s\"" old-heading new-heading)))))
 
 (defun zk-zorg-copy-region-with-link-to-heading (&optional arg)
   "Copy the content of the current active region, with a
@@ -734,6 +748,7 @@ that need to be sorted."
   "C-c s" 'zk-org-search-view
   "C-c M-s" 'zk-org-previous-search-view-buffer
   "C-c q" 'zk-org-set-tags-command
+  "C-c h" 'zk-zorg-change-current-heading
   "C-c l i" 'zk-zorg-set-customid-at-point
   "C-c l a" 'zk-zorg-create-meeting-notes-entry
   "C-c l l" 'zk-org-copy-external-link

@@ -191,6 +191,17 @@ of the region, while the mark is at the end."
   (while (> (org-outline-level) 1)
     (org-up-heading-all 1)))
 
+(defun zk-org-add-to-logbook (first-line content)
+  "Insert the content (can be multi-line) as a new entry into the LOGBOOK
+under the current heading."
+  (goto-char (org-log-beginning t))
+  (insert "- " first-line " \\\\\n")
+  ;; Add two spaces in front of each line because the log entry is
+  ;; a list item.
+  (insert (replace-regexp-in-string "^" "  " (string-trim content))
+          "\n")
+  ;; Expand the LOGBOOK drawer if it's folded
+  (org-show-context))
 
 (defun zk-org-pack-url-at-point ()
   (interactive)
