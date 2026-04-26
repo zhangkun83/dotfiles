@@ -177,6 +177,10 @@
   (interactive)
   (other-frame -1))
 
+(require 'zk-py)
+(require 'zk-py-shuangpin)
+(setq default-input-method "chinese-zk-py-shuangpin")
+
 (global-set-key (kbd "<f7>") 'other-window)
 (global-set-key (kbd "M-<f7>") 'zk-prev-window)
 (global-set-key (kbd "<f8>") 'other-frame)
