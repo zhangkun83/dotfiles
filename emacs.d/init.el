@@ -222,6 +222,7 @@
 (global-set-key (kbd "C-M-q") 'zk-fill-paragraph-after-point)
 (require 'zk-typing-board-mode)
 (global-set-key (kbd "C-z C-t") 'zk-typing-board)
+(global-set-key (kbd "C-z \\ p") 'zk-shuangpin-add-phrase)
 
 (advice-add 'recenter-top-bottom :after #'zk-highlight-current-line-momentarily)
 

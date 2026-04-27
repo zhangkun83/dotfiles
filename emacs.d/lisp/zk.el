@@ -696,6 +696,66 @@ server to create a frame and quit myself."
         (server-eval-at server '(zk-remote-raise-frame))
         (message "Asked %s to raise its frame." server)))))
 
+(defun zk-shuangpin-add-phrase ()
+  "Add a Chinese phrase to shuangpin dictionary.
+The phrase is selected from the Chinese characters immediately before the cursor.
+Initially 2 characters are selected. Use + and - to adjust length,
+Enter to confirm, and C-g to cancel.
+The phrase is then passed to zk-py-shuangpin-add-phrase.sh and
+zk-py-shuangpin.el is reloaded if successful."
+  (interactive)
+  (let* ((end (point))
+         (max-len 0))
+    ;; Find the maximum length of Chinese characters before the cursor
+    (save-excursion
+      (while (and (not (bobp))
+                  (let ((char (char-before)))
+                    (and char (aref (char-category-set char) ?C))))
+        (backward-char)
+        (setq max-len (1+ max-len))))
+    
+    (if (< max-len 2)
+        (user-error "At least 2 Chinese characters required before cursor"))
+    
+    (let ((len 2)
+          (done nil))
+      (while (not done)
+        (let* ((phrase (buffer-substring-no-properties (- end len) end))
+               (key (read-key (format "Confirm phrase (+/- to adjust, Enter to confirm): %s" phrase))))
+          (cond
+           ((member key '(?+ ?=))
+            (if (< len max-len)
+                (setq len (1+ len))
+              (message "Reached maximum Chinese phrase length (%d)" max-len)))
+           ((member key '(?- ?_))
+            (if (> len 2)
+                (setq len (1- len))
+              (message "Minimum phrase length is 2")))
+           ((member key '(return ?\r ?\n))
+            (setq done t))
+           ((equal key ?\C-g)
+            (keyboard-quit))
+           (t (message "Press + or - to adjust length, Enter to confirm")))))
+
+      (let* ((final-phrase (buffer-substring-no-properties (- end len) end))
+             ;; Find the script relative to this file's location
+             (script-dir (file-name-directory (or (symbol-file 'zk-shuangpin-add-phrase 'defun)
+                                                  load-file-name
+                                                  (buffer-file-name)
+                                                  (locate-library "zk"))))
+             (script-path (expand-file-name "zk-py-shuangpin-add-phrase.sh" script-dir)))
+
+        (unless (file-exists-p script-path)
+          (error "Could not find %s" script-path))
+
+        (message "Adding phrase \"%s\"..." final-phrase)
+        (let ((default-directory script-dir))
+          (if (eq 0 (call-process "bash" nil nil nil script-path final-phrase))
+              (progn
+                (load "zk-py-shuangpin")
+                (message "Successfully added phrase \"%s\" and reloaded zk-py-shuangpin" final-phrase))
+            (error "Failed to add phrase \"%s\"" final-phrase)))))))
+
 (defun zk-buffer-to-register ()
   "Put the current buffer to a register.  This is different from
 point-to-register in that this command doesn't save the point, so
