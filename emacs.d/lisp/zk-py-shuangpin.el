@@ -1,3 +1,5 @@
+;; GENERATED FILE.  DO NOT MODIFY.
+;; Use zk-py-shuangpin-rebuild.sh to regenerate this file.
 (require 'quail)
 
 (quail-define-package
@@ -14695,7 +14697,7 @@
 ("gufu" ["姑父" "辜负"])
 ("gugc" ["古怪"])
 ("gugd" ["孤寡"])
-("guge" ["骨骼"])
+("guge" ["谷歌" "骨骼"])
 ("guggzlhb" ["骨鲠在喉"])
 ("gugj" ["骨干" "骨感"])
 ("gugk" ["孤高"])
@@ -36629,6 +36631,7 @@
 ("wqrk" ["围绕"])
 ("wqrm" ["葳蕤"])
 ("wqro" ["微弱"])
+("wqrp" ["微软"])
 ("wqrulqlp" ["危如累卵"])
 ("wqsm" ["尾随" "未遂"])
 ("wqso" ["微缩" "猥琐" "畏缩" "萎缩"])
