@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-python zk-py-shuangpin-generate-phrases-index.py
+python3 zk-py-shuangpin-generate-phrases-index.py
 cat zk-py-shuangpin.el.base phrases-index.tmp > zk-py-shuangpin.el
 
 cat <<EOF >> zk-py-shuangpin.el
