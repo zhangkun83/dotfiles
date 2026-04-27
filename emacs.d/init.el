@@ -6,7 +6,6 @@
 
 (require 'kotlin-mode)
 (require 'zk)
-(require 'chinese-punct)
 (require 'htmlize)
 (require 'zk-ai-gemini)
 (require 'zk-org)
