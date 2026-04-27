@@ -9,6 +9,13 @@
    (" " . quail-select-current))
   nil nil nil nil)
 
+
+;; Character Pinyin mapping was copied from
+;; /usr/share/emacs/30.1/lisp/leim/quail/PY.el.gz, then converted to
+;; Intelligent ABC Shuangpin scheme.
+;;
+;; Phrases were added from generating the Shuangpin encoding for every phrase
+;; from a phrase list downloaded from internet.
 (quail-define-rules
  ;; Chinese punctuation
  ("." "。.")

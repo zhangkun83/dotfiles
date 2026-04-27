@@ -177,7 +177,6 @@
   (interactive)
   (other-frame -1))
 
-(require 'zk-py)
 (require 'zk-py-shuangpin)
 (setq default-input-method "chinese-zk-py-shuangpin")
 
