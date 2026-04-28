@@ -21,26 +21,23 @@
   "Keymap for `zk-typing-board-mode'.")
 
 (defun zk-typing-board-copy-and-insert-line ()
-  "Copy content before point to clipboard and insert a new line at buffer start."
+  "Copy the current paragraph to clipboard and insert a new line at buffer start."
   (interactive)
-  ;; Mark the content before the cursor as a region.
-  (push-mark (point-min) t t)
-  (setq mark-active t)
+  (when (save-excursion
+        (beginning-of-line)
+        (looking-at-p "[[:space:]]*$"))
+    (user-error "Not at a paragraph"))
+  ;; Put point at end of this paragraph, mark at beginning of this
+  ;; paragraph.
+  (mark-paragraph -1)
   ;; Send the region to zk-clipboard-copy.
   (zk-clipboard-copy nil)
-  ;; Move the cursor to the beginning of the buffer.
-  (goto-char (point-min))
-  ;; Insert a new line below the cursor (i.e., open a line).
-  (open-line 2))
+  (unless (bolp)
+    ;; mark-paragraph will put point at the new line if there is one.
+    ;; If there is no new line, we are at the end of the document
+    ;; without a newline, we will add a newline.
+    (newline)))
 
-;;;###autoload
-(defun zk-typing-board ()
-  "Open or switch to the `*typing-board*` buffer."
-  (interactive)
-  (let ((buffer (get-buffer-create "*typing-board*")))
-    (switch-to-buffer buffer)
-    (unless (eq major-mode 'zk-typing-board-mode)
-      (zk-typing-board-mode))))
 
 ;;;###autoload
 (define-derived-mode zk-typing-board-mode text-mode "ZK-Typing"
