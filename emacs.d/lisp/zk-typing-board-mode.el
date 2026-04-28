@@ -38,6 +38,14 @@
     ;; without a newline, we will add a newline.
     (newline)))
 
+;;;###autoload
+(defun zk-typing-board ()
+  "Open or switch to the `*typing-board*` buffer."
+  (interactive)
+  (let ((buffer (get-buffer-create "*typing-board*")))
+    (switch-to-buffer buffer)
+    (unless (eq major-mode 'zk-typing-board-mode)
+      (zk-typing-board-mode))))
 
 ;;;###autoload
 (define-derived-mode zk-typing-board-mode text-mode "ZK-Typing"
