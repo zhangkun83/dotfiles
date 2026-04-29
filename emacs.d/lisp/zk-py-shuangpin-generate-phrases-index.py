@@ -3,7 +3,7 @@ import re
 import itertools
 
 def main():
-    shuangpin_file = "zk-py-shuangpin.el"
+    shuangpin_file = "zk-py-shuangpin.el.base"
     phrases_file = "zk-py-shuangpin-phrases-list.txt"
     output_file = "phrases-index.tmp"
 
@@ -47,39 +47,50 @@ def main():
                     phrase_char_encs.append(char_to_encodings[char])
                 
                 # Generate all permutations (Cartesian product) of the encodings
-                for p in itertools.product(*phrase_char_encs):
-                    combined_enc = "".join(p)
+                for enc_list in itertools.product(*phrase_char_encs):
+                    combined_enc = "".join(enc_list)
                     if combined_enc not in encoding_to_phrases:
                         encoding_to_phrases[combined_enc] = []
-                    phrases = encoding_to_phrases[combined_enc]
-                    if phrase not in phrases:
-                        phrases.append(phrase)
-                        # TODO: sort phrases by comparing character by
-                        # character.  The relative order of two
-                        # characters is determined by their positions
-                        # in encoding_to_chars[enc], where enc is the
-                        # char encoding from combined_enc
+                    phrases_info = encoding_to_phrases[combined_enc]
+                    # Store (phrase, enc_list) to support character-by-character sorting.
+                    if not any(ph == phrase for ph, _ in phrases_info):
+                        phrases_info.append((phrase, enc_list))
     except Exception as e:
         print(f"Error reading {phrases_file}: {e}")
         return
 
     # 3. Output results in Elisp format
-    try:
-        with open(output_file, 'w', encoding='utf-8') as f:
-            # Sort by encoding for consistent output
-            for enc in sorted(encoding_to_phrases.keys()):
-                phrases = encoding_to_phrases[enc]
-                # If the encoding has only one candidate, add a fake
-                # one so that the user always need to manually commit
-                # it.  Otherwise, Quail will autocommit which is
-                # undesirable.
-                if len(phrases) < 2:
-                    phrases.append("_")
-                phrases_formatted = " ".join([f'"{p}"' for p in phrases])
-                f.write(f'("{enc}" [{phrases_formatted}])\n')
-    except Exception as e:
-        print(f"Error writing to {output_file}: {e}")
-        return
+    with open(output_file, 'w', encoding='utf-8') as f:
+        # Sort by encoding for consistent output
+        for enc in sorted(encoding_to_phrases.keys()):
+            phrases_info = encoding_to_phrases[enc]
+
+            # Sort phrases by comparing character by character.  The
+            # relative order of two characters is determined by their
+            # positions in encoding_to_chars[enc], where enc is the
+            # char encoding from enc_list.  Without actual phrase
+            # frequency data, this is the best approximate for phrase
+            # frequency.
+            def sort_key(item):
+                phr, enc_list = item
+                # enc_list is the list of single-character encodings
+                # for this phrase.  The returned sort key is the list
+                # of indexes of chacters in their lists of character
+                # from encoding_to_chars, according to their encodings
+                # from enc_list.
+                return [encoding_to_chars[enc_list[i]].index(phr[i]) for i in range(len(phr))]
+
+            phrases_info.sort(key=sort_key)
+            phrases = [phr for phr, _ in phrases_info]
+
+            # If the encoding has only one candidate, add a fake
+            # one so that the user always need to manually commit
+            # it.  Otherwise, Quail will autocommit which is
+            # undesirable.
+            if len(phrases) < 2:
+                phrases.append("_")
+            phrases_formatted = " ".join([f'"{ph}"' for ph in phrases])
+            f.write(f'("{enc}" [{phrases_formatted}])\n')
 
 if __name__ == "__main__":
     main()
