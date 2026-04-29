@@ -20,6 +20,7 @@ def main():
     # Extract patterns like ("oa" "阿啊...")
     matches = re.findall(r'\("([^"]+)"\s+"([^"]+)"\)', content)
     for enc, chars in matches:
+        assert enc not in encoding_to_chars, f"Duplicate encoding: {enc}"
         encoding_to_chars[enc] = chars
         for char in chars:
             if char not in char_to_encodings:
