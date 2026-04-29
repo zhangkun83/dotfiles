@@ -8,6 +8,7 @@ def main():
     output_file = "phrases-index.tmp"
 
     # 1. Parse shuangpin file to build a character-to-encodings mapping
+    encoding_to_chars = {}
     char_to_encodings = {}
     try:
         with open(shuangpin_file, 'r', encoding='utf-8') as f:
@@ -19,6 +20,7 @@ def main():
     # Extract patterns like ("oa" "阿啊...")
     matches = re.findall(r'\("([^"]+)"\s+"([^"]+)"\)', content)
     for enc, chars in matches:
+        encoding_to_chars[enc] = chars
         for char in chars:
             if char not in char_to_encodings:
                 char_to_encodings[char] = []
@@ -49,8 +51,14 @@ def main():
                     combined_enc = "".join(p)
                     if combined_enc not in encoding_to_phrases:
                         encoding_to_phrases[combined_enc] = []
-                    if phrase not in encoding_to_phrases[combined_enc]:
-                        encoding_to_phrases[combined_enc].append(phrase)
+                    phrases = encoding_to_phrases[combined_enc]
+                    if phrase not in phrases:
+                        phrases.append(phrase)
+                        # TODO: sort phrases by comparing character by
+                        # character.  The relative order of two
+                        # characters is determined by their positions
+                        # in encoding_to_chars[enc], where enc is the
+                        # char encoding from combined_enc
     except Exception as e:
         print(f"Error reading {phrases_file}: {e}")
         return
