@@ -61,6 +61,12 @@ def main():
             # Sort by encoding for consistent output
             for enc in sorted(encoding_to_phrases.keys()):
                 phrases = encoding_to_phrases[enc]
+                # If the encoding has only one candidate, add a fake
+                # one so that the user always need to manually commit
+                # it.  Otherwise, Quail will autocommit which is
+                # undesirable.
+                if len(phrases) < 2:
+                    phrases.append("_")
                 phrases_formatted = " ".join([f'"{p}"' for p in phrases])
                 f.write(f'("{enc}" [{phrases_formatted}])\n')
     except Exception as e:
