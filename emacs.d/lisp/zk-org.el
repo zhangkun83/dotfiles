@@ -112,7 +112,10 @@ clipboard.  If called with prefix argument, also export LOGBOOK
             (puthash (match-string-no-properties 1) t exported-ids-ht)))))
     (with-current-buffer buffer
       (zk-org-process-exported-html src-file-name exported-ids-ht)
-      (zk-clipboard-copy t))))
+      (goto-char 0)
+      (set-mark (point-max))
+      (activate-mark)
+      (zk-clipboard-copy))))
 
 (defun zk-org-extract-scheduled-timestamp-string (element)
   "Return the raw SCHEDULED timestamp string for the given org

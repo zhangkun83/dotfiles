@@ -31,7 +31,7 @@
   ;; paragraph.
   (mark-paragraph -1)
   ;; Send the region to zk-clipboard-copy.
-  (zk-clipboard-copy nil)
+  (zk-clipboard-copy)
   (unless (bolp)
     ;; mark-paragraph will put point at the new line if there is one.
     ;; If there is no new line, we are at the end of the document

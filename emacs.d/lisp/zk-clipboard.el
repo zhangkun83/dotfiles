@@ -1,42 +1,52 @@
 (require 'zk)
 
-(defun zk-clipboard-copy (arg)
-  "Save the current region (selection) to clipboard using
-desktop-helper. With prefix argument (C-u), copy the whole
-buffer."
-  (interactive "P")
-  (unless (or arg mark-active)
+(defun zk-clipboard-copy ()
+  "Save the current region (selection) to clipboard.  If not running in
+graphics mode, copy to desktop-helper."
+  (interactive)
+  (unless (use-region-p)
     (user-error "Region not active"))
   (let ((buffer (current-buffer))
-        (begin (if arg (point-min) (region-beginning)))
-        (end (if arg (point-max) (region-end))))
+        (begin (region-beginning))
+        (end (region-end)))
     (if (= begin end)
         (user-error "Content is empty"))
-    (with-temp-buffer
-      ;; Use a temp-buffer for client output
-      (let ((temp-buffer (current-buffer)))
-        (with-current-buffer buffer
-          (call-process-region
-           begin end
-           zk-dh-client-path
-           nil temp-buffer nil
-           "write-clip")))
-      (message (zk-trim-string (buffer-string)))))
-  (deactivate-mark))
+    (if (display-graphic-p)
+        (let ((select-enable-clipboard t))
+          (gui-select-text (buffer-substring-no-properties begin end))
+          (message "Copied to clipboard."))
+      (with-temp-buffer
+        ;; Use a temp-buffer for client output
+        (let ((temp-buffer (current-buffer)))
+          (with-current-buffer buffer
+            (call-process-region
+             begin end
+             zk-dh-client-path
+             nil temp-buffer nil
+             "write-clip")))
+        (message (zk-trim-string (buffer-string)))))
+    (deactivate-mark)))
 
 (defun zk-clipboard-paste ()
-  "Retrieve the clipboard from desktop-helper and insert to the current point."
+  "Retrieve the clipboard from the system clipboard (or desktop-helper if
+not in graphics mode) and insert to the current point."
   (interactive)
-  ;; Use a temp file for client output that is not the content
-  (let ((temp-file (make-temp-file "zk-clipboard-paste")))
-    (call-process
-     zk-dh-client-path
-     nil (list t temp-file) nil
-     "read-clip")
-    (with-temp-buffer
-      (insert-file-contents temp-file)
-      (message (zk-trim-string (buffer-string))))
-    (delete-file temp-file)))
+  (if (display-graphic-p)
+      (progn
+        (insert (or (gui-get-selection 'CLIPBOARD 'STRING)
+                    (gui-get-selection 'PRIMARY 'STRING)
+                    ""))
+        (message "Pasted from clipboard."))
+    ;; Use a temp file for client output that is not the content
+    (let ((temp-file (make-temp-file "zk-clipboard-paste")))
+      (call-process
+       zk-dh-client-path
+       nil (list t temp-file) nil
+       "read-clip")
+      (with-temp-buffer
+        (insert-file-contents temp-file)
+        (message (zk-trim-string (buffer-string))))
+      (delete-file temp-file))))
 
 (defun zk-clipboard-get-string ()
   "Retrieve the clipboard and return as a string."
