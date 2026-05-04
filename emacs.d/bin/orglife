@@ -1,5 +1,3 @@
 #!/bin/bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && realpath $(pwd) )"
-mkdir -p ~/orglife
 cd ~/orglife
-$DIR/tmt orglife emacs -nw --load="$DIR/orglife.el"
+tmt orglife emacs -l ~/.emacs.d/bin/orglife.el
