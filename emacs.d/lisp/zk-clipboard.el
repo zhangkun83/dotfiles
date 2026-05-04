@@ -1,6 +1,13 @@
 (require 'zk)
 
-(defvar zk-clipboard-backend (if (display-graphic-p) 'CLIPBOARD 'DESKTOP-HELPER)
+(defvar zk-clipboard-backend
+  (if (and (display-graphic-p)
+           ;; elisp clipboard operations don't work properly with
+           ;; Wayland (at least on Chromebook).  Use desktop-helper in
+           ;; that case.
+           (not (string-equal (getenv "XDG_SESSION_TYPE") "wayland")))
+      'CLIPBOARD
+    'DESKTOP-HELPER)
   "The backend of clipboard operations.  If `CLIPBOARD', will operate the
 clipboard from elisp directly.  If `DESKTOP-HELPER', will operate the clipboard
 throught dh-client.")
