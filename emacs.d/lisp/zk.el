@@ -858,7 +858,7 @@ is available."
 ;; font built from the Iosevka typeface.
 (defconst zk-font-family
   (zk-find-first-available-font
-   '("Liberation Mono" "Aporetic Sans Mono")))
+   '("Aporetic Sans Mono" "Liberation Mono")))
 
 (defconst zk-proportional-font-family
   (zk-find-first-available-font
@@ -911,11 +911,8 @@ monitor."
       (set-face-attribute 'default nil
 		          :family family
                           ;; Scale down the default (monospace) font a
-                          ;; bit, so that it doesn't appear
-                          ;; disproportionally large compared to the
-                          ;; proportional font.  This is necessary
-                          ;; because Liberation Mono is naturally
-                          ;; larger (wider) than Liberation Sans.
+                          ;; bit, to make it approximately the same
+                          ;; width as the proportional font.
                           :height (round (* 0.9 (alist-get 'font-height scaling-alist) factor)))
       (dolist (frame (frame-list))
         (zk-scale-frame frame scaling-alist))))
