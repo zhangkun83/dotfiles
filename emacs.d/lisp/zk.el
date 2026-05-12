@@ -956,6 +956,12 @@ monitor."
                (message "Using scale settings for Acer Chromebook Plus")
                (setq font-height 130)
                (setq frame-height-pixels 750)))
+            ((and (= monitor-height-pixels 2400)
+                  (= monitor-dpi 155))
+             (progn
+               (message "Using scale settings for ThinkVision monitor 32\" with Acer Chromebook Plus")
+               (setq font-height 130)
+               (setq frame-height-pixels 2000)))
             ((and (= monitor-height-pixels 900)
                   (= monitor-dpi 96))
              (progn
