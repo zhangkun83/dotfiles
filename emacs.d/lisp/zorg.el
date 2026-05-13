@@ -1290,8 +1290,7 @@ Entries that are tagged with any tag from
     (insert
      (if todo-keyword (concat "[" todo-keyword "] ") "")
      (alist-get ':title entry-alist)
-     (if tags (concat " \t:" (mapconcat 'identity tags ":") ":") "")
-     " (" (alist-get ':file entry-alist) ")")
+     (if tags (concat " \t:" (mapconcat 'identity tags ":") ":") ""))
     ;; Attach entry-alist and ancestor-links to the whole line, to be
     ;; used by zk-zorg-retr--expand-at-point
     (add-text-properties
