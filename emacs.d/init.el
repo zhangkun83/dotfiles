@@ -214,7 +214,7 @@
 (global-set-key (kbd "C-z t") 'display-time-mode)
 (global-set-key (kbd "C-z j") 'zk-remove-line-breaks-within-paragraphs)
 (global-set-key (kbd "C-z c") 'zk-copy-region-to-temp-buffer)
-(global-set-key (kbd "C-z C-l") 'zk-echo-current-line)
+(global-set-key (kbd "C-;") 'zk-echo-current-line)
 (global-set-key (kbd "C-z z c") 'zk-ai-gemini-start-session)
 (global-set-key (kbd "C-z z m") 'zk-ai-gemini-set-model-level)
 (global-set-key (kbd "C-z z f") 'zk-ai-gemini-add-context-file)

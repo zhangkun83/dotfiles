@@ -887,6 +887,26 @@ revealing long lines."
      0 (length line) `(:family ,zk-buffer-font-family) t line)
     (message "%s" line)))
 
+(defvar-local zk-last-line-number nil
+  "Tracks the last line number to ensure our action only triggers on line changes.")
+
+;; Activate globally across all buffers
+(add-hook 'post-command-hook (lambda ()
+  (let ((current-line (line-number-at-pos)))
+    (when (not (equal current-line zk-last-line-number))
+      (setq zk-last-line-number current-line)
+
+      ;; 2. Verify line truncation (`truncate-lines`) is active in this buffer
+      (when truncate-lines
+        (save-excursion
+          (let ((line-length (- (line-end-position) (line-beginning-position)))
+                ;; Get the total width of the text area in characters
+                (window-text-width (window-body-width)))
+
+            ;; 3. Trigger if the raw line length exceeds what the window can display
+            (when (> line-length window-text-width)
+              (zk-echo-current-line)))))))))
+
 (when (display-graphic-p)
   ;; Set font
   (defun zk-get-monitor-attributes-alist ()
