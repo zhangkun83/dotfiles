@@ -224,8 +224,6 @@
 (global-set-key (kbd "C-z C-t") 'zk-typing-board)
 (global-set-key (kbd "C-z \\ p") 'zk-shuangpin-add-phrase)
 
-(advice-add 'recenter-top-bottom :after #'zk-highlight-current-line-momentarily)
-
 (add-hook 'org-mode-hook
           (lambda()
             (local-set-key (kbd "C-c u p") 'zk-org-pack-url-at-point)))
