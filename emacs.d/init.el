@@ -315,6 +315,9 @@
  ;; screen by only one line, instead of half page, when the cursor is
  ;; off-screen.
  '(scroll-conservatively 102)
+ ;; Make C-v M-v commands behave similar to the usual page-down and
+ ;; page-up in text editors.
+ '(scroll-preserve-screen-position 'always)
  '(set-mark-command-repeat-pop t)
  '(switch-to-buffer-obey-display-actions t)
  '(use-dialog-box nil)
