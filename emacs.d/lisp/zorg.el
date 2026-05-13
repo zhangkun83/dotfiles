@@ -772,7 +772,6 @@ that need to be sorted."
   "C-c n p" 'zk-zorg-goto-prev-note-file
   "C-c z c" 'zk-zorg-ai-gemini-create-session
   "C-c z p" 'zk-zorg-ai-gemini-insert-prompt
-  "C-c z s" 'zk-zorg-ai-gemini-send-prompt
   "C-c c" 'zk-org-clone-narrowed-buffer)
 
 (defvar-keymap zk-zorg-org-mode-keymap
