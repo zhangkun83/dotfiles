@@ -904,16 +904,15 @@ monitor."
                           (display-pixel-width)
                           (* (display-mm-width) 0.0393701)))))))
 
-  (defun zk-set-default-font (family factor)
-    "Set the default font for Emacs.  `factor' is used to multiply
-`zk-default-font-height' to calculate the actual font height"
+  (defun zk-set-default-font (family)
+    "Set the default font for Emacs."
     (let ((scaling-alist (zk-get-default-scaling-alist)))
       (set-face-attribute 'default nil
 		          :family family
                           ;; Scale down the default (monospace) font a
                           ;; bit, to make it approximately the same
                           ;; width as the proportional font.
-                          :height (round (* 0.9 (alist-get 'font-height scaling-alist) factor)))
+                          :height (round (* 0.9 (alist-get 'font-height scaling-alist))))
       (dolist (frame (frame-list))
         (zk-scale-frame frame scaling-alist))))
 
@@ -987,15 +986,7 @@ monitor."
   (defun zk-reset-frame-size (frame)
     (zk-scale-frame frame (zk-get-default-scaling-alist)))
 
-  (defun zk-scale-default-font (factor)
-    "Scale the default font by a percentage factor, where 100 is the
-original size"
-    (interactive (list (read-number "Scale default font (as percentage, between 50 and 500): " 100)))
-    (when (or (> factor 500) (< factor 50))
-      (user-error "Factor out of range"))
-    (zk-set-default-font zk-font-family (/ factor 100.0)))
-
-  (zk-set-default-font zk-font-family 1)
+  (zk-set-default-font zk-font-family)
   (add-hook 'after-make-frame-functions 'zk-reset-frame-size))
 
 (provide 'zk)
