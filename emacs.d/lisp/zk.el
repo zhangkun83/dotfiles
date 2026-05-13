@@ -877,7 +877,7 @@ is available."
     (buffer-face-set
      `(:family ,zk-buffer-font-family
        :height ,(alist-get 'font-height scaling-alist))))
-  (setq line-spacing 0.12))
+  (setq line-spacing 0))
 
 (defun zk-echo-current-line ()
   "Echo the current line in the echo area, preserving the face.  Useful for
@@ -909,10 +909,7 @@ monitor."
     (let ((scaling-alist (zk-get-default-scaling-alist)))
       (set-face-attribute 'default nil
 		          :family family
-                          ;; Scale down the default (monospace) font a
-                          ;; bit, to make it approximately the same
-                          ;; width as the proportional font.
-                          :height (round (* 0.9 (alist-get 'font-height scaling-alist))))
+                          :height (alist-get 'font-height scaling-alist))
       (dolist (frame (frame-list))
         (zk-scale-frame frame scaling-alist))))
 
@@ -932,6 +929,12 @@ monitor."
                         monitor-attributes-alist)
                (setq frame-width-pixels 2500
                      frame-height-pixels 2000)))
+            ((and (= monitor-height-pixels 1080)
+                  (= monitor-dpi 92))
+             (progn
+               (message "Using scale settings for Acer monitor with Thinkpad P1 Windows 11")
+               (setq font-height 120)
+               (setq frame-height-pixels 750)))
             ((and (= monitor-dpi 140)
                   (= monitor-height-pixels 2160))
              (progn
