@@ -314,6 +314,10 @@
  ;; doesn't work reliably with variable-width fonts, possibly due to
  ;; incorrect calculation of screen lines.
  '(recenter-positions '(middle top))
+ ;; Setting this variable to any value larger than 100 will scroll the
+ ;; screen by only one line, instead of half page, when the cursor is
+ ;; off-screen.
+ '(scroll-conservatively 102)
  '(set-mark-command-repeat-pop t)
  '(switch-to-buffer-obey-display-actions t)
  '(use-dialog-box nil)
