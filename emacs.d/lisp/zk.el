@@ -876,8 +876,7 @@ is available."
   (let ((scaling-alist (zk-get-default-scaling-alist)))
     (buffer-face-set
      `(:family ,zk-buffer-font-family
-       :height ,(alist-get 'font-height scaling-alist))))
-  (setq line-spacing 0))
+       :height ,(alist-get 'font-height scaling-alist)))))
 
 (defun zk-echo-current-line ()
   "Echo the current line in the echo area, preserving the face.  Useful for

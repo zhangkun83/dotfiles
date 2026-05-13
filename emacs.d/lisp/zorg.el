@@ -1383,7 +1383,6 @@ refer (with \"RE:\") to any other entries.")
      ("([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*)"
       . 'zk-zorg-backref-neutralized-timestamp)))
   (zk-zorg-configure-in-scope-buffer zk-zorg-retr-keymap)
-  (zk-use-proportional-font-for-current-buffer)
   ;; Disable the built-in font-locks for strings and comments
   (setq font-lock-keywords-only t)
   (turn-on-font-lock)
