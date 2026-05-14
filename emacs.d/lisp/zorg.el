@@ -342,9 +342,8 @@ server."
                       (zk-org-generate-link id t)))))))
 
 (defun zk-org-fill-scratch-task-queue ()
-  "Insert all undone TODO entries with priority A and scheduled for
-today to the task queues of the scratch server, if they don't
-exist in the queue yet."
+  "Insert all undone TODO entries to the task queues of the scratch server,
+if they don't exist in the corresponding queue yet."
   (interactive)
   (let ((reference-metadata-list
          (--filter
@@ -355,17 +354,21 @@ exist in the queue yet."
                     (todo-type (org-element-property :todo-type headline))
                     (priority (org-element-property :priority headline))
                     ;; Include tasks that are scheduled for today or earlier
-                    (scheduled-date
-                     (let ((scheduled-timestamp (zk-org-extract-scheduled-timestamp-string headline)))
-                       (when (and scheduled-timestamp
-                                  (<= (org-time-stamp-to-now scheduled-timestamp) 0))
-                         ;; Only use the "YYYY-MM-DD" part of the timestamp like
-                         ;; "<YYYY-MM-DD Tue 12:30>"
-                         (substring scheduled-timestamp 1 11)))))
+                    (scheduled-label
+                     (let* ((scheduled-timestamp (zk-org-extract-scheduled-timestamp-string headline))
+                            (scheduled-time-to-now
+                             (and scheduled-timestamp (org-time-stamp-to-now scheduled-timestamp))))
+                       (cond ((not scheduled-time-to-now) nil)
+                             ((= scheduled-time-to-now 0)
+                              ;; Only use the "YYYY-MM-DD" part of the timestamp like
+                              ;; "<YYYY-MM-DD Tue 12:30>"
+                              (substring scheduled-timestamp 1 11))
+                             ((< scheduled-time-to-now 0)
+                              "earlier")))))
                (when (eq todo-type 'todo)
                  (let ((category
-                        (cond (scheduled-date
-                               (concat "Scheduled for " scheduled-date))
+                        (cond (scheduled-label
+                               (concat "Scheduled for " scheduled-label))
                               ((eq priority ?A) "Priorities")
                               ((eq priority ?B) "Back burner"))))
                    (when category
