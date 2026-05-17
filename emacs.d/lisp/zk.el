@@ -827,6 +827,30 @@ indicating this frame is from an existing server."
 visible-frame-list."
   (cl-position (selected-frame) (visible-frame-list)))
 
+(defun zk-shrink-region-to-whitespace ()
+  "Shrink the active region to exclude leading and trailing whitespace."
+  (interactive)
+  (when (use-region-p)
+    (let* ((beg (region-beginning))
+           (end (region-end))
+           (mark-after-point-p (> (mark) (point)))
+           (str (buffer-substring-no-properties beg end)))
+      ;; Find first non-whitespace character
+      (when (string-match "\\`[ \t\n\r]*" str)
+        (setq beg (+ beg (match-end 0))))
+      ;; Find last non-whitespace character
+      (when (string-match "[ \t\n\r]*\\'" str)
+        (setq end (- end (- (match-end 0) (match-beginning 0)))))
+      ;; Update the region if it's still valid
+      (if (< beg end)
+          (if mark-after-point-p
+              (progn
+                (goto-char beg)
+                (set-mark end))
+            (goto-char end)
+            (set-mark beg)))
+        (message "Region is entirely whitespace!")))))
+
 ;; Cygwin-specific hacks
 (when (eq system-type 'cygwin)
   (message "Cygwin detected, installing advices")

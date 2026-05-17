@@ -30,6 +30,7 @@
   ;; Put point at end of this paragraph, mark at beginning of this
   ;; paragraph.
   (mark-paragraph -1)
+  (zk-shrink-region-to-whitespace)
   ;; Send the region to zk-clipboard-copy.
   (zk-clipboard-copy)
   (unless (bolp)
