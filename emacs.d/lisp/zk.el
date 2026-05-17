@@ -848,7 +848,7 @@ visible-frame-list."
                 (goto-char beg)
                 (set-mark end))
             (goto-char end)
-            (set-mark beg)))
+            (set-mark beg))
         (message "Region is entirely whitespace!")))))
 
 ;; Cygwin-specific hacks
