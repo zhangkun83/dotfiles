@@ -73,7 +73,7 @@ White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."
       (progn
         (if (string-match-p "[^\s\t\n]+" (thing-at-point 'line t))
             (setq continue-loop-p nil)
-          (next-line))
+          (next-logical-line))
         (if (eq (point) last-point)
             (setq continue-loop-p nil)
           (setq last-point (point)))
@@ -298,10 +298,10 @@ buffer."
   and insert the mean value of the two as a new line in between.
   Useful for bi-secting version numbers."
   (interactive)
-  (previous-line)
+  (previous-logical-line)
   (move-beginning-of-line nil)
   (let ((a (thing-at-point 'number t)))
-    (next-line)
+    (next-logical-line)
     (let ((b (thing-at-point 'number t)))
       (open-line 1)
       (insert (number-to-string (/ (+ a b) 2))))))

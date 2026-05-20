@@ -823,8 +823,8 @@ that need to be sorted."
 
 (defvar-keymap zk-zorg-plain-viewer-keymap
   :parent zk-zorg-keymap-base
-  "n" 'next-line
-  "p" 'previous-line
+  "n" 'next-logical-line
+  "p" 'previous-logical-line
   "q" 'quit-window)
 
 (defun zk-zorg-rsync-create-log-buffer ()
@@ -1357,8 +1357,8 @@ refer (with \"RE:\") to any other entries.")
 
 (defvar-keymap zk-zorg-retr-keymap
   :parent zk-zorg-keymap-base
-  "n" 'next-line
-  "p" 'previous-line
+  "n" 'next-logical-line
+  "p" 'previous-logical-line
   "q" 'quit-window
   "RET" 'zk-zorg-retr--open-link
   "SPC" 'zk-zorg-retr--open-link-other-window

@@ -154,7 +154,7 @@ the content of the line at point."
                      ;; there is an empty line after it
                      (unless prev-line-empty-p (newline))
                      ;; Insert before the empty line
-                     (previous-line))
+                     (previous-logical-line))
                    (setq at-insert-point-p t)))
                 ((not (string= "" current-line))
                  (when in-import-zone-p
@@ -162,7 +162,7 @@ the content of the line at point."
                    ;; Make sure there is an empty line at the end of the import zone.
                    (unless prev-line-empty-p (newline))
                    ;; Insert before the empty line
-                   (previous-line)
+                   (previous-logical-line)
                    (setq at-insert-point-p t))))
 	  (if at-insert-point-p
 	      (progn
