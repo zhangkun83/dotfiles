@@ -226,7 +226,8 @@
 
 (add-hook 'org-mode-hook
           (lambda()
-            (local-set-key (kbd "C-c u p") 'zk-org-pack-url-at-point)))
+            (local-set-key (kbd "C-c u p") 'zk-org-pack-url-at-point)
+            (setq-local line-move-visual nil)))
 
 (add-hook 'shell-mode-hook
           (lambda()
