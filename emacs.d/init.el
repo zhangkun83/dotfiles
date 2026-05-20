@@ -226,8 +226,7 @@
 
 (add-hook 'org-mode-hook
           (lambda()
-            (local-set-key (kbd "C-c u p") 'zk-org-pack-url-at-point)
-            (visual-line-mode)))
+            (local-set-key (kbd "C-c u p") 'zk-org-pack-url-at-point)))
 
 (add-hook 'shell-mode-hook
           (lambda()
@@ -308,6 +307,7 @@
      (wl . wl-other-frame)))
  '(org-log-into-drawer t)
  '(org-startup-indented t)
+ '(org-startup-truncated nil)
  ;; The "bottom" position, which internally calls (recenter -1 t),
  ;; doesn't work reliably with variable-width fonts, possibly due to
  ;; incorrect calculation of screen lines.
