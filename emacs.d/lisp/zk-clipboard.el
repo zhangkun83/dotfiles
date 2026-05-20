@@ -45,7 +45,9 @@ not in graphics mode) and insert to the current point."
   (interactive)
   (cond ((eq zk-clipboard-backend 'CLIPBOARD)
          (insert (or (gui-get-selection 'CLIPBOARD 'UTF8_STRING)
-                     (gui-get-selection 'PRIMARY 'UTF8_STRING)
+                     ;; On Windows, UTF8_STRING returns nil while
+                     ;; STRING actually returns the Unicode string
+                     (gui-get-selection 'CLIPBOARD 'STRING)
                      ""))
          (message "Pasted from clipboard."))
         ((eq zk-clipboard-backend 'DESKTOP-HELPER)
