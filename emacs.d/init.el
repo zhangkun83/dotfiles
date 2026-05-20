@@ -227,7 +227,11 @@
 (add-hook 'org-mode-hook
           (lambda()
             (local-set-key (kbd "C-c u p") 'zk-org-pack-url-at-point)
-            (setq-local line-move-visual nil)))
+            (when (eq major-mode 'org-mode)
+              ;; Disable line truncation only for org-mode, not its
+              ;; derivatives like org-agenda-mode
+              (setq-local truncate-lines nil)
+              (setq-local line-move-visual nil))))
 
 (add-hook 'shell-mode-hook
           (lambda()
@@ -257,7 +261,10 @@
                     nil t))
 
 (add-hook 'dired-mode-hook
-          (lambda() (dired-hide-details-mode 1)))
+          (lambda()
+            (dired-hide-details-mode 1)
+            (setq-local truncate-lines t)
+            (local-set-key (kbd "E") 'zk-dired-open-file-with-os)))
 
 (when (display-graphic-p)
   (setq leuven-scale-outline-headlines nil
@@ -281,6 +288,7 @@
  '(custom-safe-themes
    '("c4cecd97a6b30d129971302fd8298c2ff56189db0a94570e7238bc95f9389cfb" default))
  '(dabbrev-case-replace nil)
+ '(dired-dwim-target t)
  '(dired-listing-switches "-alo")
  '(display-time-default-load-average nil)
  '(display-time-format "|%R|")
@@ -308,7 +316,6 @@
      (wl . wl-other-frame)))
  '(org-log-into-drawer t)
  '(org-startup-indented t)
- '(org-startup-truncated nil)
  ;; The "bottom" position, which internally calls (recenter -1 t),
  ;; doesn't work reliably with variable-width fonts, possibly due to
  ;; incorrect calculation of screen lines.

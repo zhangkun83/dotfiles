@@ -573,10 +573,6 @@ Windows uses Cygwin Emacs to open a file which invokes find-file-noselect"
         (message "Successfully opened '%s' in '%s'" file system-type)
       (message "'%s' failed to open '%s'" system-type file))))
 
-(add-hook 'dired-mode-hook
-          (lambda ()
-            (local-set-key (kbd "E") 'zk-dired-open-file-with-os)))
-
 (defun set-exec-path-from-shell-PATH ()
   "Set up Emacs' `exec-path' and PATH environment variable to match
 that used by the user's shell.
