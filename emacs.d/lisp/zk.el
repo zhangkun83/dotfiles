@@ -882,7 +882,7 @@ is available."
 ;; font built from the Iosevka typeface.
 (defconst zk-font-family
   (zk-find-first-available-font
-   '("Aporetic Sans Mono" "Liberation Mono")))
+   '("Liberation Mono" "Aporetic Sans Mono")))
 
 (defconst zk-proportional-font-family
   (zk-find-first-available-font
