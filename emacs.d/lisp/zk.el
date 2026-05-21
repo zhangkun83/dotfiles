@@ -69,9 +69,10 @@ White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."
 
 (defun zk-count-leading-spaces (str)
   "Count the number of leading spaces in STR."
-  (if (string-match "^ *" str)
-      (match-end 0)
-    0))
+  (save-match-data
+    (if (string-match "^ *" str)
+        (match-end 0)
+      0)))
 
 (defun zk-goto-next-non-empty-line ()
   (let ((continue-loop-p t) (last-point -1))
