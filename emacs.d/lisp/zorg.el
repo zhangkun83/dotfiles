@@ -1371,6 +1371,16 @@ refer (with \"RE:\") to any other entries.")
     (let ((org-agenda-sticky nil))
       (eval zk-zorg-retr-refresh-form))))
 
+(defun zk-zorg-retr-set-expand-limit ()
+  "Set the expand limit in days for the current ref tree buffer."
+  (interactive)
+  (let* ((input (read-string "Limit expansion to most recent N days (enter N, empty for no limit): "))
+         (limit (if (string= input "")
+                    nil
+                  (string-to-number input))))
+    (setq zk-zorg-retr--expand-limit-days limit)
+    (zk-zorg-retr--refresh)))
+
 (defvar-keymap zk-zorg-retr-keymap
   :parent zk-zorg-keymap-base
   "n" 'next-logical-line
@@ -1379,7 +1389,8 @@ refer (with \"RE:\") to any other entries.")
   "RET" 'zk-zorg-retr--open-link
   "SPC" 'zk-zorg-retr--open-link-other-window
   "TAB" 'zk-zorg-retr--expand-at-point
-  "g" 'zk-zorg-retr--refresh)
+  "g" 'zk-zorg-retr--refresh
+  "l" 'zk-zorg-retr-set-expand-limit)
 
 (defun zk-zorg-retr--config-buffer (refresh-form)
   "Configure a newly created rertree buffer."
@@ -1614,11 +1625,8 @@ without refreshing it."
                 ;; Delete this line and all the items below it
                 (beginning-of-line)
                 (delete-region (point) (progn (forward-line 1) (point)))
-                (while (>
-                        (length (get-text-property
-                                 (point)
-                                 'zk-zorg-retr-entry-ancestor-links))
-                        level)
+                (while (> (zk-count-leading-spaces (thing-at-point 'line t))
+                          (* level 2))
                   (delete-region (point) (progn (forward-line 1) (point))))
                 ;; Re-insert the line in its unexpanded state
                 (zk-zorg-retr--print-entry

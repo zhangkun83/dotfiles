@@ -67,6 +67,12 @@ cannot be inferred from the buffer itself."
 White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."
   (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
 
+(defun zk-count-leading-spaces (str)
+  "Count the number of leading spaces in STR."
+  (if (string-match "^ *" str)
+      (match-end 0)
+    0))
+
 (defun zk-goto-next-non-empty-line ()
   (let ((continue-loop-p t) (last-point -1))
     (while continue-loop-p
