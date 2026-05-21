@@ -274,13 +274,27 @@ remote directory suddenly becomes inaccessible."
                    (replace-regexp-in-string "/" "#" (buffer-file-name)))))
       (zk-save-buffer-as-copy localfile))))
 
-(defun zk-recreate-buffer (name)
+(defun zk-recreate-buffer (name &optional propogated-local-variables)
   "Delete the buffer with the given name if it exists, and create one with same name.
    Return the new buffer.  This is preferred to just get-buffer-create because when
    a buffer is reused by the latter compilation-minor-mode stops recognizing error
-   lines."
-  (ignore-errors (kill-buffer name))
-  (get-buffer-create name))
+   lines.
+   If PROPOGATED-LOCAL-VARIABLES is provided, it should be a list of symbols
+   representing buffer-local variables. Their values will be copied from the
+   old buffer to the new buffer."
+  (let* ((old-buffer (get-buffer name))
+         (saved-vars (when old-buffer
+                       (with-current-buffer old-buffer
+                         (mapcar (lambda (var)
+                                   (cons var (and (boundp var) (symbol-value var))))
+                                 propogated-local-variables)))))
+    (ignore-errors (kill-buffer name))
+    (let ((new-buffer (get-buffer-create name)))
+      (when saved-vars
+        (with-current-buffer new-buffer
+          (dolist (var-pair saved-vars)
+            (set (car var-pair) (cdr var-pair)))))
+      new-buffer)))
 
 (defun zk-minor-mode-active-p (mode)
   "Return t if the given minor mode (as a symbol) is active for the current

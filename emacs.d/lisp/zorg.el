@@ -1263,6 +1263,10 @@ Entries that are tagged with any tag from
           zk-zorg-retr-destid-to-src-entry-mp-up-to-date-p
           t)))
 
+(defvar-local zk-zorg-retr--expand-limit-days nil
+  "When non-nil, `zk-zorg-retr--print-entry' skips entries whose dates are
+more than this number of days older than today.")
+
 (defun zk-zorg-retr--print-entry
     (ancestor-links
      entry-alist
@@ -1306,12 +1310,24 @@ Entries that are tagged with any tag from
        ,expansion-state))
     (newline)
     (when (and print-src-entries-p custom-id)
-      (dolist (src-entry-alist src-entry-alists)
-        (zk-zorg-retr--print-entry
-         (cons link ancestor-links)
-         src-entry-alist
-         (not print-src-entries-p))))))
-
+      (let ((skipped-count 0)
+            (threshold-date-str (when zk-zorg-retr--expand-limit-days
+                                  (format-time-string "%Y-%m-%d"
+                                                      (time-subtract (current-time)
+                                                                     (days-to-time zk-zorg-retr--expand-limit-days))))))
+        (dolist (src-entry-alist src-entry-alists)
+          (let* ((date (alist-get ':date src-entry-alist))
+                 (date-10 (and date (>= (length date) 10) (substring date 0 10)))
+                 (skip (and threshold-date-str date-10 (string< date-10 threshold-date-str))))
+            (if skip
+                (setq skipped-count (1+ skipped-count))
+              (zk-zorg-retr--print-entry
+               (cons link ancestor-links)
+               src-entry-alist
+               (not print-src-entries-p)))))
+        (when (> skipped-count 0)
+          (insert (make-string (* 2 (1+ level)) ?\ ))
+          (insert (format "(%d hidden)\n" skipped-count)))))))
 
 (defvar-local zk-zorg-in-scope-buffer-p nil
   "t means this buffer is in scope of zorg, which means it has the zorg key
@@ -1394,8 +1410,8 @@ refer (with \"RE:\") to any other entries.")
 (defun zk-zorg-retr--get-heading-pos-at-point ()
   "Returns the position of the current heading in the form of alist (:buffer :point)."
   (let* ((entry-alist
-         (get-text-property (point) 'zk-zorg-retr-entry-alist)))
-    (cl-assert entry-alist t)
+          (get-text-property (point) 'zk-zorg-retr-entry-alist)))
+    (unless entry-alist (user-error "Not an entry."))
     ;; org-link-open-from-string doesn't work reliably, thus we save
     ;; the absolute positions.
     (let ((file-path (alist-get ':file-path entry-alist))
@@ -1440,9 +1456,13 @@ refer (with \"RE:\") to any other entries.")
          (entry-custom-id (alist-get ':custom-id entry-alist)))
     (if (and output-buffer org-agenda-sticky)
         (message "Sticky reftree buffer, use ‘g’ to refresh")
-      (setq output-buffer (zk-recreate-buffer output-buffer-name))
+      (setq output-buffer (zk-recreate-buffer output-buffer-name
+                                              '(zk-zorg-retr--expand-limit-days)))
       (with-current-buffer output-buffer
         (zk-zorg-retr--refresh-index)
+        (when zk-zorg-retr--expand-limit-days
+          (insert (format "(Entries older than %d days are hidden)\n\n"
+                          zk-zorg-retr--expand-limit-days)))
         (zk-zorg-retr--print-entry
          nil entry-alist t)
         (zk-zorg-retr--config-buffer
@@ -1516,7 +1536,8 @@ If ARG is not nil, open the result in another window."
          (output-buffer (get-buffer output-buffer-name)))
     (if (and output-buffer org-agenda-sticky)
         (message "Sticky reftree buffer, use ‘g’ to refresh")
-      (setq output-buffer (zk-recreate-buffer output-buffer-name))
+      (setq output-buffer (zk-recreate-buffer output-buffer-name
+                                              '(zk-zorg-retr--expand-limit-days)))
       (with-current-buffer output-buffer
         (zk-zorg-retr--refresh-index)
         (zk-zorg-retrs-for-tags--find-root-entries tag-match)
