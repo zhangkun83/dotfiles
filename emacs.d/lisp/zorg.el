@@ -541,6 +541,16 @@ dates in the range.  For other forms of names, return nil."
                       "-32"))
           (concat year-str "-12-32"))))))
 
+(defun zk-zorg--add-1000-years-to-date (date-str)
+  "Take a date string like \"2026-12-31\" and return \"3026-12-31\"."
+  (if date-str
+      (let* ((parts (split-string date-str "-"))
+             (year (string-to-number (car parts)))
+             (month (nth 1 parts))
+             (day (nth 2 parts)))
+        (format "%04d-%s-%s" (+ year 1000) month day))
+    nil))
+
 (defun zk-org-get-link-at-point()
   (let ((link-prop (get-text-property (point) 'htmlize-link)))
     (when link-prop
@@ -1069,7 +1079,8 @@ filtered by a tag."
            (tags (org-get-tags))  ; Use org-get-tags to include inherited tags
            (title (zk-org-neutralize-timestamp (org-element-property :title element)))
            (date (or (zk-zorg-extract-date title)
-                     (zk-zorg-get-approx-date))))
+                     (zk-zorg--add-1000-years-to-date  ; Make undated entries (mostly TODO entries) always appear first
+                      (zk-zorg-get-approx-date)))))
       (list (cons ':link heading-link)
             (cons ':todo-keyword todo-keyword)
             (cons ':title title)
