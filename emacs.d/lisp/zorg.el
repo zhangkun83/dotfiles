@@ -1483,7 +1483,7 @@ refer (with \"RE:\") to any other entries.")
       (with-current-buffer output-buffer
         (zk-zorg-retr--refresh-index)
         (when zk-zorg-retr--expand-limit-days
-          (insert (format "(Entries older than %d days are hidden)\n\n"
+          (insert (format "(Limiting to most recent %d days)\n\n"
                           zk-zorg-retr--expand-limit-days)))
         (zk-zorg-retr--print-entry
          nil entry-alist t)
