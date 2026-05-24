@@ -255,10 +255,7 @@
 
 (when (fboundp 'set-fontset-font)
   (set-fontset-font t 'chinese-gbk
-                    (font-spec :family (cond ((or (eq system-type 'cygwin)
-                                                  (eq system-type 'windows-nt)) "DengXian")
-                                             ((eq system-type 'gnu/linux) "Droid Sans Fallback")))
-                    nil t))
+                    (font-spec :family "DengXian")))
 
 (add-hook 'dired-mode-hook
           (lambda()
