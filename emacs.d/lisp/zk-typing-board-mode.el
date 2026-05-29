@@ -16,12 +16,13 @@
 
 (defvar zk-typing-board-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-j") #'zk-typing-board-copy-and-insert-line)
+    (define-key map (kbd "C-j") #'zk-typing-board-copy-current-paragraph)
     map)
   "Keymap for `zk-typing-board-mode'.")
 
-(defun zk-typing-board-copy-and-insert-line ()
-  "Copy the current paragraph to clipboard and insert a new line at buffer start."
+(defun zk-typing-board-copy-current-paragraph ()
+  "Copy the current paragraph to clipboard and move point to the end of the
+paragraph."
   (interactive)
   (when (save-excursion
         (beginning-of-line)
