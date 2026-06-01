@@ -1009,11 +1009,11 @@ monitor."
                (message "Using scale settings for 1080p monitor with Mac per %s"
                         monitor-attributes-alist)
                (setq font-height 200)))
-            ((and (= monitor-height-pixels 1800)
-                  (= monitor-dpi 239))
+            ((and (= monitor-height-pixels 1080)
+                  (= monitor-dpi 143))
              (progn
                (message "Using scale settings for Acer Chromebook Plus")
-               (setq font-height 130)
+               (setq font-height 140)
                (setq frame-height-pixels 750)))
             ((and (= monitor-height-pixels 3084)
                   (= monitor-dpi 199))
