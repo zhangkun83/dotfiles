@@ -788,7 +788,7 @@ that need to be sorted."
   "C-c C-o" 'zk-org-open-next-link
   "C-c n n" 'zk-zorg-goto-next-note-file
   "C-c n p" 'zk-zorg-goto-prev-note-file
-  "C-c z c" 'zk-zorg-ai-gemini-create-session
+  "C-c z c r" 'zk-zorg-ai-gemini-create-session-with-recent-notes
   "C-c z p" 'zk-zorg-ai-gemini-insert-prompt
   "C-c c" 'zk-org-clone-narrowed-buffer)
 
@@ -1635,15 +1635,14 @@ without refreshing it."
 
 ;; Generative AI (LLM) related
 
-(defvar zk-zorg-ai-context-limit-days 180
+(defvar zk-zorg-ai-gemini-recent-duration-days 180
   "Default number of days to look back for context notes files.")
 
-(defun zk-zorg-ai-gemini-create-session (&optional arg)
+(defun zk-zorg-ai-gemini-create-session-with-recent-notes (days)
   "Create a session with Gemini AI for zorg tasks."
-  (interactive "P")
+  (interactive (list (read-number "Recent days: " zk-zorg-ai-gemini-recent-duration-days)))
   (let* ((instruction-file (expand-file-name (format "~/.emacs.d/ai-instructions/%s.md" zk-zorg-profile-name)))
          (all-file-list (zk-zorg-list-note-files))
-         (days (if arg (prefix-numeric-value arg) zk-zorg-ai-context-limit-days))
          (start-time (time-subtract (current-time) (days-to-time days)))
          (start-date-str (format-time-string "%Y-%m-%d" start-time))
          (zorg-dir (zk-zorg-directory))
@@ -1691,8 +1690,9 @@ without refreshing it."
      'agenda-with-archives)
     (let ((session-buffer (zk-ai-gemini-start-session)))
       (with-current-buffer session-buffer
+        (rename-buffer (format "%s (recent %d days)" (buffer-name) days) t)
         (zk-ai-gemini--log
-         (format "Using notes since ~%s (last %d days)~" start-date-str days) t)
+         (format "Context start date: %s (%d days ago)" start-date-str days) t)
         (maphash
          (lambda (file content)
            (let* ((count (gethash file file-entry-counts))
@@ -1703,7 +1703,7 @@ without refreshing it."
                            content
                            short-file-name)))
              (setq zk-ai-gemini--context-content (concat zk-ai-gemini--context-content "\n" file-context))
-             (zk-ai-gemini--log (format "Using %d entries from: ~%s~" count short-file-name) t)))
+             (zk-ai-gemini--log (format "Included %d entries from: ~%s~" count short-file-name) t)))
          file-entries)
         (dolist (file file-list-for-context)
           (zk-ai-gemini-add-context-file file))
