@@ -379,7 +379,7 @@ if they don't exist in the corresponding queue yet."
                      ;; the scratch server.
                      (cons 'list (cons category (zk-org-get-scratch-reference-metadata))))))))
            t
-           'agenda-with-archives))))
+           'agenda))))
     (message "%s"
              (server-eval-at
               "scratch"
@@ -727,7 +727,7 @@ the current buffer."
            (unless (string= "" to-tag)
              (org-toggle-tag to-tag 'on))))
        t
-       'agenda-with-archives)
+       'agenda)
       (if (string= "" to-tag)
           (message "Removed \"%s\" in %d entries" from-tag counter)
         (message "Changed \"%s\" to \"%s\" in %d entries" from-tag to-tag counter)))))
@@ -1106,7 +1106,7 @@ entries.  The resulting list is set to the buffer-local variable
        (push (zk-zorg-retr--create-entry-alist-for-current-entry)
              root-entry-list))
      tag-match
-     'agenda-with-archives)
+     'agenda)
     (setq zk-zorg-retr-root-entry-alists
           (sort root-entry-list #'zk-zorg-retr--entry-sort-comparator))))
 
@@ -1239,7 +1239,7 @@ Entries that are tagged with any tag from
                                       (back-to-indentation)
                                       (cl-acons ':pos (point) entry-alist))))))))))
      t
-     'agenda-with-archives)
+     'agenda)
 
 
     (maphash (lambda (key value-list)
@@ -1708,7 +1708,7 @@ without refreshing it."
                  (unless (equal old-ranges new-ranges)
                    (puthash file (1+ (gethash file file-entry-counts 0)) file-entry-counts))))))))
      match-string
-     'agenda-with-archives)
+     'agenda)
     (maphash
      (lambda (file ranges)
        (let ((file-buffer (find-file-noselect file)))
