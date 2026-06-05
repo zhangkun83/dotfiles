@@ -1273,6 +1273,9 @@ Entries that are tagged with any tag from
   "When non-nil, `zk-zorg-retr--print-entry' skips entries whose dates are
 more than this number of days older than today.")
 
+(defvar-local zk-zorg-retr--expand-to-level nil
+  "To which level the trees will initially expand to.")
+
 (defun zk-zorg-retr--print-entry
     (ancestor-links
      entry-alist
@@ -1287,12 +1290,15 @@ more than this number of days older than today.")
                            custom-id))
          (src-entry-alist-count (length src-entry-alists))
          (line-start-pos (point))
+         (should-expand (or print-src-entries-p
+                            (and zk-zorg-retr--expand-to-level
+                                 (< level zk-zorg-retr--expand-to-level))))
          (expansion-state 'unexpandable))
     (when (and (> src-entry-alist-count 0)
                ;; If this entry already appears in the ancestor list,
                ;; we don't make it expandable.
                (not (member link ancestor-links)))
-      (if print-src-entries-p
+      (if should-expand
           (setq expansion-state 'expanded)
         (setq expansion-state 'expandable)))
     (insert (make-string (* 2 level) ?\ ))
@@ -1315,7 +1321,7 @@ more than this number of days older than today.")
        zk-zorg-retr-entry-expansion-state
        ,expansion-state))
     (newline)
-    (when (and print-src-entries-p custom-id)
+    (when (and should-expand custom-id)
       (let ((skipped-count 0)
             (threshold-date-str (when zk-zorg-retr--expand-limit-days
                                   (format-time-string "%Y-%m-%d"
@@ -1330,7 +1336,7 @@ more than this number of days older than today.")
               (zk-zorg-retr--print-entry
                (cons link ancestor-links)
                src-entry-alist
-               (not print-src-entries-p)))))
+               nil))))
         (when (> skipped-count 0)
           (insert (make-string (* 2 (1+ level)) ?\ ))
           (insert (format "(%d hidden)\n" skipped-count)))))))
@@ -1387,6 +1393,17 @@ refer (with \"RE:\") to any other entries.")
     (setq zk-zorg-retr--expand-limit-days limit)
     (zk-zorg-retr--refresh)))
 
+(defun zk-zorg-retr-expand-to-level (level)
+  "Set the initial expansion level (0-5) for the current ref tree buffer."
+  (interactive
+   (list (let* ((default (or zk-zorg-retr--expand-to-level 1))
+                (lvl (read-number "Expand to level (0-5): " default)))
+           (if (and (integerp lvl) (>= lvl 0) (<= lvl 5))
+               lvl
+             (user-error "Level must be an integer between 0 and 5")))))
+  (setq zk-zorg-retr--expand-to-level level)
+  (zk-zorg-retr--refresh))
+
 (defvar-keymap zk-zorg-retr-keymap
   :parent zk-zorg-keymap-base
   "n" 'next-logical-line
@@ -1396,7 +1413,8 @@ refer (with \"RE:\") to any other entries.")
   "SPC" 'zk-zorg-retr--open-link-other-window
   "TAB" 'zk-zorg-retr--expand-at-point
   "g" 'zk-zorg-retr--refresh
-  "l" 'zk-zorg-retr-set-expand-limit)
+  "l" 'zk-zorg-retr-set-expand-limit
+  "+" 'zk-zorg-retr-expand-to-level)
 
 (defun zk-zorg-retr--config-buffer (refresh-form)
   "Configure a newly created rertree buffer."
@@ -1474,14 +1492,17 @@ refer (with \"RE:\") to any other entries.")
     (if (and output-buffer org-agenda-sticky)
         (message "Sticky reftree buffer, use ‘g’ to refresh")
       (setq output-buffer (zk-recreate-buffer output-buffer-name
-                                              '(zk-zorg-retr--expand-limit-days)))
+                                              '(zk-zorg-retr--expand-limit-days
+                                                zk-zorg-retr--expand-to-level)))
       (with-current-buffer output-buffer
+        (unless zk-zorg-retr--expand-to-level
+          (setq zk-zorg-retr--expand-to-level 1))
         (zk-zorg-retr--refresh-index)
         (when zk-zorg-retr--expand-limit-days
           (insert (format "(Limiting to most recent %d days)\n\n"
                           zk-zorg-retr--expand-limit-days)))
         (zk-zorg-retr--print-entry
-         nil entry-alist t)
+         nil entry-alist nil)
         (zk-zorg-retr--config-buffer
          `(zk-zorg-retr
            (zk-zorg-retr--create-entry-alist-for-custom-id
@@ -1555,8 +1576,11 @@ If ARG is not nil, open the result in another window."
     (if (and output-buffer org-agenda-sticky)
         (message "Sticky reftree buffer, use ‘g’ to refresh")
       (setq output-buffer (zk-recreate-buffer output-buffer-name
-                                              '(zk-zorg-retr--expand-limit-days)))
+                                              '(zk-zorg-retr--expand-limit-days
+                                                zk-zorg-retr--expand-to-level)))
       (with-current-buffer output-buffer
+        (unless zk-zorg-retr--expand-to-level
+          (setq zk-zorg-retr--expand-to-level 0))
         (zk-zorg-retr--refresh-index)
         (zk-zorg-retrs-for-tags--find-root-entries tag-match)
         (let ((progress-reporter
