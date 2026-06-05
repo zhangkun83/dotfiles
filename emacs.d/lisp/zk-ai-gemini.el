@@ -89,9 +89,10 @@ not nil, insert the log before '* User' if it exists."
    "\n"))
 
 
-(defun zk-ai-gemini-new-session (&optional buffer-name-suffix)
+(defun zk-ai-gemini-new-session (&optional buffer-name-suffix model)
   "Create a new Gemini session.
-This function initializes a new session with default system instructions."
+This function initializes a new session with default system instructions.
+Optional argument MODEL is a symbol representing the model level."
   (let ((sys-instruct
          (concat
           "\nResponse format requirements:
@@ -117,7 +118,7 @@ This function initializes a new session with default system instructions."
         (setq zk-ai-gemini--sys-instruct sys-instruct)
         (setq zk-ai-gemini--history nil)
         (setq zk-ai-gemini--context-content "")
-        (zk-ai-gemini-set-model-level 'fast)
+        (zk-ai-gemini-set-model-level (or model 'fast))
         (zk-ai-gemini--set-state 'ready))
       (switch-to-buffer-other-window buffer))))
 
@@ -258,20 +259,21 @@ Specifically, it adds a comma before lines starting with '*' or '#+'."
    content                     ; The source string
    t))                         ; fixedcase
 
-(defun zk-ai-gemini-start-session ()
+(defun zk-ai-gemini-start-session (&optional model)
   "Start a new Gemini session.
 If the region is active, use it as context and prompt for an initial
 user prompt.  Otherwise, just create a new empty session.  Returns the
-session buffer."
+session buffer.
+Optional argument MODEL is a symbol representing the model level."
   (interactive)
   (if (use-region-p)
       (let* ((region-content (prog1
                                  (buffer-substring-no-properties
                                   (region-beginning) (region-end))
-                               (deactivate-mark)))
+                                (deactivate-mark)))
              (src-buffer-mode major-mode)
              (suffix (concat "region from " (buffer-name)))
-             (session-buffer (zk-ai-gemini-new-session suffix)))
+             (session-buffer (zk-ai-gemini-new-session suffix model)))
         (insert (concat "Consider the following input:\n"
                         "--- Begin of input ---\n"
                         (if (eq src-buffer-mode 'org-mode)
@@ -281,7 +283,7 @@ session buffer."
                                   "#+end_src"))
                         "\n--- End of input ---\n"))
         session-buffer)
-    (zk-ai-gemini-new-session)))
+    (zk-ai-gemini-new-session nil model)))
 
 (provide 'zk-ai-gemini)
 ;;; zk-ai-gemini.el ends here

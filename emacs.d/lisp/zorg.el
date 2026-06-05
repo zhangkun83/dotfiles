@@ -1688,7 +1688,7 @@ without refreshing it."
                                 file-entries))))))))))
      match-string
      'agenda-with-archives)
-    (let ((session-buffer (zk-ai-gemini-start-session)))
+    (let ((session-buffer (zk-ai-gemini-start-session 'thoughtful)))
       (with-current-buffer session-buffer
         (rename-buffer (format "%s (recent %d days)" (buffer-name) days) t)
         (zk-ai-gemini--log
@@ -1707,8 +1707,7 @@ without refreshing it."
          file-entries)
         (dolist (file file-list-for-context)
           (zk-ai-gemini-add-context-file file))
-        (zk-ai-gemini-add-sys-instruct-file instruction-file)
-        (zk-ai-gemini-set-model-level 'thoughtful)))))
+        (zk-ai-gemini-add-sys-instruct-file instruction-file)))))
 
 (defun zk-zorg-ai-gemini-insert-prompt ()
   "Insert a zorg prompt into the Gemini session."
