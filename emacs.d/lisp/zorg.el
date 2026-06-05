@@ -9,6 +9,7 @@
 (require 'cl-lib)
 (require 'pulse)
 (require 'zk-ai-gemini)
+(require 'zk-rangeset)
 
 (defvar zk-zorg-rsync-backup-dir
   nil "The remote path used by rsync for backing up org files")
@@ -1656,11 +1657,9 @@ without refreshing it."
                    all-file-list)))
          (file-entries (make-hash-table :test 'equal))
          (file-entry-counts (make-hash-table :test 'equal))
-         ;; Track the end position of the last copied subtree per file.
-         ;; Used to prevent duplicate copying of nested entries (subtrees).
-         (file-last-copied-end (make-hash-table :test 'equal))
+         (file-ranges (make-hash-table :test 'equal))
          (match-string (format "TIMESTAMP_IA>=\"<%s>\"|TIMESTAMP>=\"<%s>\""
-                               start-date-str start-date-str)))
+                                start-date-str start-date-str)))
     (unless (file-exists-p instruction-file)
       (user-error "Instruction file not found: %s" instruction-file))
     (org-map-entries
@@ -1669,25 +1668,27 @@ without refreshing it."
          (when (and file
                     (string-match-p "notes.*\\.org$" (file-name-nondirectory file))
                     (not (member file file-list-for-context)))
-           (let ((last-copied-end (gethash file file-last-copied-end 0)))
-             ;; Since org-map-entries visits headings sequentially, if the current
-             ;; point is past the end of the last copied subtree, it is not a
-             ;; descendant of it, so we can copy it.
-             (when (> (point) last-copied-end)
-               (save-excursion
-                 (org-back-to-heading t)
-                 (let ((beg (point)))
-                   (org-end-of-subtree t t)
-                   (let ((end (point)))
-                     ;; Record the end of the current subtree to skip its children
-                     (puthash file end file-last-copied-end)
-                     (puthash file (1+ (gethash file file-entry-counts 0)) file-entry-counts)
-                     (let ((entry-text (buffer-substring-no-properties beg end)))
-                       (puthash file
-                                (concat (gethash file file-entries "") entry-text)
-                                file-entries))))))))))
+           (save-excursion
+             (org-back-to-heading t)
+             (let ((beg (point)))
+               (org-end-of-subtree t t)
+               (let* ((end (point))
+                      (old-ranges (gethash file file-ranges))
+                      (new-ranges (zk-rangeset-add old-ranges (cons beg end))))
+                 (puthash file new-ranges file-ranges)
+                 (unless (equal old-ranges new-ranges)
+                   (puthash file (1+ (gethash file file-entry-counts 0)) file-entry-counts))))))))
      match-string
      'agenda-with-archives)
+    (maphash
+     (lambda (file ranges)
+       (let ((file-buffer (find-file-noselect file)))
+         (with-current-buffer file-buffer
+           (let ((content ""))
+             (dolist (range ranges)
+               (setq content (concat content (buffer-substring-no-properties (car range) (cdr range)))))
+             (puthash file content file-entries)))))
+     file-ranges)
     (let ((session-buffer (zk-ai-gemini-start-session 'thoughtful)))
       (with-current-buffer session-buffer
         (rename-buffer (format "%s (recent %d days)" (buffer-name) days) t)
