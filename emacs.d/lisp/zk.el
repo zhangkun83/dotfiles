@@ -1052,4 +1052,40 @@ monitor."
   (zk-set-default-font zk-font-family)
   (add-hook 'after-make-frame-functions 'zk-reset-frame-size))
 
+(defun zk-dump-variable (var-symbol)
+  "Ask the user to enter a variable name, then create a new buffer
+and insert the full content of the variable into that new buffer.
+The new buffer is named \"*zk-var-dump* <variable-name>\" if the
+variable is a global variable, or \"*zk-var-dump* <variable-name> (<buffer-name>)\"
+if the variable is a buffer-local variable."
+  (interactive
+   (let* ((v-at-point (variable-at-point))
+          (default (when (and (symbolp v-at-point)
+                              (boundp v-at-point))
+                     (symbol-name v-at-point)))
+          (prompt (if default
+                      (format "Dump variable (default %s): " default)
+                    "Dump variable: "))
+          (var-str (completing-read prompt obarray #'boundp t nil nil default)))
+     (if (equal var-str "")
+         (user-error "No variable specified")
+       (list (intern var-str)))))
+  (let* ((var-name (symbol-name var-symbol))
+         (current-buf (current-buffer))
+         (is-local (local-variable-p var-symbol current-buf))
+         (buf-name (if is-local
+                       (format "*zk-var-dump* %s (%s)" var-name (buffer-name current-buf))
+                     (format "*zk-var-dump* %s" var-name)))
+         (val (symbol-value var-symbol))
+         (dump-buf (get-buffer-create buf-name)))
+    (with-current-buffer dump-buf
+      (fundamental-mode)
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (if (stringp val)
+            (insert val)
+          (require 'pp)
+          (pp val (current-buffer)))))
+    (display-buffer dump-buf)))
+
 (provide 'zk)

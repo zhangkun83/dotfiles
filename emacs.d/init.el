@@ -223,6 +223,7 @@
 (require 'zk-typing-board-mode)
 (global-set-key (kbd "C-z C-t") 'zk-typing-board)
 (global-set-key (kbd "C-z \\ p") 'zk-shuangpin-add-phrase)
+(global-set-key (kbd "C-h M-v") 'zk-dump-variable)
 
 (add-hook 'org-mode-hook
           (lambda()
