@@ -1635,7 +1635,7 @@ without refreshing it."
 
 ;; Generative AI (LLM) related
 
-(defvar zk-zorg-ai-context-limit-days 360
+(defvar zk-zorg-ai-context-limit-days 180
   "Default number of days to look back for context notes files.")
 
 (defun zk-zorg-ai-gemini-create-session (&optional arg)
@@ -1654,11 +1654,57 @@ without refreshing it."
                (or (null approx-date)
                    (string< approx-date start-date-str))))
            (mapcar (lambda (f) (expand-file-name f zorg-dir))
-                   all-file-list))))
+                   all-file-list)))
+         (file-entries (make-hash-table :test 'equal))
+         (file-entry-counts (make-hash-table :test 'equal))
+         ;; Track the end position of the last copied subtree per file.
+         ;; Used to prevent duplicate copying of nested entries (subtrees).
+         (file-last-copied-end (make-hash-table :test 'equal))
+         (match-string (format "TIMESTAMP_IA>=\"<%s>\"|TIMESTAMP>=\"<%s>\""
+                               start-date-str start-date-str)))
     (unless (file-exists-p instruction-file)
       (user-error "Instruction file not found: %s" instruction-file))
+    (org-map-entries
+     (lambda ()
+       (let ((file (buffer-file-name)))
+         (when (and file
+                    (string-match-p "notes.*\\.org$" (file-name-nondirectory file))
+                    (not (member file file-list-for-context)))
+           (let ((last-copied-end (gethash file file-last-copied-end 0)))
+             ;; Since org-map-entries visits headings sequentially, if the current
+             ;; point is past the end of the last copied subtree, it is not a
+             ;; descendant of it, so we can copy it.
+             (when (> (point) last-copied-end)
+               (save-excursion
+                 (org-back-to-heading t)
+                 (let ((beg (point)))
+                   (org-end-of-subtree t t)
+                   (let ((end (point)))
+                     ;; Record the end of the current subtree to skip its children
+                     (puthash file end file-last-copied-end)
+                     (puthash file (1+ (gethash file file-entry-counts 0)) file-entry-counts)
+                     (let ((entry-text (buffer-substring-no-properties beg end)))
+                       (puthash file
+                                (concat (gethash file file-entries "") entry-text)
+                                file-entries))))))))))
+     match-string
+     'agenda-with-archives)
     (let ((session-buffer (zk-ai-gemini-start-session)))
       (with-current-buffer session-buffer
+        (zk-ai-gemini--log
+         (format "Using notes since ~%s (last %d days)~" start-date-str days) t)
+        (maphash
+         (lambda (file content)
+           (let* ((count (gethash file file-entry-counts))
+                  (short-file-name (zk-abbrev-home-dir-from-path file))
+                  (file-context
+                   (format "--- Beginning of File: %s ---\n%s\n--- End of File: %s ---\n"
+                           short-file-name
+                           content
+                           short-file-name)))
+             (setq zk-ai-gemini--context-content (concat zk-ai-gemini--context-content "\n" file-context))
+             (zk-ai-gemini--log (format "Using %d entries from: ~%s~" count short-file-name) t)))
+         file-entries)
         (dolist (file file-list-for-context)
           (zk-ai-gemini-add-context-file file))
         (zk-ai-gemini-add-sys-instruct-file instruction-file)
