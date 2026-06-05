@@ -1635,16 +1635,26 @@ without refreshing it."
 
 ;; Generative AI (LLM) related
 
+(defvar zk-zorg-ai-context-limit-days 360
+  "Default number of days to look back for context notes files.")
+
 (defun zk-zorg-ai-gemini-create-session (&optional arg)
   "Create a session with Gemini AI for zorg tasks."
   (interactive "P")
   (let* ((instruction-file (expand-file-name (format "~/.emacs.d/ai-instructions/%s.md" zk-zorg-profile-name)))
          (all-file-list (zk-zorg-list-note-files))
-         (used-num-files (or arg zk-zorg-ai-num-recent-notes-files-for-context))
+         (days (if arg (prefix-numeric-value arg) zk-zorg-ai-context-limit-days))
+         (start-time (time-subtract (current-time) (days-to-time days)))
+         (start-date-str (format-time-string "%Y-%m-%d" start-time))
          (zorg-dir (zk-zorg-directory))
          (file-list-for-context
-          (mapcar (lambda (f) (expand-file-name f zorg-dir))
-                  (last all-file-list used-num-files))))
+          (cl-remove-if
+           (lambda (file)
+             (let ((approx-date (zk-zorg-get-approx-date file)))
+               (or (null approx-date)
+                   (string< approx-date start-date-str))))
+           (mapcar (lambda (f) (expand-file-name f zorg-dir))
+                   all-file-list))))
     (unless (file-exists-p instruction-file)
       (user-error "Instruction file not found: %s" instruction-file))
     (let ((session-buffer (zk-ai-gemini-start-session)))
@@ -1653,8 +1663,6 @@ without refreshing it."
           (zk-ai-gemini-add-context-file file))
         (zk-ai-gemini-add-sys-instruct-file instruction-file)
         (zk-ai-gemini-set-model-level 'thoughtful)))))
-
-(defvar zk-zorg-ai-num-recent-notes-files-for-context 2)
 
 (defun zk-zorg-ai-gemini-insert-prompt ()
   "Insert a zorg prompt into the Gemini session."
