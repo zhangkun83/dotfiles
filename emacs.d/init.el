@@ -298,11 +298,6 @@
    '((mark modified read-only locked " " (name 0 -1 :left) " ")))
  '(inhibit-startup-screen t)
  '(ns-command-modifier nil)
- '(org-agenda-sorting-strategy
-   '((agenda habit-down timestamp-down time-up category-keep)
-     (todo todo-state-down category-down timestamp-down)
-     (tags todo-state-down category-down timestamp-down)
-     (search todo-state-down category-down timestamp-down)))
  '(org-agenda-sticky t)
  '(org-agenda-window-setup 'current-window)
  '(org-fontify-quote-and-verse-blocks t)
