@@ -1414,7 +1414,8 @@ refer (with \"RE:\") to any other entries.")
   "TAB" 'zk-zorg-retr--expand-at-point
   "g" 'zk-zorg-retr--refresh
   "l" 'zk-zorg-retr-set-expand-limit
-  "+" 'zk-zorg-retr-expand-to-level)
+  "+" 'zk-zorg-retr-expand-to-level
+  "z c" 'zk-zorg-ai-gemini-create-session-with-retr-entries)
 
 (defun zk-zorg-retr--config-buffer (refresh-form)
   "Configure a newly created rertree buffer."
@@ -1747,6 +1748,71 @@ without refreshing it."
          file-entries)
         (dolist (file file-list-for-context)
           (zk-ai-gemini-add-context-file file))
+        (zk-ai-gemini-add-sys-instruct-file instruction-file)))))
+
+(defun zk-zorg-ai-gemini-create-session-with-retr-entries ()
+  "Create a Gemini session with the content of visible entries.
+It uses all visible entries in the current retr buffer."
+  (interactive)
+  (unless (and (stringp (buffer-name))
+               (string-prefix-p zk-zorg-retr-buffer-name-prefix (buffer-name)))
+    (user-error "This command can only be run in a retr buffer"))
+  (let* ((retr-buf-name (buffer-name))
+         (suffix (substring retr-buf-name (length zk-zorg-retr-buffer-name-prefix)))
+         (instruction-file (expand-file-name (format "~/.emacs.d/ai-instructions/%s.md" zk-zorg-profile-name)))
+         (file-ranges (make-hash-table :test 'equal))
+         (file-entry-counts (make-hash-table :test 'equal))
+         (file-entries (make-hash-table :test 'equal)))
+    (unless (file-exists-p instruction-file)
+      (user-error "Instruction file not found: %s" instruction-file))
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+        (let ((entry-alist (get-text-property (point) 'zk-zorg-retr-entry-alist)))
+          (when entry-alist
+            (let ((file-path (alist-get ':file-path entry-alist))
+                  (pos (alist-get ':pos entry-alist)))
+              (when (and file-path pos)
+                (let ((file-buffer (find-file-noselect file-path)))
+                  (with-current-buffer file-buffer
+                    (save-excursion
+                      (goto-char pos)
+                      (ignore-errors
+                        (org-back-to-heading t)
+                        (let ((beg (point)))
+                          (org-end-of-subtree t t)
+                          (let* ((end (point))
+                                 (old-ranges (gethash file-path file-ranges))
+                                 (new-ranges (zk-rangeset-add old-ranges (cons beg end))))
+                            (puthash file-path new-ranges file-ranges)
+                            (unless (equal old-ranges new-ranges)
+                              (puthash file-path (1+ (gethash file-path file-entry-counts 0)) file-entry-counts))))))))))))
+        (forward-line 1)))
+    (maphash
+     (lambda (file ranges)
+       (let ((file-buffer (find-file-noselect file)))
+         (with-current-buffer file-buffer
+           (let ((content ""))
+             (dolist (range ranges)
+               (setq content (concat content (buffer-substring-no-properties (car range) (cdr range)))))
+             (puthash file content file-entries)))))
+     file-ranges)
+    (let ((session-buffer (zk-ai-gemini-start-session 'thoughtful)))
+      (with-current-buffer session-buffer
+        (rename-buffer (format "%s (%s)" (buffer-name) suffix) t)
+        (zk-ai-gemini--log (format "Context from retr buffer: %s" suffix) t)
+        (maphash
+         (lambda (file content)
+           (let* ((count (gethash file file-entry-counts))
+                  (short-file-name (zk-abbrev-home-dir-from-path file))
+                  (file-context
+                   (format "--- Beginning of File: %s ---\n%s\n--- End of File: %s ---\n"
+                           short-file-name
+                           content
+                           short-file-name)))
+             (setq zk-ai-gemini--context-content (concat zk-ai-gemini--context-content "\n" file-context))
+             (zk-ai-gemini--log (format "Included %d entries from: ~%s~" count short-file-name) t)))
+         file-entries)
         (zk-ai-gemini-add-sys-instruct-file instruction-file)))))
 
 (defun zk-zorg-ai-gemini-insert-prompt ()
