@@ -1583,17 +1583,32 @@ If ARG is not nil, open the result in another window."
           (setq zk-zorg-retr--expand-to-level 0))
         (zk-zorg-retr--refresh-index)
         (zk-zorg-retrs-for-tags--find-root-entries tag-match)
+        (when zk-zorg-retr--expand-limit-days
+          (insert (format "(Limiting to most recent %d days)\n\n"
+                          zk-zorg-retr--expand-limit-days)))
         (let ((progress-reporter
                (make-progress-reporter
                 "Scanning root entries"
                 0 (length zk-zorg-retr-root-entry-alists)))
-              (counter 0))
+              (counter 0)
+              (skipped-count 0)
+              (threshold-date-str (when zk-zorg-retr--expand-limit-days
+                                    (format-time-string "%Y-%m-%d"
+                                                        (time-subtract (current-time)
+                                                                       (days-to-time zk-zorg-retr--expand-limit-days))))))
           (dolist (entry-alist zk-zorg-retr-root-entry-alists)
-            (zk-zorg-retr--print-entry
-             nil entry-alist nil)
+            (let* ((date (alist-get ':date entry-alist))
+                   (date-10 (and date (>= (length date) 10) (substring date 0 10)))
+                   (skip (and threshold-date-str date-10 (string< date-10 threshold-date-str))))
+              (if skip
+                  (cl-incf skipped-count)
+                (zk-zorg-retr--print-entry
+                 nil entry-alist nil)))
             (cl-incf counter)
             (progress-reporter-update progress-reporter counter))
-          (progress-reporter-done progress-reporter))
+          (progress-reporter-done progress-reporter)
+          (when (> skipped-count 0)
+            (insert (format "\n(%d hidden top-level entries)\n" skipped-count))))
         (zk-zorg-retr--config-buffer
          (list 'zk-zorg-retrs-for-tags
                `(quote ,tag-match)))))
