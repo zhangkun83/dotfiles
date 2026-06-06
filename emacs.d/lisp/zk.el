@@ -359,17 +359,23 @@ buffer."
                              'zk-youdao-dict--history)))
   (eww-browse-url (concat "https://dict.youdao.com/w/eng/" (url-hexify-string word))) t)
 
+(defun zk-get-string-preview (str limit)
+  "Return a preview of STR, which is its first LIMIT characters, with
+continuous white spaces (newlines, tabs, spaces) replaced by single
+spaces.  If the preview doesn't show the full string, it will end with
+\"...\"."
+  (let ((reduced-whitespace
+         (zk-trim-string (replace-regexp-in-string
+          "[\n\t ]+" " " str))))
+   (if (> (length reduced-whitespace) limit)
+       (concat (substring reduced-whitespace 0 limit) "...")
+     reduced-whitespace)))
+
 (defun zk-yank-to-register (r)
   "Yank to a register"
   (interactive (list (register-read-with-preview
                       (format "Yank \"%s\" to register: "
-                              (let ((content (current-kill 0 t))
-                                    (limit 80))
-                                (replace-regexp-in-string
-                                 "\n+" " "
-                                 (if (> (length content) limit)
-                                     (concat (substring content 0 limit) "...")
-                                   content)))))))
+                              (zk-get-string-preview (current-kill 0 t) 80)))))
   (set-register r (current-kill 0 t)))
 
 ;; Use relative directory for local paths, because I may be running

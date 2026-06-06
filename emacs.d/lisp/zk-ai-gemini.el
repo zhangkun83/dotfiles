@@ -272,7 +272,7 @@ Optional argument MODEL is a symbol representing the model level."
                                   (region-beginning) (region-end))
                                 (deactivate-mark)))
              (src-buffer-mode major-mode)
-             (suffix (concat "region from " (buffer-name)))
+             (suffix (concat "\"" (zk-get-string-preview region-content 30) "\""))
              (session-buffer (zk-ai-gemini-new-session suffix model)))
         (insert (concat "Consider the following input:\n"
                         "--- Begin of input ---\n"
