@@ -446,7 +446,7 @@ CUSTOM_ID.  Ask for confirmation before setting the CUSTOM_ID."
 org-agenda-mode or any other buffer that list headings, eval the given
 `form' at the actual heading in the referenced org-mode buffer."
   (cond
-   (zk-zorg-retr-refresh-form
+   ((derived-mode-p 'zorg-retr-mode)
     ;; In a reference tree buffer
     (let ((pos-alist (zk-zorg-retr--get-heading-pos-at-point)))
       (with-current-buffer (alist-get ':buffer pos-alist)
@@ -1261,9 +1261,11 @@ Entries that are tagged with any tag from
 (defvar-local zk-zorg-retr--expand-limit-days nil
   "When non-nil, `zk-zorg-retr--print-entry' skips entries whose dates are
 more than this number of days older than today.")
+(put 'zk-zorg-retr--expand-limit-days 'permanent-local t)
 
 (defvar-local zk-zorg-retr--expand-to-level nil
   "To which level the trees will initially expand to.")
+(put 'zk-zorg-retr--expand-to-level 'permanent-local t)
 
 (defun zk-zorg-retr--print-entry
     (ancestor-links
@@ -1393,8 +1395,17 @@ refer (with \"RE:\") to any other entries.")
   (setq zk-zorg-retr--expand-to-level level)
   (zk-zorg-retr--refresh))
 
-(defvar-keymap zk-zorg-retr-keymap
-  :parent zk-zorg-keymap-base
+(defconst zorg-retr-font-lock-keywords
+  '(("^ *[+-] \\(\\[[A-Z]+\\] \\)?"
+     . 'zk-zorg-backref-bullet-prefix)
+    (":[a-zA-Z0-9_@#:]+:"
+     . 'org-tag)
+    ("([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*)"
+     . 'zk-zorg-backref-neutralized-timestamp))
+  "Font lock keywords for `zorg-retr-mode'.")
+
+(defvar-keymap zorg-retr-mode-map
+  :parent (make-composed-keymap zk-zorg-keymap-base special-mode-map)
   "n" 'next-logical-line
   "p" 'previous-logical-line
   "q" 'quit-window
@@ -1406,29 +1417,18 @@ refer (with \"RE:\") to any other entries.")
   "+" 'zk-zorg-retr-expand-to-level
   "z c" 'zk-zorg-ai-gemini-create-session-with-retr-entries)
 
+(define-derived-mode zorg-retr-mode special-mode "Zorg-Retr"
+  "Major mode for Zorg reference tree buffers."
+  (setq zk-zorg-in-scope-buffer-p t)
+  (setq truncate-lines t)
+  (setq font-lock-keywords-only t)
+  (setq font-lock-defaults '(zorg-retr-font-lock-keywords t)))
+
 (defun zk-zorg-retr--config-buffer (refresh-form)
   "Configure a newly created rertree buffer."
+  (zorg-retr-mode)
   (goto-char 0)
   (set-buffer-modified-p nil)
-  (read-only-mode t)
-
-  ;; Format different components of the content for better
-  ;; readability.  This has to be done via font-lock, instead of
-  ;; propertizing the output directly, because the propertization
-  ;; would be overridden by org-mode font-lock anyway.
-  (font-lock-add-keywords
-   nil
-   '(("^ *[+-] \\(\\[[A-Z]+\\] \\)?"
-      . 'zk-zorg-backref-bullet-prefix)
-     (":[a-zA-Z0-9_@#:]+:"
-      . 'org-tag)
-     ("([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*)"
-      . 'zk-zorg-backref-neutralized-timestamp)))
-  (zk-zorg-configure-in-scope-buffer zk-zorg-retr-keymap)
-  ;; Disable the built-in font-locks for strings and comments
-  (setq font-lock-keywords-only t)
-  (turn-on-font-lock)
-  (setq truncate-lines t)
   (setq zk-zorg-retr-refresh-form refresh-form))
 
 
@@ -1743,9 +1743,8 @@ without refreshing it."
   "Create a Gemini session with the content of visible entries.
 It uses all visible entries in the current retr buffer."
   (interactive)
-  (unless (and (stringp (buffer-name))
-               (string-prefix-p zk-zorg-retr-buffer-name-prefix (buffer-name)))
-    (user-error "This command can only be run in a retr buffer"))
+  (unless (derived-mode-p 'zorg-retr-mode)
+    (user-error "This command can only be run in a zorg-retr buffer"))
   (let* ((retr-buf-name (buffer-name))
          (suffix (substring retr-buf-name (length zk-zorg-retr-buffer-name-prefix)))
          (instruction-file (expand-file-name (format "~/.emacs.d/ai-instructions/%s.md" zk-zorg-profile-name)))
