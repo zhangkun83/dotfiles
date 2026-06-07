@@ -1841,9 +1841,13 @@ It uses all visible entries in the current retr buffer."
        action item is prepended with `*AI*`.
     5. Copy quotes verbatim, while putting a one-line summary in front of it.")
                        ((eq choice ?t)
-                        "Generate TODO entries for the given meeting notes entry using the following steps:\n
-Find every `*AI*` in the meeting notes, create a TODO entry to capture that
-action item.  The TODO entry shall:
+                        "Find or add TODO entries for the given meeting notes entry using the following steps:
+
+For every `*AI*` (action item) in the meeting notes, if there is already
+a TODO entry for that, tell me the link to that entry.  Otherwise,
+create a TODO entry to capture that action item.  The new TODO entry
+shall:
+
 1. Have a heading (up to 90 characters) summarizing the action
 2. Have a text body that includes the full text of the original action
    item, and related context information (on why we need to take this
@@ -1852,6 +1856,8 @@ action item.  The TODO entry shall:
    number of asterisks) as the meeting notes entry
 4. Be tagged according to the project and people associated with this
    TODO entry.
+5. Have a back reference (which starts with \"RE:\") to the meeting
+   notes, and any other relevant back references.
 "))))
     (goto-char (point-max))
     (insert "#+begin_src markdown\n"
