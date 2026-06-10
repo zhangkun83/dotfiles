@@ -1356,10 +1356,6 @@ ID (CUSTOM_ID) to the source entry alist.")
   "The entry-alists of root entries.  A root entry is an entry that doesn't back
 refer (with \"RE:\") to any other entries.")
 
-(defface zk-zorg-backref-neutralized-timestamp
-  `((t :height 0.9 :family ,zk-font-family :background "#EEEEEE"))
-  "The face for neutralized timestamp (e.g., `(2025-01-23)') in backref buffer")
-
 (defface zk-zorg-backref-tags
   `((t :height 0.9 :family ,zk-font-family :foreground "#9A9FA4"))
   "The face for tags in backref buffer")
@@ -1401,7 +1397,7 @@ refer (with \"RE:\") to any other entries.")
     (":[a-zA-Z0-9_@#:]+:"
      . 'org-tag)
     ("([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*)"
-     . 'zk-zorg-backref-neutralized-timestamp))
+     . 'org-date))
   "Font lock keywords for `zorg-retr-mode'.")
 
 (defvar-keymap zorg-retr-mode-map

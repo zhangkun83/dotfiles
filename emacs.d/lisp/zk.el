@@ -26,6 +26,22 @@ than $HOME which is \"c:\\Users\\foo\\AppData\\Roaming\".")
   '((t :foreground "black" :background "cyan" :extend t))
   "The face for higlighting momentarily")
 
+(defvar zk-dark-mode nil)
+
+(defun zk-dark-mode-apply ()
+  (if zk-dark-mode
+      (progn
+        (disable-theme 'leuven)
+        (load-theme 'leuven-dark t))
+    (disable-theme 'leuven-dark)
+    (load-theme 'leuven t))
+  (message "Dark mode: %s" (if zk-dark-mode "on" "off")))
+
+(defun zk-dark-mode-toggle ()
+  (interactive)
+  (setq zk-dark-mode (not zk-dark-mode))
+  (zk-dark-mode-apply))
+
 (defun zk-echo-active-modes ()
   "Display the currently active modes (as would be displayed in the mode
 line) in the echo area."
@@ -976,6 +992,7 @@ monitor."
       (set-face-attribute 'default nil
 		          :family family
                           :height (alist-get 'font-height scaling-alist))
+      (setq-default line-spacing 0.2)
       (dolist (frame (frame-list))
         (zk-scale-frame frame scaling-alist))))
 
@@ -998,8 +1015,8 @@ monitor."
             ((and (= monitor-height-pixels 1080)
                   (= monitor-dpi 92))
              (progn
-               (message "Using scale settings for Acer monitor with Thinkpad P1 Windows 11")
-               (setq font-height 135)
+               (message "Using scale settings for Acer 24\" monitor with Thinkpad P1 Windows 11")
+               (setq font-height 125)
                (setq frame-height-pixels 750)))
             ((and (= monitor-dpi 140)
                   (= monitor-height-pixels 2160))
