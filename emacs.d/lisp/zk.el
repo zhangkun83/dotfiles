@@ -992,7 +992,7 @@ monitor."
       (set-face-attribute 'default nil
 		          :family family
                           :height (alist-get 'font-height scaling-alist))
-      (setq-default line-spacing 0.2)
+      (setq-default line-spacing nil)
       (dolist (frame (frame-list))
         (zk-scale-frame frame scaling-alist))))
 
