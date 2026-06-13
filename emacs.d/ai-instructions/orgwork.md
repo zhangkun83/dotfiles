@@ -60,6 +60,20 @@ meeting notes, and personal reminders.
 
 *  Tags must be at the end of the heading line.
 
+## Task tracking
+
+*  An entry whose heading title starts with "TODO", "WIP", "DONE",
+   "CANCELLED" etc are for tracking tasks.
+
+*  A task's updates could be in the following forms:
+   *  A timestamped bullet point inside the ":LOGBOOK" drawer that
+      ends with ":END"
+   *  A content paragraph that starts with a timestamp
+   *  Another entry that has back reference to the task's entry
+
+*  Unless specified with a different person's name, updates of tasks
+   represent my own work.
+
 ## Meeting notes
 
 *  A meeting notes entry is tagged with the tag for the persons
