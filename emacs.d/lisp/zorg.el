@@ -640,6 +640,12 @@ the agenda."
               (save-excursion
                 (org-up-element)
                 (zk-org-get-external-reference)))
+             (topic-deadline
+              (save-excursion
+                (org-up-element)
+                (org-element-property
+                 :raw-value
+                 (org-element-property :deadline (org-element-at-point)))))
              (agenda-title
               (org-element-property :title (org-element-at-point)))
              (agenda-content
@@ -651,6 +657,8 @@ the agenda."
                                  "- *" agenda-title "*\n"
                                  (if (equal "" agenda-content) ""
                                    (concat agenda-content "\n"))
+                                 (if (not topic-deadline) ""
+                                   (concat "- *DEADLINE*: " topic-deadline "\n"))
                                  "- ---- -\n\n")))
            ;; When CUSTOM_ID is added during the process, the position
            ;; of the entry is shifted down, which could cause the
