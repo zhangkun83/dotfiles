@@ -1370,10 +1370,10 @@ refer (with \"RE:\") to any other entries.")
     (let ((org-agenda-sticky nil))
       (eval zk-zorg-retr-refresh-form))))
 
-(defun zk-zorg-retr-set-expand-limit ()
-  "Set the expand limit in days for the current ref tree buffer."
+(defun zk-zorg-retr-limit-view-to-recent-days ()
+  "Limit the view to the most recent N days for the current ref tree buffer."
   (interactive)
-  (let* ((input (read-string "Limit expansion to most recent N days (enter N, empty for no limit): "))
+  (let* ((input (read-string "Limit view to most recent N days (enter N, empty for no limit): "))
          (limit (if (string= input "")
                     nil
                   (string-to-number input))))
@@ -1409,7 +1409,7 @@ refer (with \"RE:\") to any other entries.")
   "SPC" 'zk-zorg-retr--open-link-other-window
   "TAB" 'zk-zorg-retr--expand-at-point
   "g" 'zk-zorg-retr--refresh
-  "l" 'zk-zorg-retr-set-expand-limit
+  "r" 'zk-zorg-retr-limit-view-to-recent-days
   "+" 'zk-zorg-retr-expand-to-level
   "z c" 'zk-zorg-ai-gemini-create-session-with-retr-entries)
 
