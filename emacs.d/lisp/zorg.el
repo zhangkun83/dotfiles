@@ -655,10 +655,10 @@ the agenda."
                  (buffer-substring-no-properties (region-beginning) (region-end))))))
          (let ((new-item (concat "RE: " topic-link "\n"
                                  "- *" agenda-title "*\n"
-                                 (if (equal "" agenda-content) ""
-                                   (concat agenda-content "\n"))
                                  (if (not topic-deadline) ""
                                    (concat "- *DEADLINE*: " topic-deadline "\n"))
+                                 (if (equal "" agenda-content) ""
+                                   (concat agenda-content "\n"))
                                  "- ---- -\n\n")))
            ;; When CUSTOM_ID is added during the process, the position
            ;; of the entry is shifted down, which could cause the
