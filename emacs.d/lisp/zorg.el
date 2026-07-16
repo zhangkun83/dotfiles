@@ -654,9 +654,9 @@ the agenda."
                 (string-trim
                  (buffer-substring-no-properties (region-beginning) (region-end))))))
          (let ((new-item (concat "RE: " topic-link "\n"
-                                 "- *" agenda-title "*\n"
                                  (if (not topic-deadline) ""
                                    (concat "- *DEADLINE*: " topic-deadline "\n"))
+                                 "- *" agenda-title "*\n"
                                  (if (equal "" agenda-content) ""
                                    (concat agenda-content "\n"))
                                  "- ---- -\n\n")))
