@@ -1018,6 +1018,12 @@ monitor."
                (message "Using scale settings for Acer 24\" monitor with Thinkpad P1 Windows 11")
                (setq font-height 125)
                (setq frame-height-pixels 750)))
+            ((and (= monitor-height-pixels 1080)
+                  (= monitor-dpi 70))
+             (progn
+               (message "Using scale settings for Acer 32\" monitor with Thinkpad P1 Windows 11")
+               (setq font-height 110)
+               (setq frame-height-pixels 750)))
             ((and (= monitor-dpi 140)
                   (= monitor-height-pixels 2160))
              (progn
