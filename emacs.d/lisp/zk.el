@@ -26,7 +26,7 @@ than $HOME which is \"c:\\Users\\foo\\AppData\\Roaming\".")
   '((t :foreground "black" :background "cyan" :extend t))
   "The face for higlighting momentarily")
 
-(defvar zk-dark-mode nil)
+(defvar zk-dark-mode t)
 
 (defun zk-dark-mode-apply ()
   (if zk-dark-mode
@@ -921,7 +921,7 @@ is available."
 ;; font built from the Iosevka typeface.
 (defconst zk-font-family
   (zk-find-first-available-font
-   '("Liberation Mono" "Aporetic Sans Mono")))
+   '("Aporetic Sans Mono" "Liberation Mono")))
 
 (defconst zk-proportional-font-family
   (zk-find-first-available-font
@@ -990,14 +990,23 @@ monitor."
     "Set the default font for Emacs."
     (let ((scaling-alist (zk-get-default-scaling-alist)))
       (set-face-attribute 'default nil
-		          :family family
+		          :family (alist-get 'font-family scaling-alist)
                           :height (alist-get 'font-height scaling-alist))
+      ;; If t, symbols like punctuations will use the default font,
+      ;; but bitmap font like Terminus doesn't include unicode
+      ;; punctuations like Chinese punctuations.
+      (setq use-default-font-for-symbols nil)
+      (when (fboundp 'set-fontset-font)
+        (set-fontset-font t 'chinese-gbk
+                          (font-spec :family (alist-get 'chinese-font-family scaling-alist))))
       (setq-default line-spacing nil)
       (dolist (frame (frame-list))
         (zk-scale-frame frame scaling-alist))))
 
   (defun zk-get-default-scaling-alist ()
-    (let* ((font-height 120)
+    (let* ((font-family zk-font-family)
+           (chinese-font-family "DengXian")
+           (font-height 120)
            (frame-width-pixels 1000)
            (frame-height-pixels 900)
            (monitor-attributes-alist (zk-get-monitor-attributes-alist))
@@ -1015,16 +1024,18 @@ monitor."
             ((and (= monitor-height-pixels 1080)
                   (= monitor-dpi 92))
              (progn
-               (message "Using scale settings for Acer 24\" monitor with Thinkpad P1 Windows 11")
+               (message "Using scale settings for Acer 24\" 1080p monitor with Thinkpad P1 Windows 11")
                (setq font-height 125)
                (setq frame-height-pixels 750)))
             ((and (= monitor-height-pixels 1080)
                   (= monitor-dpi 70))
              (progn
-               (message "Using scale settings for Acer 32\" monitor with Thinkpad P1 Windows 11")
-               (setq font-height 110)
-               (setq frame-width-pixels 850)
-               (setq frame-height-pixels 750)))
+               (message "Using scale settings for Acer 32\" 1080p monitor with Thinkpad P1 Windows 11")
+               (setq font-family "Terminus"
+                     chinese-font-family "NSimSun"
+                     font-height 120
+                     frame-width-pixels 850
+                     frame-height-pixels 750)))
             ((and (= monitor-dpi 140)
                   (= monitor-height-pixels 2160))
              (progn
@@ -1060,13 +1071,15 @@ monitor."
             ((and (= monitor-height-pixels 1080)
                   (= monitor-dpi 96))
              (progn
-               (message "Using scale settings for Acer monitor with Thinkpad T440s")
+               (message "Using scale settings for Acer 32\" 1080p monitor with Thinkpad T440s")
                (setq font-height 120)
                (setq frame-height-pixels 750)))
             (t
              (progn
                (message "Using default scale settings per %s" monitor-attributes-alist))))
-      (list (cons 'font-height font-height)
+      (list (cons 'font-family font-family)
+            (cons 'chinese-font-family chinese-font-family)
+            (cons 'font-height font-height)
             (cons 'frame-width-pixels frame-width-pixels)
             (cons 'frame-height-pixels frame-height-pixels))))
 

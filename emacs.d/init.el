@@ -255,10 +255,6 @@
           (lambda()
             (local-set-key (kbd "C-c C-p") 'zk-copy-pid)))
 
-(when (fboundp 'set-fontset-font)
-  (set-fontset-font t 'chinese-gbk
-                    (font-spec :family "DengXian")))
-
 (add-hook 'dired-mode-hook
           (lambda()
             (dired-hide-details-mode 1)
