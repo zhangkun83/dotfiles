@@ -995,7 +995,6 @@ monitor."
       (when (fboundp 'set-fontset-font)
         (set-fontset-font t 'chinese-gbk
                           (font-spec :family (alist-get 'chinese-font-family scaling-alist))))
-      (setq-default line-spacing nil)
       (dolist (frame (frame-list))
         (zk-scale-frame frame scaling-alist))))
 
@@ -1032,7 +1031,8 @@ monitor."
                      frame-height-pixels 750
                      chinese-font-family "NSimSun")
                ;; Force the use of NSimSun for punctuations
-               (setq use-default-font-for-symbols nil)))
+               (setq use-default-font-for-symbols nil)
+               (setq-default line-spacing 0.1)))
             ((and (= monitor-dpi 140)
                   (= monitor-height-pixels 2160))
              (progn
