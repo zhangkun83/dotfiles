@@ -1425,6 +1425,7 @@ refer (with \"RE:\") to any other entries.")
   "Major mode for Zorg reference tree buffers."
   (setq zk-zorg-in-scope-buffer-p t)
   (setq truncate-lines t)
+  (zk-use-proportional-font-for-current-buffer)
   (setq font-lock-keywords-only t)
   (setq font-lock-defaults '(zorg-retr-font-lock-keywords t)))
 
@@ -1880,9 +1881,17 @@ shall:
 (add-hook 'org-mode-hook 'zk-org-set-file-encoding)
 (add-hook 'org-mode-hook
           (lambda ()
-            (zk-zorg-configure-in-scope-buffer zk-zorg-org-mode-keymap)))
+            (zk-zorg-configure-in-scope-buffer zk-zorg-org-mode-keymap)
+            (zk-use-proportional-font-for-current-buffer)))
 (add-hook 'org-agenda-mode-hook
           (lambda ()
-            (zk-zorg-configure-in-scope-buffer zk-zorg-org-agenda-mode-keymap)))
+            (zk-zorg-configure-in-scope-buffer zk-zorg-org-agenda-mode-keymap)
+            (zk-use-proportional-font-for-current-buffer)))
+
+;; Since we use proportional font in graphics mode, tags righ-alignment will
+;; be off because it's done by adding spaces.  Disable the right-aligning.
+(when (display-graphic-p)
+  (setq org-tags-column 0)
+  (setq org-agenda-tags-column 0))
 
 (provide 'zorg)
