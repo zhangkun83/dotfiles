@@ -225,6 +225,8 @@
 (global-set-key (kbd "C-z C-t") 'zk-typing-board)
 (global-set-key (kbd "C-z \\ p") 'zk-shuangpin-add-phrase)
 (global-set-key (kbd "C-h M-v") 'zk-dump-variable)
+(global-set-key (kbd "C-z w +") 'zk-double-frame-width-and-fit)
+(global-set-key (kbd "C-z w -") 'zk-halve-frame-width)
 
 (add-hook 'org-mode-hook
           (lambda()

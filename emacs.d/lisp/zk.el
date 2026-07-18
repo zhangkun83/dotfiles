@@ -1085,6 +1085,66 @@ monitor."
   (zk-set-default-font zk-font-family)
   (add-hook 'after-make-frame-functions 'zk-reset-frame-size))
 
+(defun zk-double-frame-width-and-fit ()
+  "Double the current frame width, capped by the screen width.
+If the frame goes out of bounds, adjust its position so that it is fully visible."
+  (interactive)
+  (unless (memq (frame-parameter nil 'fullscreen) '(maximized fullboth))  
+    (let* ((frame (selected-frame))
+           ;; Get the current frame size and position in pixels
+           (cur-left (or (car (frame-position frame)) 0))
+           (cur-top (or (cdr (frame-position frame)) 0))
+           (cur-width (frame-pixel-width frame))
+           (cur-height (frame-pixel-height frame))
+
+           ;; Get monitor workarea geometry (multi-monitor friendly)
+           (workarea (frame-monitor-workarea frame))
+           (screen-left (nth 0 workarea))
+           (screen-top (nth 1 workarea))
+           (screen-width (nth 2 workarea))
+
+           ;; Calculate target width (capped by monitor/screen width)
+           (new-width (min (* cur-width 2) screen-width))
+
+           ;; Calculate new left position if the frame starts going off screen
+           ;; (ensure the right edge does not exceed (screen-left + screen-width))
+           (new-left (if (> (+ cur-left new-width) (+ screen-left screen-width))
+                         (- (+ screen-left screen-width) new-width)
+                       cur-left))
+           ;; Ensure we don't push the left edge past the screen's left edge
+           (new-left (max new-left screen-left)))
+
+      ;; Apply position first, then the size (pixelwise)
+      (set-frame-position frame new-left cur-top)
+      (set-frame-size frame new-width cur-height t))))
+
+(defun zk-halve-frame-width ()
+  "Cut the current frame width in half, maintaining its vertical position."
+  (interactive)
+  (unless (memq (frame-parameter nil 'fullscreen) '(maximized fullboth))
+    (let* ((frame (selected-frame))
+           ;; Get the current frame size and position in pixels
+           (cur-left (or (car (frame-position frame)) 0))
+           (cur-top (or (cdr (frame-position frame)) 0))
+           (cur-width (frame-pixel-width frame))
+           (cur-height (frame-pixel-height frame))
+
+           ;; Calculate the new width (halved)
+           (new-width (/ cur-width 2))
+
+           ;; Get monitor workarea geometry to make sure we stay within bounds
+           (workarea (frame-monitor-workarea frame))
+           (screen-left (nth 0 workarea))
+
+           ;; Prevent the width from becoming microscopic (minimum 200px)
+           (final-width (max new-width 200))
+           ;; Make sure the frame's left coordinate doesn't drift off-screen
+           (final-left (max cur-left screen-left)))
+
+      ;; Set the new position and width pixelwise
+      (set-frame-position frame final-left cur-top)
+      (set-frame-size frame final-width cur-height t))))
+
 (defun zk-dump-variable (var-symbol)
   "Ask the user to enter a variable name, then create a new buffer
 and insert the full content of the variable into that new buffer.
