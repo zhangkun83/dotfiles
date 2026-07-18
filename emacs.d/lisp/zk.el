@@ -936,6 +936,7 @@ is available."
 (defun zk-use-proportional-font-for-current-buffer ()
   (set-cursor-color (face-attribute 'default :foreground))
   (setq zk-buffer-font-family zk-proportional-font-family)
+  (setq cursor-type 'bar)
   (let ((scaling-alist (zk-get-default-scaling-alist)))
     (buffer-face-set
      `(:family ,zk-buffer-font-family
