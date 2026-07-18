@@ -26,7 +26,7 @@ than $HOME which is \"c:\\Users\\foo\\AppData\\Roaming\".")
   '((t :foreground "black" :background "cyan" :extend t))
   "The face for higlighting momentarily")
 
-(defvar zk-dark-mode t)
+(defvar zk-dark-mode nil)
 
 (defun zk-dark-mode-apply ()
   (if zk-dark-mode
@@ -921,7 +921,7 @@ is available."
 ;; font built from the Iosevka typeface.
 (defconst zk-font-family
   (zk-find-first-available-font
-   '("Aporetic Sans Mono" "Liberation Mono")))
+   '("Liberation Mono" "Aporetic Sans Mono")))
 
 (defconst zk-proportional-font-family
   (zk-find-first-available-font
@@ -992,10 +992,6 @@ monitor."
       (set-face-attribute 'default nil
 		          :family (alist-get 'font-family scaling-alist)
                           :height (alist-get 'font-height scaling-alist))
-      ;; If t, symbols like punctuations will use the default font,
-      ;; but bitmap font like Terminus doesn't include unicode
-      ;; punctuations like Chinese punctuations.
-      (setq use-default-font-for-symbols nil)
       (when (fboundp 'set-fontset-font)
         (set-fontset-font t 'chinese-gbk
                           (font-spec :family (alist-get 'chinese-font-family scaling-alist))))
@@ -1031,11 +1027,12 @@ monitor."
                   (= monitor-dpi 70))
              (progn
                (message "Using scale settings for Acer 32\" 1080p monitor with Thinkpad P1 Windows 11")
-               (setq font-family "Terminus"
-                     chinese-font-family "NSimSun"
-                     font-height 120
+               (setq font-height 105
                      frame-width-pixels 850
-                     frame-height-pixels 750)))
+                     frame-height-pixels 750
+                     chinese-font-family "NSimSun")
+               ;; Force the use of NSimSun for punctuations
+               (setq use-default-font-for-symbols nil)))
             ((and (= monitor-dpi 140)
                   (= monitor-height-pixels 2160))
              (progn
