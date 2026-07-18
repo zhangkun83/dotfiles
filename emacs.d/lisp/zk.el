@@ -990,18 +990,16 @@ monitor."
     "Set the default font for Emacs."
     (let ((scaling-alist (zk-get-default-scaling-alist)))
       (set-face-attribute 'default nil
-		          :family (alist-get 'font-family scaling-alist)
+                          :family zk-font-family
                           :height (alist-get 'font-height scaling-alist))
       (when (fboundp 'set-fontset-font)
         (set-fontset-font t 'chinese-gbk
-                          (font-spec :family (alist-get 'chinese-font-family scaling-alist))))
+                          (font-spec :family "DengXian")))
       (dolist (frame (frame-list))
         (zk-scale-frame frame scaling-alist))))
 
   (defun zk-get-default-scaling-alist ()
-    (let* ((font-family zk-font-family)
-           (chinese-font-family "DengXian")
-           (font-height 120)
+    (let* ((font-height 120)
            (frame-width-pixels 1000)
            (frame-height-pixels 900)
            (monitor-attributes-alist (zk-get-monitor-attributes-alist))
@@ -1026,13 +1024,9 @@ monitor."
                   (= monitor-dpi 70))
              (progn
                (message "Using scale settings for Acer 32\" 1080p monitor with Thinkpad P1 Windows 11")
-               (setq font-height 105
+               (setq font-height 110
                      frame-width-pixels 850
-                     frame-height-pixels 750
-                     chinese-font-family "NSimSun")
-               ;; Force the use of NSimSun for punctuations
-               (setq use-default-font-for-symbols nil)
-               (setq-default line-spacing 0.1)))
+                     frame-height-pixels 750)))
             ((and (= monitor-dpi 140)
                   (= monitor-height-pixels 2160))
              (progn
@@ -1074,9 +1068,7 @@ monitor."
             (t
              (progn
                (message "Using default scale settings per %s" monitor-attributes-alist))))
-      (list (cons 'font-family font-family)
-            (cons 'chinese-font-family chinese-font-family)
-            (cons 'font-height font-height)
+      (list (cons 'font-height font-height)
             (cons 'frame-width-pixels frame-width-pixels)
             (cons 'frame-height-pixels frame-height-pixels))))
 
