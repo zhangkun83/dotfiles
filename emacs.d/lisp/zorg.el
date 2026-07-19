@@ -1372,6 +1372,10 @@ refer (with \"RE:\") to any other entries.")
   `((t :height 0.9 :family ,zk-font-family :weight bold))
   "The face for the bullet character and the TODO keywords in backref buffer")
 
+(defface zk-zorg-backref-date
+  `((t :height 0.9 :family ,zk-font-family :foreground "#00459E"))
+  "The face for the dates in backref buffer")
+
 (defun zk-zorg-retr--refresh ()
   (interactive)
   (when (yes-or-no-p "Do you want to refresh the ref tree (expansions will be reset)?")
@@ -1405,7 +1409,7 @@ refer (with \"RE:\") to any other entries.")
     (":[a-zA-Z0-9_@#:]+:"
      . 'org-tag)
     ("([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][^)]*)"
-     . 'org-date))
+     . 'zk-zorg-backref-date))
   "Font lock keywords for `zorg-retr-mode'.")
 
 (defvar-keymap zorg-retr-mode-map
