@@ -937,6 +937,7 @@ is available."
   (set-cursor-color (face-attribute 'default :foreground))
   (setq zk-buffer-font-family zk-proportional-font-family)
   (setq cursor-type 'bar)
+  (setq line-spacing 0.2)
   (let ((scaling-alist (zk-get-default-scaling-alist)))
     (buffer-face-set
      `(:family ,zk-buffer-font-family

@@ -1885,12 +1885,11 @@ shall:
 (add-hook 'org-mode-hook 'zk-org-set-file-encoding)
 (add-hook 'org-mode-hook
           (lambda ()
-            (zk-zorg-configure-in-scope-buffer zk-zorg-org-mode-keymap)
-            (zk-use-proportional-font-for-current-buffer)))
+            (zk-zorg-configure-in-scope-buffer zk-zorg-org-mode-keymap)))
+
 (add-hook 'org-agenda-mode-hook
           (lambda ()
-            (zk-zorg-configure-in-scope-buffer zk-zorg-org-agenda-mode-keymap)
-            (zk-use-proportional-font-for-current-buffer)))
+            (zk-zorg-configure-in-scope-buffer zk-zorg-org-agenda-mode-keymap)))
 
 ;; Since we use proportional font in graphics mode, tags righ-alignment will
 ;; be off because it's done by adding spaces.  Disable the right-aligning.

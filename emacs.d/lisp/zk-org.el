@@ -278,4 +278,10 @@ It returns the full link string, including the filename."
 (advice-add 'org-next-visible-heading :around #'zk-push-mark-ring-advice)
 (advice-add 'outline-up-heading :around #'zk-push-mark-ring-advice)
 
+(add-hook 'org-mode-hook
+          #'zk-use-proportional-font-for-current-buffer)
+
+(add-hook 'org-agenda-mode-hook
+          #'zk-use-proportional-font-for-current-buffer)
+
 (provide 'zk-org)
