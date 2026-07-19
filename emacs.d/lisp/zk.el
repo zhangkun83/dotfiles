@@ -1025,7 +1025,7 @@ monitor."
                   (= monitor-dpi 70))
              (progn
                (message "Using scale settings for Acer 32\" 1080p monitor with Thinkpad P1 Windows 11")
-               (setq font-height 110
+               (setq font-height 120
                      frame-width-pixels 850
                      frame-height-pixels 750)))
             ((and (= monitor-dpi 140)
