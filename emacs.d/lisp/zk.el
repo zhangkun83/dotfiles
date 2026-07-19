@@ -940,7 +940,7 @@ is available."
   (let ((scaling-alist (zk-get-default-scaling-alist)))
     (buffer-face-set
      `(:family ,zk-buffer-font-family
-       :height ,(alist-get 'font-height scaling-alist)))))
+       :height ,(alist-get 'proportional-font-height scaling-alist)))))
 
 (defun zk-echo-current-line ()
   "Echo the current line in the echo area, preserving the face.  Useful for
@@ -1001,6 +1001,7 @@ monitor."
 
   (defun zk-get-default-scaling-alist ()
     (let* ((font-height 120)
+           (proportional-font-scale 1.04)
            (frame-width-pixels 1000)
            (frame-height-pixels 900)
            (monitor-attributes-alist (zk-get-monitor-attributes-alist))
@@ -1025,7 +1026,7 @@ monitor."
                   (= monitor-dpi 70))
              (progn
                (message "Using scale settings for Acer 32\" 1080p monitor with Thinkpad P1 Windows 11")
-               (setq font-height 120
+               (setq font-height 115
                      frame-width-pixels 850
                      frame-height-pixels 750)))
             ((and (= monitor-dpi 140)
@@ -1070,6 +1071,8 @@ monitor."
              (progn
                (message "Using default scale settings per %s" monitor-attributes-alist))))
       (list (cons 'font-height font-height)
+            (cons 'proportional-font-height
+                  (round (* font-height proportional-font-scale)))
             (cons 'frame-width-pixels frame-width-pixels)
             (cons 'frame-height-pixels frame-height-pixels))))
 
