@@ -298,6 +298,7 @@
  '(ibuffer-formats
    '((mark modified read-only locked " " (name 0 -1 :left) " ")))
  '(inhibit-startup-screen t)
+ '(kkc-show-conversion-list-count 1)
  '(ns-command-modifier nil)
  '(org-agenda-sticky t)
  '(org-agenda-window-setup 'current-window)
