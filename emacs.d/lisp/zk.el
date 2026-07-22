@@ -1033,9 +1033,10 @@ monitor."
             ((and (= monitor-dpi 140)
                   (= monitor-height-pixels 2160))
              (progn
-               (message "Using scale settings for ThinkVision monitor 32\" per %s"
+               (message "Using scale settings for 32\" 4K monitor with Thinkpad P1 Windows 11 per %s"
                         monitor-attributes-alist)
-               (setq frame-width-pixels 1600
+               (setq font-height 130
+                     frame-width-pixels 1600
                      frame-height-pixels 1500)))
             ((and (= monitor-dpi 92)
                   (= monitor-height-pixels 1080)
