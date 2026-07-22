@@ -4,7 +4,7 @@
 
 (require 'ox)  ; defines org-export-with-drawers
 
-(defun zk-org-init-fonts ()
+(defun zk-org-init-fonts (&rest _)
   (when (display-graphic-p)
     (setq org-hide-emphasis-markers t)
     ;; Remove the boldness from several elements because they don't look
@@ -31,6 +31,7 @@
                     org-special-keyword))
       (set-face-attribute face nil :font zk-font-family :weight 'bold))))
 
+(add-hook 'enable-theme-functions #'zk-org-init-fonts)
 
 (defun zk-org-process-exported-html (src-file &optional exported-ids-ht)
   "Process the exported HTML in the current buffer.
