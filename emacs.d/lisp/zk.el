@@ -1035,7 +1035,7 @@ monitor."
              (progn
                (message "Using scale settings for 32\" 4K monitor with Thinkpad P1 Windows 11 per %s"
                         monitor-attributes-alist)
-               (setq font-height 130
+               (setq font-height 140
                      frame-width-pixels 1600
                      frame-height-pixels 1500)))
             ((and (= monitor-dpi 92)
