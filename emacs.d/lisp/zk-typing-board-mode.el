@@ -13,6 +13,7 @@
 ;;; Code:
 
 (require 'zk-clipboard)
+(require 'zk)
 
 (defvar zk-typing-board-mode-map
   (let ((map (make-sparse-keymap)))
@@ -53,6 +54,7 @@ paragraph."
 (define-derived-mode zk-typing-board-mode text-mode "ZK-Typing"
   "Major mode for a simple typing board.
 \\{zk-typing-board-mode-map}"
+  (zk-use-proportional-font-for-current-buffer)
   (setq-local indent-line-function 'indent-relative))
 
 (provide 'zk-typing-board-mode)

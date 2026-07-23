@@ -934,14 +934,14 @@ is available."
 (defvar-local zk-buffer-font-family nil)
 
 (defun zk-use-proportional-font-for-current-buffer ()
-  (set-cursor-color (face-attribute 'default :foreground))
-  (setq zk-buffer-font-family zk-proportional-font-family)
-  (setq cursor-type 'bar)
-  (setq line-spacing 0.2)
-  (let ((scaling-alist (zk-get-default-scaling-alist)))
+  (when (display-graphic-p)
+    (set-cursor-color (face-attribute 'default :foreground))
+    (setq zk-buffer-font-family zk-proportional-font-family)
+    (setq cursor-type 'bar)
+    (setq line-spacing 0.2)
     (buffer-face-set
      `(:family ,zk-buffer-font-family
-       :height ,(alist-get 'proportional-font-height scaling-alist)))))
+               :height ,(alist-get 'proportional-font-height zk-default-scaling-alist)))))
 
 (defun zk-echo-current-line ()
   "Echo the current line in the echo area, preserving the face.  Useful for
@@ -990,15 +990,14 @@ monitor."
 
   (defun zk-set-default-font (family)
     "Set the default font for Emacs."
-    (let ((scaling-alist (zk-get-default-scaling-alist)))
-      (set-face-attribute 'default nil
-                          :family zk-font-family
-                          :height (alist-get 'font-height scaling-alist))
-      (when (fboundp 'set-fontset-font)
-        (set-fontset-font t 'chinese-gbk
-                          (font-spec :family "DengXian")))
-      (dolist (frame (frame-list))
-        (zk-scale-frame frame scaling-alist))))
+    (set-face-attribute 'default nil
+                        :family zk-font-family
+                        :height (alist-get 'font-height zk-default-scaling-alist))
+    (when (fboundp 'set-fontset-font)
+      (set-fontset-font t 'chinese-gbk
+                        (font-spec :family "DengXian")))
+    (dolist (frame (frame-list))
+      (zk-scale-frame frame zk-default-scaling-alist)))
 
   (defun zk-get-default-scaling-alist ()
     (let* ((font-height 120)
@@ -1078,6 +1077,8 @@ monitor."
             (cons 'frame-width-pixels frame-width-pixels)
             (cons 'frame-height-pixels frame-height-pixels))))
 
+  (defconst zk-default-scaling-alist (zk-get-default-scaling-alist))
+
   (defun zk-scale-frame (frame scaling-alist)
     (set-frame-size frame
                     (alist-get 'frame-width-pixels scaling-alist)
@@ -1085,7 +1086,7 @@ monitor."
                     t))
 
   (defun zk-reset-frame-size (frame)
-    (zk-scale-frame frame (zk-get-default-scaling-alist)))
+    (zk-scale-frame frame zk-default-scaling-alist))
 
   (zk-set-default-font zk-font-family)
   (add-hook 'after-make-frame-functions 'zk-reset-frame-size))
