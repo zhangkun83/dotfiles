@@ -39,8 +39,8 @@
                          (t "Daniel"))))
                      ((symbol-function 'read-char-choice)
                       (lambda (prompt _chars)
-                        (message "[MOCK read-char-choice] Prompt: %s -> ANSWER: c (commit)" prompt)
-                        ?c)))
+                        (message "[MOCK read-char-choice] Prompt: %s" prompt)
+                        (if (string-match-p "Side-by-side" prompt) ?c ?a))))
             
             (message "Calling zk-ai-gemini-agent-sort-meeting-notes...")
             (zk-ai-gemini-agent-sort-meeting-notes)

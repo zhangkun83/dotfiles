@@ -217,19 +217,21 @@ without an actual link, and put the section under it directly in BUF."
                 (delete-region re-beg (point))
                 (goto-char re-beg)))))))))
 
-;;; Step 1.4 & Additional Req 1 (Gemini-driven language incoherence directly applied to buffer)
+;;; Step 1.4 & Additional Req 1 (Gemini-driven language incoherence with entire notes fed as context)
 (defun zk-ai-gemini-agent--clarify-missing-info-in-buffer (buf start-marker end-marker)
-  "Use Gemini to identify language incoherence such as missing subject, ask user
-for clarification after moving cursor and flashing highlight on sentence,
-use Gemini to incorporate user's clarification into notes, and ask for confirmation
-before applying edit directly to BUF without saving to disk."
+  "Use Gemini to identify language incoherence feeding the entire notes document as context,
+ask user for clarification after moving cursor and flashing highlight on sentence,
+use Gemini with full notes context to incorporate user's clarification into notes,
+and allow user to [a]ccept, [r]e-answer, or [m]anually fix."
   (let* ((text (with-current-buffer buf
                  (buffer-substring-no-properties start-marker end-marker)))
+         (full-notes-context (with-current-buffer buf
+                               (buffer-string)))
          (sys-instruct
           "You are an assistant analyzing meeting notes. Identify sentences or bullet points that suffer from language incoherence, such as missing subject (e.g., 'Need to finalize timeline.', 'Merged a PR...', 'Don't think there is much...'), ambiguous pronouns, or incomplete syntax.")
          (prompt
-          (format "Analyze the following meeting notes content and find every sentence or bullet item that has language incoherence such as missing subject.\nReturn a strict JSON list of objects with keys \"original\" (exact sentence text) and \"question\" (a concise clarification question like 'Who needs to finalize timeline?').\nIf none found, return []. Do not include commentary, only output the JSON array.\n\nMeeting Notes:\n%s"
-                  text))
+          (format "Here is the full meeting notes file content for background context:\n--- FULL MEETING NOTES DOCUMENT ---\n%s\n--- END FULL DOCUMENT ---\n\nAnalyze the following specific meeting notes entry to be sorted and find every sentence or bullet item that has language incoherence such as missing subject.\nReturn a strict JSON list of objects with keys \"original\" (exact sentence text) and \"question\" (a concise clarification question like 'Who needs to finalize timeline?').\nIf none found, return []. Do not include commentary, only output the JSON array.\n\nMeeting Notes Entry to Analyze:\n%s"
+                  full-notes-context text))
          (resp-json (zk-ai-gemini-agent--query-gemini prompt sys-instruct 'fast))
          (clean-json (zk-ai-gemini-agent--strip-code-fences resp-json))
          (items nil))
@@ -245,8 +247,7 @@ before applying edit directly to BUF without saving to disk."
         (when (listp item)
           (let* ((orig (string-trim (or (zk-ai-gemini-agent--json-get item "original") "")))
                  (question (string-trim (or (zk-ai-gemini-agent--json-get item "question") ""))))
-            (when (and (not (string-empty-p orig))
-                       (string-match-p (regexp-quote orig) text))
+            (when (not (string-empty-p orig))
               ;; Check if orig exists in current region of buffer
               (let ((found-pos nil))
                 (with-current-buffer buf
@@ -255,35 +256,66 @@ before applying edit directly to BUF without saving to disk."
                     (when (re-search-forward (regexp-quote orig) end-marker t)
                       (setq found-pos (match-beginning 0)))))
                 (when found-pos
-                  ;; Move cursor to sentence in question and flash a highlight
-                  (zk-ai-gemini-agent--highlight-sentence-in-buffer buf start-marker orig)
-                  (let ((user-ans (read-string
-                                   (format "Language incoherence identified in:\n  \"%s\"\nQuestion: %s\nProvide clarification (or press ENTER to skip): "
-                                           orig question))))
-                    (when (not (string-empty-p (string-trim user-ans)))
-                      (message "Using Gemini to incorporate clarification into notes...")
-                      (let* ((incorp-prompt
-                              (format "Original sentence:\n\"%s\"\n\nUser clarification:\n\"%s\"\n\nIncorporate the user's clarification into the original sentence to fix language incoherence (e.g. adding the missing subject). Preserve the original indentation/bullet formatting. Return ONLY the single revised sentence line."
-                                      orig user-ans))
-                             (revised-line (zk-ai-gemini-agent--query-gemini
-                                            incorp-prompt
-                                            "You are an editor updating meeting notes."
-                                            'fast)))
-                        (when revised-line
-                          (setq revised-line (string-trim (replace-regexp-in-string "^```.*" "" revised-line)))
-                          ;; Flash highlight again when asking for edit confirmation
-                          (zk-ai-gemini-agent--highlight-sentence-in-buffer buf start-marker orig)
-                          (if (y-or-n-p
-                               (format "Original:\n  \"%s\"\nProposed revision from Gemini:\n  \"%s\"\nConfirm edit? "
-                                       orig revised-line))
-                              (with-current-buffer buf
-                                (let ((inhibit-read-only t))
-                                  (save-excursion
-                                    (goto-char start-marker)
-                                    (when (re-search-forward (regexp-quote orig) end-marker t)
-                                      (replace-match revised-line t t)
-                                      (message "Updated sentence in buffer (unsaved).")))))
-                            (message "Skipped edit for: \"%s\"" orig)))))))))))))))
+                  (let ((done nil))
+                    (while (not done)
+                      ;; Move cursor to sentence in question and flash a highlight
+                      (zk-ai-gemini-agent--highlight-sentence-in-buffer buf start-marker orig)
+                      (let ((user-ans (read-string
+                                       (format "Language incoherence identified in:\n  \"%s\"\nQuestion: %s\nProvide clarification (or press ENTER to skip): "
+                                               orig question))))
+                        (if (string-empty-p (string-trim user-ans))
+                            (progn
+                              (message "Skipped clarification for: \"%s\"" orig)
+                              (setq done t))
+                          (message "Using Gemini with full notes context to incorporate clarification...")
+                          (let* ((latest-full-context (with-current-buffer buf (buffer-string)))
+                                 (incorp-prompt
+                                  (format "Here is the full meeting notes document for background context:\n--- FULL MEETING NOTES DOCUMENT ---\n%s\n--- END FULL DOCUMENT ---\n\nOriginal sentence to fix:\n\"%s\"\n\nUser clarification:\n\"%s\"\n\nUsing the full meeting notes context above to determine missing subjects, project names, or pronouns, incorporate the user's clarification into the original sentence to fix language incoherence. Return ONLY the single revised sentence line."
+                                          latest-full-context orig user-ans))
+                                 (revised-line (zk-ai-gemini-agent--query-gemini
+                                                incorp-prompt
+                                                "You are an editor updating meeting notes."
+                                                'fast)))
+                            (when revised-line
+                              (setq revised-line (string-trim (replace-regexp-in-string "^```.*" "" revised-line)))
+                              (let ((choice-done nil))
+                                (while (not choice-done)
+                                  (zk-ai-gemini-agent--highlight-sentence-in-buffer buf start-marker orig)
+                                  (let ((choice (read-char-choice
+                                                 (format "Original:\n  \"%s\"\nProposed revision:\n  \"%s\"\n[a]ccept; [r]e-answer; [m]anually fix; [s]kip: "
+                                                         orig revised-line)
+                                                 '(?a ?y ?r ?m ?s ?n))))
+                                    (cond
+                                     ((or (eq choice ?a) (eq choice ?y))
+                                      (with-current-buffer buf
+                                        (let ((inhibit-read-only t))
+                                          (save-excursion
+                                            (goto-char start-marker)
+                                            (when (re-search-forward (regexp-quote orig) end-marker t)
+                                              (replace-match revised-line t t)
+                                              (message "Updated sentence in buffer (unsaved).")))))
+                                      (setq choice-done t
+                                            done t))
+                                     ((eq choice ?r)
+                                      ;; Re-answer clarification loop
+                                      (setq choice-done t))
+                                     ((eq choice ?m)
+                                      ;; Manually fix: populate original text in minibuffer
+                                      (let ((manual-fix (read-string "Manually edit sentence: " orig)))
+                                        (when (not (string-empty-p (string-trim manual-fix)))
+                                          (with-current-buffer buf
+                                            (let ((inhibit-read-only t))
+                                              (save-excursion
+                                                (goto-char start-marker)
+                                                (when (re-search-forward (regexp-quote orig) end-marker t)
+                                                  (replace-match manual-fix t t)
+                                                  (message "Applied manual edit in buffer (unsaved)."))))))
+                                        (setq choice-done t
+                                              done t)))
+                                     ((or (eq choice ?s) (eq choice ?n))
+                                      (message "Skipped edit for: \"%s\"" orig)
+                                      (setq choice-done t
+                                            done t)))))))))))))))))))))
 
 ;;; Step 1.6.1: Find target entry, call C-c l r to copy back reference, and replace invalid link
 (defun zk-ai-gemini-agent--find-and-copy-backref (heading-title)
