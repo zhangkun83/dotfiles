@@ -421,27 +421,24 @@ and allow user to [a]ccept, [r]e-answer, or [m]anually fix."
             (car kill-ring)))))))
 
 (defun zk-ai-gemini-agent--resolve-generated-backrefs (response-text)
-  "Go over generated entries from RESPONSE-TEXT. If a new back reference is added
-without a valid CUSTOM_ID link, search heading text to locate entry, run C-c l r,
-and replace invalid link with created link."
+  "Go over generated entries from RESPONSE-TEXT. For each back reference (\"RE:\"),
+locate target entry, run 'C-c l r' (zk-org-copy-external-reference) to generate/copy
+the reference, and replace the RE: line with the output of 'C-c l r' so that the
+timestamp is always neutralized."
   (let* ((lines (split-string response-text "\n"))
          (new-lines nil))
     (dolist (line lines)
       (if (string-match "^\\(\\s-*RE:\\s-+\\)\\(.*\\)$" line)
-          (let ((prefix (match-string 1 line))
-                (rest (string-trim (match-string 2 line))))
-            ;; Check if link has valid [[file:...::#...][^]] structure
-            (if (string-match-p "\\[\\[file:[^][]+::#[^][]+\\]\\[\\^\\]\\]" rest)
-                (push line new-lines)
-              ;; Missing or invalid custom-id link
-              (let* ((title-only (replace-regexp-in-string "\\[\\[.*\\]\\]" "" rest))
-                     (title-clean (string-trim (replace-regexp-in-string "\\[\\^?\\]" "" title-only)))
-                     (created-ref (zk-ai-gemini-agent--find-and-copy-backref title-clean)))
-                (if created-ref
-                    (progn
-                      (message "Replaced invalid back reference '%s' with '%s'" rest created-ref)
-                      (push (concat prefix created-ref) new-lines))
-                  (push line new-lines)))))
+          (let* ((prefix (match-string 1 line))
+                 (rest (string-trim (match-string 2 line)))
+                 (title-only (replace-regexp-in-string "\\[\\[.*\\]\\]" "" rest))
+                 (title-clean (string-trim (replace-regexp-in-string "\\[\\^?\\]" "" title-only)))
+                 (created-ref (zk-ai-gemini-agent--find-and-copy-backref title-clean)))
+            (if created-ref
+                (progn
+                  (message "Replaced back reference '%s' with '%s'" rest created-ref)
+                  (push (zk-org-neutralize-timestamp (concat prefix created-ref)) new-lines))
+              (push (zk-org-neutralize-timestamp line) new-lines)))
         (push line new-lines)))
     (string-join (nreverse new-lines) "\n")))
 
