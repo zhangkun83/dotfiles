@@ -972,6 +972,37 @@ revealing long lines."
             (when (> line-length window-text-width)
               (zk-echo-current-line)))))))))
 
+(defun zk-set-cjk-font-lang (lang)
+  "Set the language for CJK fonts.  Could be either `chinese' or `japanese'."
+  (when (display-graphic-p)
+    (when (fboundp 'set-fontset-font)
+      (cond
+       ((eq lang 'chinese)
+        (set-fontset-font t 'chinese-gbk
+                          (font-spec :family "Microsoft YaHei")))
+       ((eq lang 'japanese)
+        (set-fontset-font t 'japanese-jisx0208
+                          (font-spec :family "MS Gothic")))
+       (t (user-error "Unsupported language: %s" lang))))))
+
+(defun zk-select-cjk-lang ()
+  "Set the CJK language."
+  (interactive)
+  (let* ((choice (read-char-choice
+                  "Select CJK language ([c] Chinese; [j] Japanese): "
+                  '(?c ?j)))
+         (lang (cond ((eq choice ?c) 'chinese)
+                     ((eq choice ?j) 'japanese))))
+    (when lang
+      (cond
+       ((eq lang 'chinese)
+        (set-input-method "chinese-zk-py-shuangpin")
+        (message "CJK language set to Chinese."))
+       ((eq lang 'japanese)
+        (set-input-method "japanese")
+        (message "CJK language set to Japanese."))))
+      (zk-set-cjk-font-lang lang)))
+
 (when (display-graphic-p)
   ;; Set font
   (defun zk-get-monitor-attributes-alist ()
@@ -993,9 +1024,7 @@ monitor."
     (set-face-attribute 'default nil
                         :family zk-font-family
                         :height (alist-get 'font-height zk-default-scaling-alist))
-    (when (fboundp 'set-fontset-font)
-      (set-fontset-font t 'chinese-gbk
-                        (font-spec :family "DengXian")))
+    (zk-set-cjk-font-lang 'chinese)
     (dolist (frame (frame-list))
       (zk-scale-frame frame zk-default-scaling-alist)))
 
