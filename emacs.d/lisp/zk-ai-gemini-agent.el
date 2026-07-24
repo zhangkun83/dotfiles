@@ -2,6 +2,7 @@
 
 (require 'zorg)
 (require 'zk-ai-gemini)
+(require 'request)
 (require 'cl-lib)
 (require 'subr-x)
 (require 'json)
@@ -21,40 +22,30 @@
          (model-name (zk-ai-gemini--get-model level))
          (payload `((model . ,model-name)
                     (contents . [((role . "user") (parts . [((text . ,prompt))]))])))
-         (json-str (progn
-                     (when sys-instruct
-                       (setq payload (append `((system_instruction . ((parts . [((text . ,sys-instruct))])))) payload)))
-                     (encode-coding-string (json-encode payload) 'utf-8)))
-         (temp-file (make-temp-file "gemini-req" nil ".json"))
-         (output-buf (generate-new-buffer "*zk-gemini-query*"))
+         (payload (if sys-instruct
+                      (append `((system_instruction . ((parts . [((text . ,sys-instruct))])))) payload)
+                    payload))
+         (response (request
+                    "http://localhost:1880/generateContent"
+                    :type "POST"
+                    :headers '(("Content-Type" . "application/json"))
+                    :data (encode-coding-string (json-encode payload) 'utf-8)
+                    :parser (lambda () (decode-coding-string (buffer-string) 'utf-8))
+                    :sync t))
+         (data (request-response-data response))
          (result-text nil))
-    (unwind-protect
-        (progn
-          (with-temp-file temp-file
-            (set-buffer-multibyte nil)
-            (insert json-str))
-          (let ((exit-code
-                 (call-process "curl" nil output-buf nil
-                               "-s" "-X" "POST"
-                               "-H" "Content-Type: application/json"
-                               "-d" (concat "@" temp-file)
-                               "http://localhost:1880/generateContent")))
-            (when (= exit-code 0)
-              (with-current-buffer output-buf
-                (goto-char (point-min))
-                (let* ((json-object-type 'alist)
-                       (json-array-type 'list)
-                       (json-key-type 'symbol)
-                       (resp (json-read-from-string
-                              (decode-coding-string (buffer-string) 'utf-8)))
-                       (candidates (alist-get 'candidates resp))
-                       (first-cand (elt candidates 0))
-                       (content (alist-get 'content first-cand))
-                       (parts (alist-get 'parts content))
-                       (text (alist-get 'text (elt parts 0))))
-                  (setq result-text (string-trim text)))))))
-      (when (file-exists-p temp-file) (delete-file temp-file))
-      (when (buffer-live-p output-buf) (kill-buffer output-buf)))
+    (when data
+      (ignore-errors
+        (let* ((json-object-type 'alist)
+               (json-array-type 'list)
+               (json-key-type 'symbol)
+               (resp (json-read-from-string data))
+               (candidates (alist-get 'candidates resp))
+               (first-cand (elt candidates 0))
+               (content (alist-get 'content first-cand))
+               (parts (alist-get 'parts content))
+               (text (alist-get 'text (elt parts 0))))
+          (setq result-text (string-trim text)))))
     result-text))
 
 (defun zk-ai-gemini-agent--strip-code-fences (str)
