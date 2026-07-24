@@ -1,4 +1,5 @@
 (require 'zorg)
+(require 'zk-ai-gemini-agent)
 (setq zk-zorg-rsync-backup-dir
       "rsync://127.0.0.1:1873/repo/orgworkdev")
 (setq zk-zorg-profile-name "orgworkdev")
