@@ -308,34 +308,114 @@ and allow user to [a]ccept, [r]e-answer, or [m]anually fix."
                                       (setq choice-done t
                                             done t)))))))))))))))))))))
 
+(defvar zk-ai-gemini-agent--stop-words
+  '("a" "an" "the" "and" "or" "but" "in" "on" "at" "to" "for" "of" "with"
+    "by" "from" "up" "about" "into" "over" "after" "is" "are" "was" "were"
+    "be" "been" "being" "have" "has" "had" "do" "does" "did" "will" "would"
+    "should" "could" "can" "may" "might" "must" "shall" "it" "its" "this"
+    "that" "these" "those" "we" "my" "our" "your" "his" "her" "their" "re")
+  "List of common English stop words to filter out in heading matching.")
+
+(defun zk-ai-gemini-agent--extract-date-str (text)
+  "Extract YYYY-MM-DD date string from TEXT, or nil if none."
+  (when (and text (string-match "\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)" text))
+    (match-string 1 text)))
+
+(defun zk-ai-gemini-agent--core-title (text)
+  "Normalize TEXT by stripping tags, timestamps/dates, ellipsis, and extra space."
+  (when text
+    (let ((s (downcase text)))
+      (setq s (replace-regexp-in-string ":[a-zA-Z0-9_@#:]+:$" "" s))
+      (setq s (replace-regexp-in-string "<[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}[^>]*>" "" s))
+      (setq s (replace-regexp-in-string "\\[[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}[^]]*\\]" "" s))
+      (setq s (replace-regexp-in-string "([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}[^)]*)" "" s))
+      (setq s (replace-regexp-in-string "\\b[0-9]\\{4\\}-[0-9]\\{2\\}\\(?:-[0-9]\\{2\\}\\)?\\b" "" s))
+      (setq s (replace-regexp-in-string "\\.\\.\\.*$" "" s))
+      (setq s (replace-regexp-in-string "…$" "" s))
+      (string-trim (replace-regexp-in-string "\\s-+" " " s)))))
+
+(defun zk-ai-gemini-agent--significant-words (str)
+  "Extract significant words (length >= 3, not in stop words) from STR."
+  (when str
+    (let* ((clean (replace-regexp-in-string "[^a-z0-9]+" " " (downcase str)))
+           (words (split-string clean "\\s-+" t))
+           (filtered nil))
+      (dolist (w words (nreverse filtered))
+        (when (and (>= (length w) 3)
+                   (not (member w zk-ai-gemini-agent--stop-words)))
+          (push w filtered))))))
+
+(defun zk-ai-gemini-agent--word-matches-p (w1 w2)
+  "Check if word W1 matches W2 (exact or shared prefix of length >= 4)."
+  (or (string= w1 w2)
+      (and (>= (length w1) 4)
+           (>= (length w2) 4)
+           (or (string-prefix-p w1 w2)
+               (string-prefix-p w2 w1)))))
+
+(defun zk-ai-gemini-agent--score-heading-match (raw-h target-title)
+  "Return match score (positive number) if RAW-H matches TARGET-TITLE, or nil."
+  (let ((cand-core (zk-ai-gemini-agent--core-title raw-h))
+        (target-core (zk-ai-gemini-agent--core-title target-title))
+        (cand-date (zk-ai-gemini-agent--extract-date-str raw-h))
+        (target-date (zk-ai-gemini-agent--extract-date-str target-title)))
+    (when (and (not (string-empty-p cand-core))
+               (>= (length cand-core) 3)
+               (not (string-empty-p target-core))
+               (or (null cand-date)
+                   (null target-date)
+                   (string= cand-date target-date)))
+      (cond
+       ;; Tier 1: Exact core match
+       ((string= cand-core target-core)
+        (+ 1000 (if (and cand-date target-date) 100 0)))
+       ;; Tier 2: Whole word phrase substring match or prefix match
+       ((string-match-p (concat "\\b" (regexp-quote target-core) "\\b") cand-core)
+        (+ 500 (length target-core)))
+       ((string-prefix-p target-core cand-core)
+        (+ 450 (length target-core)))
+       ((and (>= (length target-core) 5)
+             (string-match-p (regexp-quote target-core) cand-core))
+        (+ 400 (length target-core)))
+       ;; Tier 3: Significant keyword set overlap
+       (t
+        (let* ((t-words (zk-ai-gemini-agent--significant-words target-core))
+               (c-words (zk-ai-gemini-agent--significant-words cand-core))
+               (total (length t-words))
+               (matched 0))
+          (when (> total 0)
+            (dolist (tw t-words)
+              (when (cl-some (lambda (cw) (zk-ai-gemini-agent--word-matches-p tw cw)) c-words)
+                (cl-incf matched)))
+            (let ((ratio (/ (float matched) total)))
+              (when (or (and (= total 1) (= matched 1) (>= (length (car t-words)) 4))
+                        (and (= total 2) (= matched 2))
+                        (and (>= total 3) (>= matched 2) (>= ratio 0.5)))
+                (+ (round (* ratio 200)) matched))))))))))
+
 ;;; Step 1.6.1: Find target entry, call C-c l r to copy back reference, and replace invalid link
 (defun zk-ai-gemini-agent--find-and-copy-backref (heading-title)
-  "Search org note files for entry with HEADING-TITLE, call 'C-c l r'
+  "Search org note files for entry best matching HEADING-TITLE, call 'C-c l r'
 \(zk-org-copy-external-reference) to generate/copy back reference."
-  (let ((found-marker nil)
-        (norm-title (downcase (string-trim (zk-org-neutralize-timestamp heading-title)))))
+  (let ((best-marker nil)
+        (best-score 0))
     (dolist (file-name (zk-zorg-list-note-files))
-      (when (not found-marker)
-        (let* ((file-path (expand-file-name file-name (zk-zorg-directory)))
-               (buf (find-file-noselect file-path)))
-          (with-current-buffer buf
-            (save-excursion
-              (goto-char (point-min))
-              (while (and (not found-marker)
-                          (re-search-forward "^\\(\\*+\\)\\s-+\\(.*?\\)\\s-*$" nil t))
-                (let* ((raw-h (match-string-no-properties 2))
-                       (clean-h (downcase (string-trim
-                                           (zk-org-neutralize-timestamp
-                                            (replace-regexp-in-string ":[a-zA-Z0-9_@#:]+:$" "" raw-h))))))
-                  (when (or (string= clean-h norm-title)
-                            (string-match-p (regexp-quote norm-title) clean-h)
-                            (string-match-p (regexp-quote clean-h) norm-title))
-                    (setq found-marker (copy-marker (line-beginning-position)))))))))))
-    (when found-marker
-      (with-current-buffer (marker-buffer found-marker)
+      (let* ((file-path (expand-file-name file-name (zk-zorg-directory)))
+             (buf (find-file-noselect file-path)))
+        (with-current-buffer buf
+          (save-excursion
+            (goto-char (point-min))
+            (while (re-search-forward "^\\(\\*+\\)\\s-+\\(.*?\\)\\s-*$" nil t)
+              (let* ((raw-h (match-string-no-properties 2))
+                     (score (zk-ai-gemini-agent--score-heading-match raw-h heading-title)))
+                (when (and score (> score best-score))
+                  (setq best-score score
+                        best-marker (copy-marker (line-beginning-position))))))))))
+    (when best-marker
+      (with-current-buffer (marker-buffer best-marker)
         (let ((inhibit-read-only t))
           (save-excursion
-            (goto-char (marker-position found-marker))
+            (goto-char (marker-position best-marker))
             ;; Call C-c l r to create and copy external reference
             (call-interactively 'zk-org-copy-external-reference)
             (car kill-ring)))))))
