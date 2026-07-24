@@ -210,7 +210,7 @@ under the current heading."
     (let ((url-start (car url-bounds))
           (url-end (cdr url-bounds)))
       (or (replace-regexp-in-region
-           "https?://docs\\.google\\.com/document/.*[&?]disco=.+$"
+           "https?://docs\\.google\\.com/.*[&?]disco=.+$"
            "([[\\&][comment]])" url-start url-end)
           (replace-regexp-in-region
            "https?://docs\\.google\\.com/document/.*#bookmark=.+$"
