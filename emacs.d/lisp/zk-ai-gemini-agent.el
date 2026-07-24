@@ -454,7 +454,7 @@ and commit change when pressing 'C-c C-c' or abort with 'C-c C-g' (without savin
       (org-mode)
       (insert generated-entries-text)
       (goto-char (point-min))
-      (use-local-map (copy-keymap org-mode-map))
+      (zk-zorg-configure-in-scope-buffer (copy-keymap zk-zorg-org-mode-keymap))
       (local-set-key (kbd "C-c C-c")
                      (lambda () (interactive) (throw 'zk-agent-preview-done 'commit)))
       (local-set-key (kbd "C-c C-g")
