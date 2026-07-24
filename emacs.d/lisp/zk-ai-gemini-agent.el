@@ -374,18 +374,25 @@ and replace invalid link with created link."
         (push line new-lines)))
     (string-join (nreverse new-lines) "\n")))
 
-;;; Step 1.6.2 & Additional Req 2 & Step 1.7: Side-by-side preview, manual adjustment & commit (never saving to disk)
+;;; Step 1.6.2 & Additional Req 2 & Step 1.7: Side-by-side preview with direct full editing, "C-c C-c" to commit, "C-c C-g" to abort
 (defun zk-ai-gemini-agent--show-preview-and-commit
     (orig-buf start-marker end-marker generated-entries-text)
-  "Show proposed content side-by-side with original org file, allow manual editing,
-and commit change directly to original file buffer without saving to disk."
+  "Show proposed content side-by-side with original org file, allow user to fully edit,
+and commit change when pressing 'C-c C-c' or abort with 'C-c C-g' (without saving to disk)."
   (let* ((preview-buf-name "*Meeting Notes Sorting Preview*")
          (preview-buf (get-buffer-create preview-buf-name)))
     (with-current-buffer preview-buf
       (erase-buffer)
       (org-mode)
       (insert generated-entries-text)
-      (goto-char (point-min)))
+      (goto-char (point-min))
+      (use-local-map (copy-keymap org-mode-map))
+      (local-set-key (kbd "C-c C-c")
+                     (lambda () (interactive) (throw 'zk-agent-preview-done 'commit)))
+      (local-set-key (kbd "C-c C-g")
+                     (lambda () (interactive) (throw 'zk-agent-preview-done 'abort)))
+      (local-set-key (kbd "C-c C-k")
+                     (lambda () (interactive) (throw 'zk-agent-preview-done 'abort))))
     
     (unless noninteractive
       (delete-other-windows)
@@ -396,28 +403,12 @@ and commit change directly to original file buffer without saving to disk."
         (select-window preview-win)
         (switch-to-buffer preview-buf)))
 
-    (let ((user-confirmed nil)
-          (user-cancelled nil))
-      (while (not (or user-confirmed user-cancelled))
-        (let ((ans (read-char-choice
-                    "Side-by-side preview active in right window. [c]ommit changes; [e]dit in preview window then re-prompt; [a]bort"
-                    '(?c ?e ?a))))
-          (cond
-           ((eq ans ?c) (setq user-confirmed t))
-           ((eq ans ?a) (setq user-cancelled t))
-           ((eq ans ?e)
-            (message "Make your edits in *Meeting Notes Sorting Preview*, then type M-x zk-ai-gemini-agent-commit-preview or press 'C-c C-c'")
-            (local-set-key (kbd "C-c C-c")
-                           (lambda () (interactive) (throw 'zk-agent-preview-done 'commit)))
-            (local-set-key (kbd "C-c C-k")
-                           (lambda () (interactive) (throw 'zk-agent-preview-done 'abort)))
-            (let ((action (catch 'zk-agent-preview-done
-                            (recursive-edit))))
-              (cond
-               ((eq action 'commit) (setq user-confirmed t))
-               ((eq action 'abort) (setq user-cancelled t))))))))
-      
-      (if user-cancelled
+    (message "Review generated changes in right window. Press 'C-c C-c' to commit, or 'C-c C-g' to abort.")
+    (let ((action (if noninteractive
+                      'commit
+                    (catch 'zk-agent-preview-done
+                      (recursive-edit)))))
+      (if (eq action 'abort)
           (progn
             (unless noninteractive (delete-other-windows))
             (message "Meeting notes sorting cancelled by user."))
