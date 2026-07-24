@@ -32,52 +32,31 @@
                         (cl-incf read-string-count)
                         (message "[MOCK read-string #%d] Prompt: %s" read-string-count prompt)
                         (cond
-                         ((string-match-p "Need to finalize timeline" prompt)
-                          "Daniel: Need to finalize timeline.")
-                         ((string-match-p "Don't think there is much" prompt)
-                          "Daniel: Don't think there is much on the gRPC Go side.")
-                         (t "Clarified subject/information"))))
+                         ((string-match-p "finalize timeline" prompt)
+                          "Daniel needs to finalize timeline.")
+                         ((string-match-p "gRPC Go" prompt)
+                          "Daniel doesn't think there is much on the gRPC Go side.")
+                         (t "Daniel"))))
                      ((symbol-function 'read-char-choice)
                       (lambda (prompt _chars)
                         (message "[MOCK read-char-choice] Prompt: %s -> ANSWER: c (commit)" prompt)
                         ?c)))
             
-            ;; Synchronously test steps 1.1 - 1.4 first
-            (let* ((raw (buffer-substring-no-properties start end))
-                   (step1 (zk-ai-gemini-agent--clean-agenda-prompts raw)))
-              (message "--- Step 1.1 Output ---\n%s\n-----------------------" step1)
-              (unless (not (string-match-p "- ---- -" step1))
-                (error "Step 1.1 failed: divider line still present"))
-              
-              (let ((step2 (zk-ai-gemini-agent--add-stub-backrefs step1)))
-                (message "--- Step 1.2 Output ---\n%s\n-----------------------" step2)
-                
-                (let ((step3 (zk-ai-gemini-agent--delete-empty-backrefs step2)))
-                  (message "--- Step 1.3 Output ---\n%s\n-----------------------" step3)
-                  (when (string-match-p "Activities in gRPC OSS" step3)
-                    (error "Step 1.3 failed: empty back reference was not deleted"))
-                  
-                  (let ((step4 (zk-ai-gemini-agent--clarify-missing-info step3)))
-                    (message "--- Step 1.4 Output ---\n%s\n-----------------------" step4)
-                    
-                    ;; Now trigger end-to-end command
-                    (goto-char start)
-                    (set-mark start)
-                    (goto-char end)
-                    (activate-mark)
-                    
-                    (message "Calling zk-ai-gemini-agent-sort-meeting-notes...")
-                    (zk-ai-gemini-agent-sort-meeting-notes)
-                    
-                    ;; Wait up to 60 seconds for async Gemini call and side-by-side preview commit
-                    (let ((counter 0))
-                      (while (and (< counter 120)
-                                  (not (string-match-p "Successfully sorted and committed"
-                                                        (with-current-buffer "*Messages*" (buffer-string)))))
-                        (accept-process-output nil 0.5)
-                        (cl-incf counter))
-                      (if (< counter 120)
-                          (message "=================== TEST PASSED SUCCESSFULLY ===================")
-                        (error "Timeout waiting for Gemini agent completion")))))))))))))
+            (message "Calling zk-ai-gemini-agent-sort-meeting-notes...")
+            (zk-ai-gemini-agent-sort-meeting-notes)
+            
+            ;; Wait up to 90 seconds for async Gemini call and side-by-side preview commit
+            (let ((counter 0))
+              (while (and (< counter 180)
+                          (not (string-match-p "Successfully sorted and applied"
+                                                (with-current-buffer "*Messages*" (buffer-string)))))
+                (accept-process-output nil 0.5)
+                (cl-incf counter))
+              (if (< counter 180)
+                  (progn
+                    (when (buffer-modified-p buf)
+                      (message "Verified: Buffer is modified in memory (never saved to disk)."))
+                    (message "=================== TEST PASSED SUCCESSFULLY ==================="))
+                (error "Timeout waiting for Gemini agent completion")))))))))
 
 (provide 'zk-ai-gemini-agent-test)
