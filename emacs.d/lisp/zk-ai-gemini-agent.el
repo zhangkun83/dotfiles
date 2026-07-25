@@ -159,13 +159,11 @@ use Gemini with full notes context to incorporate user's clarification into note
 and allow user to [a]ccept, [r]e-answer, or [m]anually fix."
   (let* ((text (with-current-buffer buf
                  (buffer-substring-no-properties start-marker end-marker)))
-         (full-notes-context (with-current-buffer buf
-                               (buffer-string)))
          (sys-instruct
           "You are an assistant analyzing meeting notes. Identify sentences or bullet points that suffer from language incoherence, such as missing subject (e.g., 'Need to finalize timeline.', 'Merged a PR...', 'Don't think there is much...'), ambiguous pronouns, or incomplete syntax.")
          (prompt
-          (format "Here is the full meeting notes file content for background context:\n--- FULL MEETING NOTES DOCUMENT ---\n%s\n--- END FULL DOCUMENT ---\n\nAnalyze the following specific meeting notes entry to be sorted and find every sentence or bullet item that has language incoherence such as missing subject.\nReturn a strict JSON list of objects with keys \"original\" (exact sentence text) and \"question\" (a concise clarification question like 'Who needs to finalize timeline?').\nIf none found, return []. Do not include commentary, only output the JSON array.\n\nMeeting Notes Entry to Analyze:\n%s"
-                  full-notes-context text))
+          (format "Analyze the following specific meeting notes entry to be sorted and find every sentence or bullet item that has language incoherence such as missing subject.\nReturn a strict JSON list of objects with keys \"original\" (exact sentence text) and \"question\" (a concise clarification question like 'Who needs to finalize timeline?').\nIf none found, return []. Do not include commentary, only output the JSON array.\n\nMeeting Notes Entry to Analyze:\n%s"
+                  text))
          (resp-json (zk-ai-gemini-agent--query-gemini prompt sys-instruct 'fast))
          (clean-json (zk-ai-gemini-agent--strip-code-fences resp-json))
          (items nil))
