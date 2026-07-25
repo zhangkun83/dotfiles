@@ -509,7 +509,7 @@ and commit change when pressing 'C-c C-c' or abort with 'C-c C-g' (without savin
               ;; NOTE: Explicitly DO NOT call (save-buffer) per requirement: "never save them to disk."
               (message "Successfully sorted and applied meeting notes to buffer (unsaved to disk)!" )))
           (when (buffer-live-p preview-buf)
-            (kill-buffer preview-buf))))))))
+            (kill-buffer preview-buf)))))))
 
 (defun zk-ai-gemini-agent--on-response-ready (session-buf orig-buf start-marker end-marker)
   "Process Gemini output once response is ready, filtering out top-level headings reserved for prompts."
