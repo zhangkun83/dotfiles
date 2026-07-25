@@ -162,7 +162,7 @@ and allow user to [a]ccept, [r]e-answer, or [m]anually fix."
          (sys-instruct
           "You are an assistant analyzing meeting notes. Identify sentences or bullet points that suffer from language incoherence, such as missing subject (e.g., 'Need to finalize timeline.', 'Merged a PR...', 'Don't think there is much...'), ambiguous pronouns, or incomplete syntax.")
          (prompt
-          (format "Analyze the following specific meeting notes entry to be sorted and find every sentence or bullet item that has language incoherence such as missing subject.\nReturn a strict JSON list of objects with keys \"original\" (exact sentence text) and \"question\" (a concise clarification question like 'Who needs to finalize timeline?').\nIf none found, return []. Do not include commentary, only output the JSON array.\n\nMeeting Notes Entry to Analyze:\n%s"
+          (format "Analyze the following specific meeting notes entry to be sorted and find every sentence or bullet item that has language incoherence such as missing subject.\nReturn a strict JSON list of objects with keys \"original\" (exact sentence text), \"question\" (a concise clarification question like 'Who needs to finalize timeline?'), and \"answer\" (the most likely answer or missing information fill-in based on context or best guess).\nIf none found, return []. Do not include commentary, only output the JSON array.\n\nMeeting Notes Entry to Analyze:\n%s"
                   text))
          (resp-json (zk-ai-gemini-agent--query-gemini prompt sys-instruct 'fast))
          (clean-json (zk-ai-gemini-agent--strip-code-fences resp-json))
@@ -178,7 +178,8 @@ and allow user to [a]ccept, [r]e-answer, or [m]anually fix."
       (dolist (item items)
         (when (listp item)
           (let* ((orig (string-trim (or (zk-ai-gemini-agent--json-get item "original") "")))
-                 (question (string-trim (or (zk-ai-gemini-agent--json-get item "question") ""))))
+                 (question (string-trim (or (zk-ai-gemini-agent--json-get item "question") "")))
+                 (answer (string-trim (or (zk-ai-gemini-agent--json-get item "answer") ""))))
             (when (not (string-empty-p orig))
               ;; Check if orig exists in current region of buffer
               (let ((found-pos nil))
@@ -194,7 +195,8 @@ and allow user to [a]ccept, [r]e-answer, or [m]anually fix."
                       (zk-ai-gemini-agent--highlight-sentence-in-buffer buf start-marker orig)
                       (let ((user-ans (read-string
                                        (format "Language incoherence identified in:\n  \"%s\"\nQuestion: %s\nProvide clarification (or press ENTER to skip): "
-                                               orig question))))
+                                               orig question)
+                                       answer)))
                         (if (string-empty-p (string-trim user-ans))
                             (progn
                               (message "Skipped clarification for: \"%s\"" orig)
