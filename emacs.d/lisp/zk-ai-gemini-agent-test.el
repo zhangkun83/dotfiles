@@ -59,4 +59,35 @@
                     (message "=================== TEST PASSED SUCCESSFULLY ==================="))
                 (error "Timeout waiting for Gemini agent completion")))))))))
 
+(require 'ert)
+
+(ert-deftest test-zk-ai-gemini-agent-parse-title-and-timestamp ()
+  "Test parsing of pre-timestamp prefix and date string from generated RE: headings."
+  (let ((p1 (zk-ai-gemini-agent--parse-title-and-timestamp "Weekly Team Sync <2026-07-20 Mon 10:00>"))
+        (p2 (zk-ai-gemini-agent--parse-title-and-timestamp "1-on-1 with Bob [2026-07-15]"))
+        (p3 (zk-ai-gemini-agent--parse-title-and-timestamp "Project Review (2026-07-18)"))
+        (p4 (zk-ai-gemini-agent--parse-title-and-timestamp "Discussion on bug fix")))
+    (should (string= (car p1) "Weekly Team Sync"))
+    (should (string= (cdr p1) "2026-07-20"))
+    (should (string= (car p2) "1-on-1 with Bob"))
+    (should (string= (cdr p2) "2026-07-15"))
+    (should (string= (car p3) "Project Review"))
+    (should (string= (cdr p3) "2026-07-18"))
+    (should (string= (car p4) "Discussion on bug fix"))
+    (should (null (cdr p4)))))
+
+(ert-deftest test-zk-ai-gemini-agent-resolve-generated-backrefs ()
+  "Integration test verifying org-map-entries backref resolution."
+  (let* ((temp-dir (make-temp-file "zk-agent-test-" t))
+         (file1 (expand-file-name "file1.org" temp-dir))
+         (input-text "** Discussion item\n  RE: Weekly Team Sync <2026-07-20 Mon>\n- Notes here"))
+    (with-temp-file file1
+      (insert "* Unrelated\n** Weekly Team Sync <2026-07-20 Mon>\n:PROPERTIES:\n:CUSTOM_ID: sync-20260720\n:END:\n"))
+    (cl-letf (((symbol-function 'zk-zorg-directory) (lambda () temp-dir))
+              ((symbol-function 'zk-zorg-list-note-files) (lambda () '("file1.org"))))
+      (let ((resolved (zk-ai-gemini-agent--resolve-generated-backrefs input-text)))
+        (should (string-match-p "#sync-20260720" resolved))
+        (should-not (string-match-p "<2026-07-20 Mon>" resolved))))
+    (delete-directory temp-dir t)))
+
 (provide 'zk-ai-gemini-agent-test)
