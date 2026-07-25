@@ -218,9 +218,9 @@ and allow user to [a]ccept, [r]e-answer, or [m]anually fix."
                                 (while (not choice-done)
                                   (zk-ai-gemini-agent--highlight-sentence-in-buffer buf start-marker orig)
                                   (let ((choice (read-char-choice
-                                                 (format "Original:\n  \"%s\"\nProposed revision:\n  \"%s\"\n[a]ccept; [r]e-answer; [m]anually fix; [s]kip: "
+                                                 (format "Original:\n  \"%s\"\nProposed revision:\n  \"%s\"\n[a]ccept; [r]e-answer; [m]anually fix orig; [e]dit proposed; [s]kip: "
                                                          orig revised-line)
-                                                 '(?a ?y ?r ?m ?s ?n))))
+                                                 '(?a ?y ?r ?m ?e ?s ?n))))
                                     (cond
                                      ((or (eq choice ?a) (eq choice ?y))
                                       (with-current-buffer buf
@@ -238,6 +238,19 @@ and allow user to [a]ccept, [r]e-answer, or [m]anually fix."
                                      ((eq choice ?m)
                                       ;; Manually fix: populate original text in minibuffer
                                       (let ((manual-fix (read-string "Manually edit sentence: " orig)))
+                                        (when (not (string-empty-p (string-trim manual-fix)))
+                                          (with-current-buffer buf
+                                            (let ((inhibit-read-only t))
+                                              (save-excursion
+                                                (goto-char start-marker)
+                                                (when (re-search-forward (regexp-quote orig) end-marker t)
+                                                  (replace-match manual-fix t t)
+                                                  (message "Applied manual edit in buffer (unsaved)."))))))
+                                        (setq choice-done t
+                                              done t)))
+                                     ((eq choice ?e)
+                                      ;; Edit proposed fix: populate proposed revision in minibuffer
+                                      (let ((manual-fix (read-string "Manually edit proposed revision: " revised-line)))
                                         (when (not (string-empty-p (string-trim manual-fix)))
                                           (with-current-buffer buf
                                             (let ((inhibit-read-only t))
