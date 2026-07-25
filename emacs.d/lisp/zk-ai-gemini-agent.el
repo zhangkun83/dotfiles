@@ -125,63 +125,6 @@ it up until the back reference after asking the user for confirmation directly i
                       (goto-char prompt-beg))
                   (goto-char sep-end))))))))))
 
-;;; Step 1.2: Write stub back reference for orphan sections directly in buffer
-(defun zk-ai-gemini-agent--add-stub-backrefs-in-buffer (buf start-marker end-marker)
-  "If a discussion section lacks a back reference in meeting notes,
-write a stub back reference (\"RE: <a short description of the subject>\")
-without an actual link, and put the section under it directly in BUF."
-  (with-current-buffer buf
-    (let ((inhibit-read-only t))
-      (save-excursion
-        (goto-char start-marker)
-        (let ((in-re-p nil)
-              (orphan-start nil))
-          (while (< (point) end-marker)
-            (cond
-             ((looking-at "^\\*+")
-              (when orphan-start
-                (zk-ai-gemini-agent--prompt-and-insert-stub buf orphan-start (point))
-                (setq orphan-start nil))
-              (setq in-re-p nil)
-              (forward-line 1))
-             ((looking-at "^\\s-*RE:")
-              (when orphan-start
-                (zk-ai-gemini-agent--prompt-and-insert-stub buf orphan-start (point))
-                (setq orphan-start nil))
-              (setq in-re-p t)
-              (forward-line 1))
-             ((looking-at "^\\s-*$")
-              (if in-re-p
-                  (forward-line 1)
-                (when orphan-start
-                  (zk-ai-gemini-agent--prompt-and-insert-stub buf orphan-start (point))
-                  (setq orphan-start nil))
-                (forward-line 1)))
-             (t
-              (if in-re-p
-                  (forward-line 1)
-                (unless orphan-start
-                  (setq orphan-start (point)))
-                (forward-line 1)))))
-          (when orphan-start
-            (zk-ai-gemini-agent--prompt-and-insert-stub buf orphan-start end-marker)))))))
-
-(defun zk-ai-gemini-agent--prompt-and-insert-stub (buf beg end)
-  "Prompt user and insert stub RE: line before BEG in BUF."
-  (with-current-buffer buf
-    (let ((orphan-str (string-trim (buffer-substring-no-properties beg end))))
-      (when (not (string-empty-p orphan-str))
-        (let* ((preview (if (> (length orphan-str) 80)
-                            (concat (substring orphan-str 0 77) "...")
-                          orphan-str))
-               (first-line (buffer-substring-no-properties beg (min end (line-end-position)))))
-          (zk-ai-gemini-agent--highlight-sentence-in-buffer buf beg first-line)
-          (let* ((subject (read-string
-                           (format "Discussion section lacks 'RE:' back reference:\n  \"%s\"\nEnter a short description of the subject for stub back reference: "
-                                   preview)))
-                 (stub-line (format "RE: %s\n" (string-trim subject))))
-            (goto-char beg)
-            (insert stub-line)))))))
 
 ;;; Step 1.3: Delete back reference if no discussions exist under it directly in buffer
 (defun zk-ai-gemini-agent--delete-empty-backrefs-in-buffer (buf start-marker end-marker)
@@ -547,9 +490,6 @@ avoids copying top-level headings back from Gemini buffer, and never saves edite
     ;; Directly apply cleanups to the original file buffer before inserting into Gemini buffer:
     ;; Step 1.1: Remove agenda prompts (- ---- -) directly in buffer with user confirmation
     (zk-ai-gemini-agent--clean-agenda-prompts-in-buffer orig-buf start-marker end-marker)
-    
-    ;; Step 1.2: Add stub back reference for orphan sections directly in buffer
-    (zk-ai-gemini-agent--add-stub-backrefs-in-buffer orig-buf start-marker end-marker)
     
     ;; Step 1.3: Delete back references with no discussion left directly in buffer
     (zk-ai-gemini-agent--delete-empty-backrefs-in-buffer orig-buf start-marker end-marker)
