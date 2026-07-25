@@ -63,19 +63,21 @@
     (if (stringp val) val (and val (format "%s" val)))))
 
 (defun zk-ai-gemini-agent--highlight-sentence-in-buffer (buf start-pos target-text)
-  "Move cursor in BUF to TARGET-TEXT (searching from START-POS) and flash a highlight."
+  "Move cursor in BUF to TARGET-TEXT (searching from START-POS), select region, center, and flash a highlight."
   (when (and buf (buffer-live-p buf) (not (string-empty-p target-text)))
     (with-current-buffer buf
-      (save-excursion
-        (goto-char (or start-pos (point-min)))
-        (when (re-search-forward (regexp-quote target-text) nil t)
-          (let ((beg (match-beginning 0))
-                (end (match-end 0)))
-            (unless noninteractive
-              (switch-to-buffer buf)
-              (goto-char beg)
-              (pulse-momentary-highlight-region beg end)
-              (redisplay))))))))
+      (goto-char (or start-pos (point-min)))
+      (when (re-search-forward (regexp-quote target-text) nil t)
+        (let ((beg (match-beginning 0))
+              (end (match-end 0)))
+          (unless noninteractive
+            (switch-to-buffer buf)
+            (goto-char beg)
+            (set-mark end)
+            (activate-mark)
+            (recenter)
+            (pulse-momentary-highlight-region beg end)
+            (redisplay)))))))
 
 (defun zk-ai-gemini-agent--convert-top-level-headings-to-second-level (text)
   "Replace top-level headings starting with a single asterisk (^\\* ) with 2nd-level headings (^** )."
