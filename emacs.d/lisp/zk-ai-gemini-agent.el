@@ -320,9 +320,7 @@ prefix of HEADING-TITLE, confirming by timestamp match, and call 'C-c l r'
         (let ((inhibit-read-only t))
           (save-excursion
             (goto-char (marker-position best-marker))
-            ;; Call C-c l r to create and copy external reference
-            (call-interactively 'zk-org-copy-external-reference)
-            (car kill-ring)))))))
+            (zk-org-get-external-reference)))))))
 
 (defun zk-ai-gemini-agent--resolve-generated-backrefs (response-text)
   "Go over generated entries from RESPONSE-TEXT. For each back reference (\"RE:\"),
