@@ -128,31 +128,6 @@ it up until the back reference after asking the user for confirmation directly i
                   (goto-char sep-end))))))))))
 
 
-;;; Step 1.3: Delete back reference if no discussions exist under it directly in buffer
-(defun zk-ai-gemini-agent--delete-empty-backrefs-in-buffer (buf start-marker end-marker)
-  "If there were no discussions related to a back reference, delete that back reference directly in BUF."
-  (with-current-buffer buf
-    (let ((inhibit-read-only t))
-      (save-excursion
-        (goto-char start-marker)
-        (while (re-search-forward "^\\s-*RE:" end-marker t)
-          (let ((re-beg (line-beginning-position))
-                (re-end (1+ (line-end-position)))
-                (has-discussion-p nil))
-            (forward-line 1)
-            (let ((chk-beg (point)))
-              (while (and (< (point) end-marker)
-                          (not (looking-at "^\\s-*RE:"))
-                          (not (looking-at "^\\*+")))
-                (when (not (looking-at "^\\s-*$"))
-                  (setq has-discussion-p t))
-                (forward-line 1))
-              (unless has-discussion-p
-                (message "Deleting back reference with no discussion: %s"
-                         (buffer-substring-no-properties re-beg (1- re-end)))
-                (delete-region re-beg (point))
-                (goto-char re-beg)))))))))
-
 ;;; Step 1.4 & Additional Req 1 (Gemini-driven language incoherence with entire notes fed as context)
 (defun zk-ai-gemini-agent--clarify-missing-info-in-buffer (buf start-marker end-marker)
   "Use Gemini to identify language incoherence feeding the entire notes document as context,
@@ -449,9 +424,6 @@ avoids copying top-level headings back from Gemini buffer, and never saves edite
     ;; Directly apply cleanups to the original file buffer before inserting into Gemini buffer:
     ;; Step 1.1: Remove agenda prompts (- ---- -) directly in buffer with user confirmation
     (zk-ai-gemini-agent--clean-agenda-prompts-in-buffer orig-buf start-marker end-marker)
-    
-    ;; Step 1.3: Delete back references with no discussion left directly in buffer
-    (zk-ai-gemini-agent--delete-empty-backrefs-in-buffer orig-buf start-marker end-marker)
     
     ;; Step 1.4 & Additional Req 1: Language coherence & ask user for clarification directly applied to buffer
     (zk-ai-gemini-agent--clarify-missing-info-in-buffer orig-buf start-marker end-marker)
