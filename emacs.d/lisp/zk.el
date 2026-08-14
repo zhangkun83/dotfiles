@@ -937,7 +937,7 @@ is available."
   (when (display-graphic-p)
     (set-cursor-color (face-attribute 'default :foreground))
     (setq zk-buffer-font-family zk-proportional-font-family)
-    (setq cursor-type 'bar)
+    (setq cursor-type (cons 'bar 5))
     (setq line-spacing 0.2)
     (buffer-face-set
      `(:family ,zk-buffer-font-family
